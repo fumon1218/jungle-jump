@@ -119,23 +119,24 @@
 
   #topBtns{position:absolute;top:2.2%;right:1.4%;display:flex;gap:8px}
   /* ---- 모바일: 버튼은 게임 화면 바깥 여백에 ---- */
-  body.touchui{padding:0;display:block}
+  html:has(body.touchui){overflow:hidden;height:100%}
+  body.touchui{padding:0;display:block;position:fixed;inset:0;overflow:hidden;width:100%;height:100%;overscroll-behavior:none}
   .touchmode#wrap{position:absolute}
   .touchmode canvas{border-radius:8px}
-  .touchmode #touch{position:fixed;inset:0;z-index:5}
+  .touchui #touch{display:block;position:fixed;inset:0;z-index:5;pointer-events:none}
   .touchmode #overlay{position:fixed;inset:0;border-radius:0;z-index:20}
-  .touchmode.menuopen #touch, .touchmode.menuopen #topBtns{display:none}
-  .touchmode #topBtns{position:fixed;z-index:6;gap:var(--sg,8px)}
-  .touchmode #topBtns button{width:var(--sb,40px);height:var(--sb,40px);font-size:calc(var(--sb,40px)*0.42)}
-  .touchmode .tb{width:var(--B,64px);height:var(--B,64px);font-size:calc(var(--B,64px)*0.36);
+  .touchui.menuopen #touch, .touchui.menuopen #topBtns{display:none}
+  .touchui #topBtns{position:fixed;z-index:6;gap:var(--sg,8px)}
+  .touchui #topBtns button{width:var(--sb,40px);height:var(--sb,40px);font-size:calc(var(--sb,40px)*0.42)}
+  .touchui .tb{width:var(--B,64px);height:var(--B,64px);font-size:calc(var(--B,64px)*0.36);
     background:rgba(255,246,220,.13);border:2px solid rgba(255,246,220,.5);box-shadow:0 3px 0 rgba(0,0,0,.35)}
-  .touchmode .tb.pressed{background:rgba(242,193,78,.55);transform:scale(.93)}
-  .touchmode #pad{left:auto;bottom:auto;padding:0}
-  .touchmode #tS{right:auto;bottom:auto}
+  .touchui .tb.pressed{background:rgba(242,193,78,.55);transform:scale(.93)}
+  .touchui #pad{left:auto;bottom:auto;padding:0}
+  .touchui #tS{right:auto;bottom:auto}
   #tJ{position:absolute;display:none;pointer-events:auto;touch-action:none;flex-direction:column;border-color:rgba(242,193,78,.8)}
-  .touchmode #tJ{display:flex}
-  .touchmode #tJ small, .touchmode #tS small{font-size:calc(var(--B,64px)*0.16);margin-top:-2px}
-  .touchmode #tapHint{right:auto;bottom:auto;width:13em;font-size:13px}
+  .touchui #tJ{display:flex}
+  .touchui #tJ small, .touchui #tS small{font-size:calc(var(--B,64px)*0.16);margin-top:-2px}
+  .touchui #tapHint{right:auto;bottom:auto;width:13em;font-size:13px}
   #topBtns button{width:clamp(32px,4.4vw,44px);height:clamp(32px,4.4vw,44px);border-radius:50%;border:2px solid rgba(255,255,255,.35);
     background:rgba(8,30,22,.55);color:#fff;font-family:var(--font);font-size:clamp(14px,2vw,20px);cursor:pointer}
 
@@ -764,13 +765,22 @@ const wrapEl = document.getElementById('wrap');
 function applyBtnSize(){ wrapEl.style.setProperty('--tbs', {s:0.8, m:1, l:1.3}[SET.btn] || 1); try{ if(isTouch) layoutUI(); }catch(e){} }
 applyBtnSize();
 let isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-function enableTouch(){ isTouch = true; wrapEl.classList.add('touchmode'); document.body.classList.add('touchui'); layoutUI(); }
+function enableTouch(){
+  isTouch = true; wrapEl.classList.add('touchmode'); document.body.classList.add('touchui');
+  // 조작 버튼은 게임 화면 밖(화면 전체 기준)에 두기
+  document.body.appendChild(document.getElementById('touch'));
+  document.body.appendChild(document.getElementById('topBtns'));
+  layoutUI();
+  for(const t of [100, 400, 1000, 2000]) setTimeout(layoutUI, t);   // 주소창·툴바가 자리 잡은 뒤 다시 맞추기
+}
 const insetProbe = document.createElement('div');
 insetProbe.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
 document.body.appendChild(insetProbe);
 function layoutUI(){
   if(!isTouch) return;
-  const vv = window.visualViewport, vw = vv ? vv.width : innerWidth, vh = vv ? vv.height : innerHeight;
+  const de = document.documentElement;
+  const vw = de.clientWidth || innerWidth, vh = de.clientHeight || innerHeight;   // 실제 화면(레이아웃 뷰포트) 크기
+  if(window.scrollX || window.scrollY) window.scrollTo(0, 0);
   const cs = getComputedStyle(insetProbe), T = parseFloat(cs.paddingTop) || 0, R = parseFloat(cs.paddingRight) || 0, Bm = parseFloat(cs.paddingBottom) || 0, L = parseFloat(cs.paddingLeft) || 0;
   const sc = {s:0.85, m:1, l:1.2}[SET.btn] || 1;
   const B = Math.round(clamp(Math.min(vw, vh)*0.17, 48, 84)*sc), g = Math.round(B*0.16), pad = 10;
@@ -784,7 +794,7 @@ function layoutUI(){
   const bW = Math.max(0, Math.min(bAW, bAH*16/9)), bH = bW*9/16;
   const side = sW*sH >= bW*bH;
   const cw = side ? sW : bW, ch = side ? sH : bH;
-  const cx = side ? leftW + (sAW - cw)/2 : L + (bAW - cw)/2, cy = side ? T + (sAH - ch)/2 : T + Math.max(0, (bAH - ch)/2);
+  const cx = side ? clamp((vw - cw)/2, leftW, vw - rightW - cw) : L + (bAW - cw)/2, cy = side ? T + (sAH - ch)/2 : T + Math.max(0, (bAH - ch)/2);
   Object.assign(wrapEl.style, {left:cx + 'px', top:cy + 'px', width:cw + 'px', height:ch + 'px'});
   const touch = document.getElementById('touch'); touch.style.setProperty('--B', B + 'px');
   const tJ = document.getElementById('tJ'), tSb = document.getElementById('tS'), padEl = document.getElementById('pad'), tb = document.getElementById('topBtns'), hint = document.getElementById('tapHint');
@@ -800,11 +810,17 @@ function layoutUI(){
     Object.assign(tb.style, {left:(vw/2 - (sb*3 + 16)/2) + 'px', top:(bottomY + (B - sb)/2) + 'px', right:'auto', flexDirection:'row'});
   }
   tb.style.setProperty('--sb', sb + 'px');
+  for(const el of [padEl, tJ, tSb, tb]){   // 혹시라도 화면 밖으로 나가지 않게
+    const x = parseFloat(el.style.left) || 0, y = parseFloat(el.style.top) || 0;
+    el.style.left = clamp(x, 0, Math.max(0, vw - 40)) + 'px'; el.style.top = clamp(y, 0, Math.max(0, vh - 40)) + 'px';
+  }
   Object.assign(hint.style, {left:Math.max(8, vw - R - pad - B - 220) + 'px', top:Math.max(T + 8, bottomY - 120) + 'px'});
 }
 addEventListener('resize', layoutUI);
 addEventListener('orientationchange', () => setTimeout(layoutUI, 250));
 if(window.visualViewport) visualViewport.addEventListener('resize', layoutUI);
+addEventListener('pageshow', layoutUI); addEventListener('load', layoutUI);
+if(window.ResizeObserver) new ResizeObserver(() => layoutUI()).observe(document.documentElement);
 if(isTouch) enableTouch();
 addEventListener('pointerdown', e => { if(e.pointerType === 'touch' && !isTouch){ enableTouch(); if(screen === 'title') showScreen('title'); } }, true);
 
@@ -3574,7 +3590,7 @@ function showScreen(type){
   }
   screen = type;
   card.innerHTML = html;
-  overlay.classList.add('show'); wrapEl.classList.add('menuopen');
+  overlay.classList.add('show'); document.body.classList.add('menuopen');
   const b = document.getElementById('goBtn');
   const back = () => { bgmStop(); showScreen('title'); };
   const again = () => startGame(S.daily ? {daily:true, seed:+todayKey()} : {});
@@ -3778,7 +3794,7 @@ function wireWardrobe(){
     const sc = card.scrollTop; showScreen('wardrobe'); card.scrollTop = sc;
   });
 }
-function hideScreen(){ overlay.classList.remove('show'); wrapEl.classList.remove('menuopen'); screen = ''; }
+function hideScreen(){ overlay.classList.remove('show'); document.body.classList.remove('menuopen'); screen = ''; }
 function startGame(opts = {}){
   bgmStop(); screen = '';
   stopRainSound();
