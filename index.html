@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="정글 점프">
+<meta name="theme-color" content="#07190f">
 <title>정글 점프 탐험대</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +18,7 @@
     --font:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--deep);overflow:hidden;touch-action:none;
+  html,body{margin:0;height:100%;background:var(--deep);overflow:hidden;touch-action:none;overscroll-behavior:none;-webkit-touch-callout:none;
     -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
   body{display:flex;align-items:center;justify-content:center;font-family:var(--font);color:var(--cream);
     padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
@@ -74,14 +79,23 @@
   #topBtns button{width:clamp(32px,4.4vw,44px);height:clamp(32px,4.4vw,44px);border-radius:50%;border:2px solid rgba(255,255,255,.35);
     background:rgba(8,30,22,.55);color:#fff;font-family:var(--font);font-size:clamp(14px,2vw,20px);cursor:pointer}
 
-  #touch{position:absolute;inset:auto 0 0 0;height:30%;display:none;pointer-events:none}
-  #touch.on{display:block}
-  .tb{position:absolute;bottom:8%;width:clamp(56px,11vw,96px);height:clamp(56px,11vw,96px);border-radius:50%;
-    background:rgba(255,246,220,.18);border:2px solid rgba(255,246,220,.45);color:#fff;font-size:clamp(20px,4vw,34px);
-    display:flex;align-items:center;justify-content:center;pointer-events:auto;font-family:var(--font)}
-  .tb.pressed{background:rgba(242,193,78,.5)}
-  #tL{left:3%} #tR{left:calc(6% + clamp(56px,11vw,96px))}
-  #tJ{right:4%;width:clamp(70px,14vw,120px);height:clamp(70px,14vw,120px);font-size:clamp(16px,2.8vw,24px)}
+  #tapzone{position:absolute;inset:0;display:none;overflow:hidden;border-radius:10px}
+  #touch{position:absolute;inset:0;display:none;pointer-events:none}
+  .touchmode #tapzone, .touchmode #touch{display:block}
+  #pad{position:absolute;left:max(2.5%, env(safe-area-inset-left,0px));bottom:5%;display:flex;gap:clamp(10px,2vw,20px);pointer-events:auto;touch-action:none;padding:8px}
+  .tb{width:clamp(60px,11.5vw,104px);height:clamp(60px,11.5vw,104px);border-radius:50%;pointer-events:none;
+    background:rgba(255,246,220,.16);border:2px solid rgba(255,246,220,.45);color:#fff;font-size:clamp(22px,4.2vw,38px);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font);transition:background .08s, transform .08s}
+  .tb.pressed{background:rgba(242,193,78,.55);transform:scale(.94)}
+  #tapHint{position:absolute;right:6%;bottom:12%;text-align:center;font-size:clamp(12px,2vw,18px);line-height:1.4;opacity:0;transition:opacity .5s;pointer-events:none}
+  #tapHint.show{opacity:.9}
+  #tapHint i{display:block;margin:0 auto .4em;width:clamp(44px,8vw,70px);height:clamp(44px,8vw,70px);border-radius:50%;
+    border:2px solid rgba(255,246,220,.7);animation:tapPulse 1.2s ease-out infinite}
+  @keyframes tapPulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.25);opacity:0}}
+  .ripple{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:2px solid rgba(255,246,220,.8);
+    pointer-events:none;animation:ripple .4s ease-out forwards}
+  @keyframes ripple{from{transform:scale(.3);opacity:1}to{transform:scale(1.3);opacity:0}}
+  #btnFull{display:none}
   #rotate{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;opacity:.7;display:none}
   @media (orientation:portrait) and (pointer:coarse){#rotate{display:block}}
 </style>
@@ -89,14 +103,15 @@
 <body>
 <div id="wrap">
   <canvas id="game" aria-label="정글 점프 탐험대 게임 화면"></canvas>
+  <div id="tapzone" aria-hidden="true"></div>
   <div id="topBtns">
     <button id="btnPause" aria-label="일시정지">Ⅱ</button>
     <button id="btnSound" aria-label="소리 켜기/끄기">♪</button>
+    <button id="btnFull" aria-label="전체 화면">⛶</button>
   </div>
   <div id="touch">
-    <div class="tb" id="tL" data-k="left">◀</div>
-    <div class="tb" id="tR" data-k="right">▶</div>
-    <div class="tb" id="tJ" data-k="jump">점프</div>
+    <div id="pad" aria-label="이동 버튼"><div class="tb" id="tL">◀</div><div class="tb" id="tR">▶</div></div>
+    <div id="tapHint"><i></i>화면을 탭하면 점프<br>두 번 탭하면 2단 점프</div>
   </div>
   <div id="overlay" class="show"><div class="card" id="card"></div></div>
 </div>
@@ -338,28 +353,75 @@ const sfx = {
 
 /* ================= 입력 ================= */
 const keys = {left:false, right:false, jump:false};
-let jumpQueued = false;
+let jumpQueued = 0;
 const KEYMAP = {ArrowLeft:'left', KeyA:'left', ArrowRight:'right', KeyD:'right', ArrowUp:'jump', KeyW:'jump', Space:'jump'};
 addEventListener('keydown', e => {
   const tag = e.target && e.target.tagName;
   if(tag === 'INPUT') return;
   if(tag === 'BUTTON' && (e.code === 'Enter' || e.code === 'Space') && S.state !== 'play') return;
   const k = KEYMAP[e.code];
-  if(k){ e.preventDefault(); if(k==='jump' && !e.repeat) jumpQueued = true; keys[k] = true; }
+  if(k){ e.preventDefault(); if(k==='jump' && !e.repeat) jumpQueued = Math.min(2, jumpQueued + 1); keys[k] = true; }
   if((e.code==='KeyP' || e.code==='Escape') && S.state==='play') togglePause();
   if(e.code==='Enter' && screen !== 'custom' && (S.state==='title' || S.state==='over' || S.state==='win')) startGame();
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if(k) keys[k] = false; });
 
-const touchBox = document.getElementById('touch');
-if('ontouchstart' in window || navigator.maxTouchPoints > 0) touchBox.classList.add('on');
-touchBox.querySelectorAll('.tb').forEach(b => {
-  const k = b.dataset.k;
-  const down = e => { e.preventDefault(); keys[k] = true; if(k==='jump') jumpQueued = true; b.classList.add('pressed'); };
-  const up = e => { e.preventDefault(); keys[k] = false; b.classList.remove('pressed'); };
-  b.addEventListener('pointerdown', down);
-  ['pointerup','pointerleave','pointercancel'].forEach(ev => b.addEventListener(ev, up));
+/* ---- 모바일 터치 조작 ---- */
+const wrapEl = document.getElementById('wrap');
+let isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+function enableTouch(){ isTouch = true; wrapEl.classList.add('touchmode'); }
+if(isTouch) enableTouch();
+addEventListener('pointerdown', e => { if(e.pointerType === 'touch' && !isTouch){ enableTouch(); if(screen === 'title') showScreen('title'); } }, true);
+
+// 이동 패드: 손가락을 떼지 않고 ◀ ▶ 사이를 미끄러져도 방향이 바뀜
+const pad = document.getElementById('pad'), tL = document.getElementById('tL'), tR = document.getElementById('tR');
+let padId = null;
+function padSet(e){
+  const r = pad.getBoundingClientRect(), right = e.clientX > r.left + r.width/2;
+  keys.left = !right; keys.right = right;
+  tL.classList.toggle('pressed', !right); tR.classList.toggle('pressed', right);
+}
+function padClear(){ padId = null; keys.left = keys.right = false; tL.classList.remove('pressed'); tR.classList.remove('pressed'); }
+pad.addEventListener('pointerdown', e => { e.preventDefault(); padId = e.pointerId; try{ pad.setPointerCapture(e.pointerId); }catch(_){} padSet(e); });
+pad.addEventListener('pointermove', e => { if(e.pointerId === padId) padSet(e); });
+['pointerup','pointercancel','lostpointercapture'].forEach(ev => pad.addEventListener(ev, e => { if(e.pointerId === padId) padClear(); }));
+
+// 화면 탭 = 점프 (두 번 탭 = 2단 점프, 길게 누르면 더 높이)
+const tapzone = document.getElementById('tapzone'), jumpPointers = new Set();
+let tapCount = 0;
+tapzone.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if(S.state !== 'play' || S.paused) return;
+  jumpPointers.add(e.pointerId); keys.jump = true;
+  jumpQueued = Math.min(2, jumpQueued + 1);
+  const r = tapzone.getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'ripple'; d.style.left = (e.clientX - r.left) + 'px'; d.style.top = (e.clientY - r.top) + 'px';
+  tapzone.appendChild(d); setTimeout(() => d.remove(), 420);
+  if(++tapCount >= 3) hideTapHint();
 });
+['pointerup','pointercancel','pointerleave'].forEach(ev => tapzone.addEventListener(ev, e => {
+  jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false;
+}));
+tapzone.addEventListener('contextmenu', e => e.preventDefault());
+
+const tapHint = document.getElementById('tapHint');
+let hintTimer = 0;
+function showTapHint(){ tapCount = 0; tapHint.classList.add('show'); clearTimeout(hintTimer); hintTimer = setTimeout(hideTapHint, 6000); }
+function hideTapHint(){ tapHint.classList.remove('show'); }
+
+// 전체 화면 (지원하는 기기만)
+const btnFull = document.getElementById('btnFull');
+const root = document.documentElement;
+const canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+if(canFull && isTouch) btnFull.style.display = 'block';
+btnFull.onclick = async e => {
+  e.currentTarget.blur();
+  try{
+    if(document.fullscreenElement || document.webkitFullscreenElement){ (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    await (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    if(window.screen.orientation && window.screen.orientation.lock) window.screen.orientation.lock('landscape').catch(() => {});
+  }catch(_){}
+};
 
 /* ================= 게임 상태 ================= */
 let S;
@@ -516,7 +578,7 @@ function update(k){
   if(jumpQueued){
     if(P.onGround){ P.vy = JUMP; P.jumps = 1; P.onGround = false; sfx.jump(); }
     else if(P.jumps < 2){ P.vy = JUMP2; P.jumps = 2; sfx.jump2(); burst(P.x+P.w/2, P.y+P.h, '#e8f5c8', 8, 2); }
-    jumpQueued = false;
+    jumpQueued--;
   }
   if(!keys.jump && P.vy < -3) P.vy += 0.45*k; // 짧게 누르면 낮은 점프
 
@@ -1206,7 +1268,7 @@ function showScreen(type){
       <div class="legend"><span>🍌 바나나 10</span><span>🍒 체리 15</span><span>🥭 망고 20</span><span>🐉 용과 40</span><span>❤️ 생명 +1</span></div>
       <p class="bad">초록빛 해골 독열매와 매달린 독거미는 피하세요. 물에 빠져도 생명이 줄어요.</p>
       <p class="pot">상자에서 10초짜리 물약이 나오기도 해요: 체공 · 빛 · 요정 물약, 그리고 조심해야 할 느림보 물약!</p>
-      <p class="keys">← → 이동 · 스페이스/↑ 점프 (공중에서 한 번 더!) · P 일시정지</p>
+      <p class="keys">${isTouch ? '◀ ▶ 버튼으로 이동 · 화면을 탭하면 점프 (두 번 탭하면 2단 점프, 길게 누르면 더 높이)' : '← → 이동 · 스페이스/↑ 점프 (공중에서 한 번 더!) · P 일시정지'}</p>
       <div class="btnrow"><button class="go" id="goBtn">탐험 시작</button><button class="go alt" id="customBtn">꾸미기</button></div>`;
   } else if(type === 'custom'){
     html = `<h2>나만의 정글 꾸미기</h2>
@@ -1276,7 +1338,8 @@ function hideScreen(){ overlay.classList.remove('show'); screen = ''; }
 function startGame(){
   bgmStop(); screen = '';
   newGame(); S.state = 'play'; hideScreen();
-  jumpQueued = false; Object.keys(keys).forEach(k => keys[k] = false);
+  jumpQueued = 0; Object.keys(keys).forEach(k => keys[k] = false); jumpPointers.clear();
+  if(isTouch) showTapHint();
   tone(1,0.01,'sine',0.0001); // 모바일 오디오 잠금 해제
   bgmPlay(true);
 }
