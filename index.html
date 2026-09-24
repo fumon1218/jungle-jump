@@ -138,6 +138,16 @@
   #tJ{position:absolute;display:none;pointer-events:auto;touch-action:none;flex-direction:column;border-color:rgba(242,193,78,.8)}
   .touchui #tJ{display:flex}
   .touchui #tJ small, .touchui #tS small{font-size:calc(var(--B,64px)*0.16);margin-top:-2px}
+  #joyZone{position:absolute;left:0;top:0;bottom:0;width:50%;display:none;pointer-events:auto;touch-action:none}
+  .touchui.joy #joyZone{display:block}
+  .touchui.joy #pad{display:none}
+  #joyBase{position:absolute;border-radius:50%;border:3px solid rgba(255,246,220,.6);background:radial-gradient(circle, rgba(20,50,40,.15), rgba(20,50,40,.4));
+    pointer-events:none;opacity:.28;transition:opacity .12s}
+  #joyBase.on{opacity:1}
+  #joyKnob{position:absolute;left:50%;top:50%;border-radius:50%;background:radial-gradient(circle at 35% 30%, #8fe8ff, #1e88c5);
+    border:3px solid rgba(255,255,255,.85);box-shadow:0 3px 8px rgba(0,0,0,.45);transform:translate(-50%,-50%)}
+  #joyHint{position:absolute;color:#fff6dc;font-size:14px;text-align:center;line-height:1.4;text-shadow:0 1px 3px #000;pointer-events:none;opacity:0;transition:opacity .4s}
+  #joyHint.show{opacity:.95}
   .touchui #tapHint{right:auto;bottom:auto;width:13em;font-size:13px}
   #topBtns button{width:clamp(32px,4.4vw,44px);height:clamp(32px,4.4vw,44px);border-radius:50%;border:2px solid rgba(255,255,255,.35);
     background:rgba(8,30,22,.55);color:#fff;font-family:var(--font);font-size:clamp(14px,2vw,20px);cursor:pointer}
@@ -173,6 +183,7 @@
     <button id="btnFull" aria-label="전체 화면">⛶</button>
   </div>
   <div id="touch">
+    <div id="joyZone" aria-label="이동 조이스틱 영역"><div id="joyBase"><div id="joyKnob"></div></div><div id="joyHint">왼쪽 아무 곳이나 누르고<br>좌우로 밀면 이동</div></div>
     <div id="pad" aria-label="이동 버튼"><div class="tb" id="tL">◀</div><div class="tb" id="tR">▶</div></div>
     <div class="tb" id="tS">▼<small>슬라이딩</small></div>
     <div class="tb" id="tJ">▲<small>점프</small></div>
@@ -191,7 +202,7 @@ let ctx = cv.getContext('2d');
 /* ---- 설정 (이 기기에 저장) ---- */
 function loadJSON(k){ try{ return JSON.parse(localStorage.getItem(k)) || null; }catch(e){ return null; } }
 function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-const SET = Object.assign({bgm:0.45, sfx:1, shake:true, flash:true, btn:'m', perf:'auto'}, loadJSON('jungle_settings'));
+const SET = Object.assign({bgm:0.45, sfx:1, shake:true, flash:true, btn:'m', perf:'auto', move:'joy'}, loadJSON('jungle_settings'));
 function saveSet(){ saveJSON('jungle_settings', SET); }
 let LIGHT = SET.perf === 'on';   // 가벼운 모드 (효과 줄이기)
 const W = 960, H = 540;
@@ -788,7 +799,9 @@ function layoutUI(){
   const B = Math.round(clamp(Math.min(vw, vh)*0.17, 48, 84)*sc), g = Math.round(B*0.16), pad = 10;
   const sb = Math.round(clamp(B*0.6, 32, 46));
   // ① 양옆 배치: 왼쪽 ◀ ▶ / 오른쪽 점프·슬라이딩
-  const leftW = L + pad*2 + B*2 + g, rightW = R + pad*2 + B;
+  const joy = SET.move !== 'btn';
+  document.body.classList.toggle('joy', joy);
+  const leftW = joy ? L + pad : L + pad*2 + B*2 + g, rightW = R + pad*2 + B;
   const sAW = vw - leftW - rightW, sAH = vh - T - Bm;
   const sW = Math.max(0, Math.min(sAW, sAH*16/9)), sH = sW*9/16;
   // ② 아래 배치: 게임 화면 아래에 버튼 줄
@@ -802,6 +815,12 @@ function layoutUI(){
   const tJ = document.getElementById('tJ'), tSb = document.getElementById('tS'), padEl = document.getElementById('pad'), tb = document.getElementById('topBtns'), hint = document.getElementById('tapHint');
   const bottomY = vh - Bm - pad - B;
   Object.assign(padEl.style, {left:(L + pad) + 'px', top:bottomY + 'px', gap:g + 'px'});
+  joyR = Math.round(B*0.95); joyHome = {x:L + pad + joyR + 14, y:vh - Bm - pad - joyR - 8};
+  const jz = document.getElementById('joyZone'); jz.style.width = Math.round(vw*0.5) + 'px';
+  const jb = document.getElementById('joyBase'), jk = document.getElementById('joyKnob');
+  Object.assign(jb.style, {width:joyR*2 + 'px', height:joyR*2 + 'px'}); Object.assign(jk.style, {width:Math.round(joyR*0.95) + 'px', height:Math.round(joyR*0.95) + 'px'});
+  if(joyId === null) joyPlace(joyHome.x, joyHome.y);
+  Object.assign(document.getElementById('joyHint').style, {left:(L + pad) + 'px', top:(joyHome.y - joyR - 58) + 'px', width:'14em'});
   tJ.style.left = (vw - R - pad - B) + 'px'; tJ.style.top = bottomY + 'px';
   if(side){
     const sB = Math.round(B*0.82);
@@ -883,6 +902,38 @@ tapzone.addEventListener('pointerdown', e => {
   jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false;
 }));
 tapzone.addEventListener('contextmenu', e => e.preventDefault());
+/* ---- 떠오르는 조이스틱 (왼쪽 절반 아무 곳이나) ---- */
+const joyZone = document.getElementById('joyZone'), joyBase = document.getElementById('joyBase'), joyKnob = document.getElementById('joyKnob');
+let joyId = null, joyR = 60, joyHome = {x:90, y:300}, joyO = {x:0, y:0}, joyMag = 0, joySlideLatch = false, joyUsed = false;
+function joyPlace(x, y){ joyO.x = x; joyO.y = y; joyBase.style.left = (x - joyR) + 'px'; joyBase.style.top = (y - joyR) + 'px'; }
+function joyKnobAt(dx, dy){ joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; }
+function joyMove(e){
+  let dx = e.clientX - joyO.x, dy = e.clientY - joyO.y, d = Math.hypot(dx, dy);
+  if(d > joyR*1.35){ const k = (d - joyR*1.35)/d; joyPlace(joyO.x + dx*k, joyO.y + dy*k); dx = e.clientX - joyO.x; dy = e.clientY - joyO.y; d = Math.hypot(dx, dy); }   // 손가락을 따라옴
+  if(d > joyR){ dx *= joyR/d; dy *= joyR/d; }
+  joyKnobAt(dx, dy);
+  const dead = joyR*0.2;
+  keys.right = dx > dead; keys.left = dx < -dead;
+  joyMag = Math.min(1, Math.abs(dx)/(joyR*0.8));
+  if(dy > joyR*0.6 && Math.abs(dx) < joyR*0.8){ if(!joySlideLatch){ joySlideLatch = true; slideQueued = 1; } }   // 아래로 당기면 슬라이딩
+  else if(dy < joyR*0.3) joySlideLatch = false;
+}
+function joyEnd(){
+  joyId = null; keys.left = keys.right = false; joyMag = 0; joySlideLatch = false;
+  joyBase.classList.remove('on'); joyKnobAt(0, 0); joyPlace(joyHome.x, joyHome.y);
+}
+joyZone.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if(S.state !== 'play' || S.paused || joyId !== null) return;
+  joyId = e.pointerId; try{ joyZone.setPointerCapture(e.pointerId); }catch(_){}
+  const vw = document.documentElement.clientWidth || innerWidth, vh = document.documentElement.clientHeight || innerHeight;
+  joyPlace(clamp(e.clientX, joyR + 4, vw - joyR - 4), clamp(e.clientY, joyR + 4, vh - joyR - 4));
+  joyBase.classList.add('on'); joyMove(e);
+  if(!joyUsed){ joyUsed = true; document.getElementById('joyHint').classList.remove('show'); }
+});
+joyZone.addEventListener('pointermove', e => { if(e.pointerId === joyId) joyMove(e); });
+['pointerup','pointercancel','lostpointercapture'].forEach(ev => joyZone.addEventListener(ev, e => { if(e.pointerId === joyId) joyEnd(); }));
+function showJoyHint(){ if(SET.move !== 'btn' && !joyUsed){ const h = document.getElementById('joyHint'); h.classList.add('show'); setTimeout(() => h.classList.remove('show'), 6000); } }
 const tJ = document.getElementById('tJ');
 tJ.addEventListener('pointerdown', e => {
   e.preventDefault(); tJ.classList.add('pressed');
@@ -960,7 +1011,7 @@ function buildTutorial(){
 function tutSteps(){
   const P = S.player, tp = S.tutPlats;
   return [
-    {text: isTouch ? '◀ ▶ 버튼으로 오른쪽으로 걸어가요' : '→ 키로 오른쪽으로 걸어가요', done: () => P.x > 380},
+    {text: isTouch ? (SET.move !== 'btn' ? '왼쪽을 누른 채 오른쪽으로 밀어서 걸어가요' : '◀ ▶ 버튼으로 오른쪽으로 걸어가요') : '→ 키로 오른쪽으로 걸어가요', done: () => P.x > 380},
     {text: isTouch ? '▲ 버튼이나 화면을 탭해서 점프! 틈을 건너요' : '스페이스로 점프! 틈을 건너요', done: () => P.onGround && P.plat === tp[1]},
     {text: '높은 발판이에요. 공중에서 한 번 더 누르면 2단 점프!', done: () => P.onGround && P.plat === tp[2]},
     {text: isTouch ? '넓은 틈! 떨어질 때 ▲ 버튼을 꾹 누르면 글라이딩' : '넓은 틈! 떨어질 때 스페이스를 꾹 누르면 글라이딩', done: () => P.onGround && P.plat === tp[3]},
@@ -1706,7 +1757,7 @@ function update(k){
     }
   }
   if(!S.ride && !S.swing){
-    const slow = S.fx.slow > 0, maxv = slow ? MAXV*0.5 : MAXV;
+    const slow = S.fx.slow > 0, maxv = (slow ? MAXV*0.5 : MAXV)*(joyId !== null ? 0.45 + 0.55*joyMag : 1);
     const wet = S.rain && S.rain.a > 0.5 && P.onGround;   // 소나기: 미끄러운 발판
     if(slideQueued && P.onGround && !(P.slide > 0)){
       P.slide = SLIDE_TIME; P.vx = P.face*Math.max(Math.abs(P.vx), slow ? 3.2 : 5.8);
@@ -3455,7 +3506,7 @@ function showScreen(type){
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="tutBtn">연습하기</button><button class="go alt sm" id="dailyBtn">오늘의 도전${dailyDone ? ' ✓' : ''}</button><button class="go alt sm" id="duoBtn">2인 대결</button></div>
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="helpBtn">게임 방법</button><button class="go alt sm" id="dexBtn">도감</button><button class="go alt sm" id="wardBtn">옷장</button><button class="go alt sm" id="rankBtn">순위표</button><button class="go alt sm" id="customBtn">꾸미기</button><button class="go alt sm" id="myItemsBtn">내 아이템</button><button class="go alt sm" id="setBtn">설정</button></div>
       <p class="coins">🪙 ${DEX.coins} 코인</p>
-      <p class="keys">${isTouch ? '◀ ▶ 이동 · ▲ 버튼이나 화면 탭으로 점프 (두 번 = 2단 점프, 꾹 = 글라이딩) · ▼ 슬라이딩' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · ↓ 슬라이딩 · P 일시정지'}</p>`;
+      <p class="keys">${isTouch ? (SET.move !== 'btn' ? '왼쪽을 누르고 밀어서 이동 (아래로 당기면 슬라이딩)' : '◀ ▶ 이동') + ' · ▲ 버튼이나 화면 탭으로 점프 (두 번 = 2단 점프, 꾹 = 글라이딩) · ▼ 슬라이딩' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · ↓ 슬라이딩 · P 일시정지'}</p>`;
   } else if(type === 'myitems'){
     const off = ciRepoOff(), mine = CUSTOM.filter(d => !d.repo).length;
     const cardH = d => {
@@ -3504,6 +3555,7 @@ function showScreen(type){
       <div class="setrow"><span>효과음 크기</span><input type="range" id="sSfx" min="0" max="1" step="0.05" value="${SET.sfx}"></div>
       <div class="setrow"><span>화면 흔들림</span><input type="checkbox" id="sShake" ${SET.shake ? 'checked' : ''}></div>
       <div class="setrow"><span>번쩍이는 효과 (붉은 경고 깜빡임 등)</span><input type="checkbox" id="sFlash" ${SET.flash ? 'checked' : ''}></div>
+      <div class="setrow"><span>이동 조작 (모바일)</span>${seg('move', [['joy','조이스틱'],['btn','화살표 버튼']])}</div>
       <div class="setrow"><span>조작 버튼 크기</span>${seg('btn', [['s','작게'],['m','보통'],['l','크게']])}</div>
       <div class="setrow"><span>가벼운 모드 (효과 줄이기)</span>${seg('perf', [['auto','자동'],['on','켜기'],['off','끄기']])}</div>
       <h3 class="wtitle">플레이 통계 (밸런스 점검용)</h3>
@@ -3731,7 +3783,7 @@ function wireSettings(){
   g('sFlash').onchange = e => { SET.flash = e.target.checked; saveSet(); };
   card.querySelectorAll('[data-set]').forEach(b => b.onclick = () => {
     SET[b.dataset.set] = b.dataset.v; saveSet();
-    if(b.dataset.set === 'btn') applyBtnSize();
+    if(b.dataset.set === 'btn' || b.dataset.set === 'move') applyBtnSize();
     if(b.dataset.set === 'perf'){ LIGHT = SET.perf === 'on'; perfN = perfSum = 0; resize(); }
     const sc = card.scrollTop; showScreen('settings'); card.scrollTop = sc;
   });
@@ -3833,7 +3885,7 @@ function startGame(opts = {}){
   S.banner = {text:opts.testItem ? '아이템 시험 중: ' + ((CUSTOM.find(c => c.id === opts.testItem) || {}).name || '') : S.tutorial ? '연습 구간' : opts.resume ? '이어서 탐험!' : opts.daily ? '오늘의 도전!' : ZONES[S.zoneIdx % 4].name, t:0};
   if(S.duo) S.toast = {text:`${S.duo.names[S.duo.idx]} 차례예요!`, t:0};
   jumpQueued = 0; Object.keys(keys).forEach(k => keys[k] = false); jumpPointers.clear();
-  if(isTouch) showTapHint();
+  if(isTouch){ showTapHint(); showJoyHint(); if(joyId !== null) joyEnd(); }
   tone(1,0.01,'sine',0.0001); // 모바일 오디오 잠금 해제
   bgmPlay(true);
 }
