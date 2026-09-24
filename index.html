@@ -24,7 +24,37 @@
   #overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
     background:radial-gradient(ellipse at center, rgba(7,25,15,.55), rgba(7,25,15,.85));border-radius:10px}
   #overlay.show{display:flex}
-  .card{width:min(88%,560px);text-align:center;padding:clamp(14px,3.5vw,32px)}
+  .card{width:min(90%,620px);max-height:100%;overflow:auto;text-align:center;padding:clamp(14px,3.5vw,32px)}
+  .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  button.go.alt{background:#5ea83a;color:#fff;box-shadow:0 5px 0 #2f6b1c}
+  button.go.alt:active{box-shadow:0 1px 0 #2f6b1c}
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.6vw,16px);margin:.8em 0}
+  .slot{background:rgba(255,246,220,.08);border:2px solid rgba(255,246,220,.2);border-radius:14px;padding:clamp(8px,1.4vw,14px) 6px}
+  .slot b{display:block;font-weight:400;font-size:clamp(13px,1.9vw,18px);margin:.3em 0 .1em}
+  .slot small{display:block;opacity:.7;font-size:clamp(10px,1.4vw,13px);min-height:1.3em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .thumb{height:clamp(54px,9vw,96px);display:flex;align-items:flex-end;justify-content:center;
+    background:linear-gradient(transparent 82%, #6b4424 82%, #5a3a1e);border-radius:8px}
+  .thumb img{max-height:92%;max-width:90%;object-fit:contain}
+  .thumb .note{font-size:clamp(30px,5vw,52px);align-self:center;color:var(--gold)}
+  .thumb .none{align-self:center;opacity:.55;font-size:clamp(11px,1.6vw,14px)}
+  .sbtn{font-family:var(--font);font-size:clamp(11px,1.6vw,15px);border:0;border-radius:999px;padding:.35em .8em;margin:.35em .15em 0;cursor:pointer;
+    background:var(--gold);color:#4a2a10}
+  .sbtn.ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(255,246,220,.45)}
+  .opts{display:flex;flex-wrap:wrap;gap:.5em 1.4em;justify-content:center;align-items:center;font-size:clamp(12px,1.8vw,16px)}
+  .opts input[type=range]{width:clamp(90px,16vw,160px);accent-color:#f2c14e;vertical-align:middle}
+  .opts input[type=checkbox]{accent-color:#f2c14e;width:1.1em;height:1.1em;vertical-align:middle}
+  #msg{min-height:1.4em;color:#b8ff7a}
+  .word{margin:.6em 0 .3em;line-height:1}
+  .word .line{display:flex;justify-content:center;gap:clamp(4px,1vw,10px);margin:clamp(6px,1.2vw,12px) 0}
+  .orb{display:inline-flex;align-items:center;justify-content:center;width:clamp(30px,5.6vw,54px);height:clamp(30px,5.6vw,54px);border-radius:50%;
+    font-size:clamp(17px,3.2vw,31px);color:#fffbe8;text-shadow:0 0 8px #fff3b0,0 0 2px #fff;
+    background:radial-gradient(circle at 33% 28%, #e4dcff 0%, #8c6ff5 30%, #22106b 100%);
+    box-shadow:0 0 14px 4px rgba(185,165,255,.65), inset 0 0 0 2px rgba(235,225,255,.85);
+    animation:orbGlow 2.4s ease-in-out infinite}
+  .orb.empty{background:rgba(255,255,255,.05);color:rgba(255,246,220,.28);text-shadow:none;box-shadow:inset 0 0 0 2px rgba(255,246,220,.22);animation:none}
+  @keyframes orbGlow{50%{box-shadow:0 0 22px 8px rgba(185,165,255,.9), inset 0 0 0 2px rgba(255,255,255,.95)}}
+  @media (prefers-reduced-motion:reduce){.orb{animation:none}}
+  @media (max-width:520px){.slots{grid-template-columns:1fr 1fr 1fr;gap:6px}}
   .card h1{margin:0 0 .2em;font-weight:400;font-size:clamp(28px,6vw,62px);line-height:1.05;color:var(--gold);
     text-shadow:0 3px 0 #6b3f1f, 0 6px 0 rgba(0,0,0,.35);letter-spacing:.02em}
   .card h2{margin:0 0 .3em;font-weight:400;font-size:clamp(24px,4.6vw,44px);color:var(--gold);text-shadow:0 3px 0 #6b3f1f}
@@ -79,10 +109,168 @@ const cv = document.getElementById('game');
 const ctx = cv.getContext('2d');
 const W = 960, H = 540;
 const FONT = '"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
-const GOAL = 5;          // 모아야 할 보물 수
+const WORD = ['강','원','특','수','교','육','원','강','릉','분','원']; // 완성할 글자 (앞 7글자 / 뒤 4글자)
+const LINE1 = 7;                                   // 첫 줄(강원특수교육원) 글자 수
+const GOAL = WORD.length;
 const MAX_LIVES = 5;
 const GRAV = 0.55, ACC = 0.7, MAXV = 5.2, FRIC = 0.82, JUMP = -11.2, JUMP2 = -9.6;
 const WATER_Y = 495;
+
+/* ================= 나만의 캐릭터 · 배경음악 =================
+   1) 게임 안 [꾸미기] 화면에서 파일을 불러오면 이 기기 브라우저에 저장되어 계속 적용됩니다.
+   2) 모든 방문자에게 보이게 하려면 index.html과 같은 폴더에 아래 이름으로 파일을 올리세요.
+   (게임 안에서 불러온 파일이 있으면 그것이 우선입니다.) */
+const HERO_IMG      = 'player.png';       // 주인공 이미지
+const HERO_JUMP_IMG = 'player-jump.png';  // (선택) 점프할 때 이미지
+const BGM_SRC       = 'bgm.mp3';          // 배경음악
+const BGM_VOLUME    = 0.45;               // 배경음악 크기 0 ~ 1
+let heroHeight = 58;                      // 캐릭터 키(픽셀) — 꾸미기 화면에서 조절 가능
+
+function newSlot(def){ return {img:new Image(), ok:false, def, custom:null, url:null}; }
+const hero = newSlot(HERO_IMG), heroJump = newSlot(HERO_JUMP_IMG);
+function setImg(a, src){
+  const img = new Image(); a.ok = false; a.img = img;
+  img.onload = () => { if(a.img === img){ a.ok = true; refreshCustom(); } };
+  img.onerror = () => { if(a.img === img) a.ok = false; };
+  img.src = src;
+}
+const bgm = new Audio();
+bgm.loop = true; bgm.volume = BGM_VOLUME; bgm.preload = 'auto';
+let bgmOk = true, bgmCustom = null, bgmUrl = null;
+bgm.addEventListener('error', () => { bgmOk = false; refreshCustom(); });
+function setBgm(src){ bgmOk = true; bgm.src = src; bgm.load(); }
+function bgmPlay(restart){
+  if(!bgmOk || !soundOn || !bgm.src) return;
+  if(restart) bgm.currentTime = 0;
+  bgm.volume = BGM_VOLUME;
+  bgm.play().catch(() => {});
+}
+function bgmStop(){ bgm.pause(); previewing = false; }
+let previewing = false;
+
+/* ---- 브라우저 저장소(IndexedDB) ---- */
+function idbOpen(){
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('jungle-jump', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('assets');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbGet(k){
+  const db = await idbOpen();
+  return new Promise((res, rej) => { const q = db.transaction('assets').objectStore('assets').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+}
+async function idbSet(k, v){
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const t = db.transaction('assets', 'readwrite'), st = t.objectStore('assets');
+    v == null ? st.delete(k) : st.put(v, k);
+    t.oncomplete = () => res(); t.onerror = () => rej(t.error);
+  });
+}
+function applyImg(a, rec){
+  if(a.url) URL.revokeObjectURL(a.url);
+  a.custom = rec || null; a.url = rec ? URL.createObjectURL(rec.blob) : null;
+  setImg(a, a.url || a.def);
+}
+function applyBgm(rec){
+  bgmStop();
+  if(bgmUrl) URL.revokeObjectURL(bgmUrl);
+  bgmCustom = rec || null; bgmUrl = rec ? URL.createObjectURL(rec.blob) : null;
+  setBgm(bgmUrl || BGM_SRC);
+}
+async function loadSaved(){
+  const get = async k => { try{ return await idbGet(k); }catch(e){ return null; } };
+  applyImg(hero, await get('hero'));
+  applyImg(heroJump, await get('heroJump'));
+  applyBgm(await get('bgm'));
+  try{ const h = +localStorage.getItem('jungle_hero_h'); if(h) heroHeight = h; }catch(e){}
+  refreshCustom();
+}
+
+/* ---- 이미지 정리: 배경 지우기 + 여백 자르기 ---- */
+async function cleanImage(file, removeBg){
+  const url = URL.createObjectURL(file);
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  URL.revokeObjectURL(url);
+  const sc = Math.min(1, 512 / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth*sc)), h = Math.max(1, Math.round(img.naturalHeight*sc));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h), px = d.data;
+  if(removeBg){
+    const corners = [0, w-1, (h-1)*w, (h-1)*w + w-1].filter(i => px[i*4+3] > 200);
+    if(corners.length >= 3){ // 모서리가 불투명하면 = 배경이 있는 그림
+      const o0 = corners[0]*4, br = px[o0], bgc = px[o0+1], bb = px[o0+2], TOL = 60*60;
+      const seen = new Uint8Array(w*h), stack = [];
+      for(let i=0;i<w;i++){ stack.push(i, (h-1)*w + i); }
+      for(let j=0;j<h;j++){ stack.push(j*w, j*w + w-1); }
+      while(stack.length){
+        const i = stack.pop(); if(seen[i]) continue; seen[i] = 1;
+        const o = i*4, dr = px[o]-br, dg = px[o+1]-bgc, db = px[o+2]-bb;
+        if(px[o+3] < 20 || dr*dr + dg*dg + db*db < TOL){
+          px[o+3] = 0;
+          const xx = i % w, yy = (i / w) | 0;
+          if(xx > 0) stack.push(i-1); if(xx < w-1) stack.push(i+1);
+          if(yy > 0) stack.push(i-w); if(yy < h-1) stack.push(i+w);
+        }
+      }
+      x.putImageData(d, 0, 0);
+    }
+  }
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for(let yy=0; yy<h; yy++) for(let xx=0; xx<w; xx++){
+    if(px[(yy*w + xx)*4 + 3] > 12){ if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(yy<minY)minY=yy; if(yy>maxY)maxY=yy; }
+  }
+  let out = c;
+  if(maxX >= 0){
+    const bw = maxX-minX+1, bh = maxY-minY+1;
+    out = document.createElement('canvas'); out.width = bw; out.height = bh;
+    out.getContext('2d').drawImage(c, minX, minY, bw, bh, 0, 0, bw, bh);
+  }
+  return new Promise(res => out.toBlob(b => res(b || file), 'image/png'));
+}
+
+/* ---- 파일 선택 ---- */
+const pickImg = Object.assign(document.createElement('input'), {type:'file', accept:'image/*'});
+const pickAud = Object.assign(document.createElement('input'), {type:'file', accept:'audio/*,.mp3,.m4a,.wav,.ogg'});
+let pickSlot = 'hero', autoBg = true;
+pickImg.onchange = async () => {
+  const f = pickImg.files[0]; pickImg.value = ''; if(!f) return;
+  setMsg('이미지를 정리하는 중…');
+  try{
+    const blob = await cleanImage(f, autoBg);
+    const rec = {blob, name:f.name};
+    applyImg(pickSlot === 'hero' ? hero : heroJump, rec);
+    try{ await idbSet(pickSlot, rec); setMsg('불러왔어요! 이 기기에 저장됐어요.'); }
+    catch(e){ setMsg('불러왔어요. (저장은 안 돼서 새로고침하면 사라져요)'); }
+  }catch(e){ setMsg('이 이미지는 열 수 없어요. PNG나 JPG로 다시 시도해 주세요.'); }
+};
+pickAud.onchange = async () => {
+  const f = pickAud.files[0]; pickAud.value = ''; if(!f) return;
+  const rec = {blob:f, name:f.name};
+  applyBgm(rec);
+  try{ await idbSet('bgm', rec); setMsg('음악을 불러왔어요! 이 기기에 저장됐어요.'); }
+  catch(e){ setMsg('음악을 불러왔어요. (저장은 안 돼서 새로고침하면 사라져요)'); }
+  refreshCustom();
+};
+function setMsg(t){ const m = document.getElementById('msg'); if(m) m.textContent = t; }
+let screen = '';
+function refreshCustom(){
+  if(screen !== 'custom') return;
+  const th = (a, id, nameId, emptyText) => {
+    const el = document.getElementById(id), nm = document.getElementById(nameId); if(!el) return;
+    el.innerHTML = a.ok ? '' : `<span class="none">${emptyText}</span>`;
+    if(a.ok){ const i = document.createElement('img'); i.src = a.img.src; i.alt = ''; el.appendChild(i); }
+    nm.textContent = a.custom ? a.custom.name : (a.ok ? '저장소 파일' : '');
+  };
+  th(hero, 'thHero', 'nmHero', '기본 탐험가');
+  th(heroJump, 'thJump', 'nmJump', '없음 (선택)');
+  const nb = document.getElementById('nmBgm');
+  if(nb) nb.textContent = bgmCustom ? bgmCustom.name : (bgmOk ? '저장소 bgm.mp3' : '없음');
+  const pv = document.getElementById('pvBtn'); if(pv){ pv.textContent = previewing ? '멈춤' : '들어보기'; pv.disabled = !bgmOk; }
+}
+
 
 function resize(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -94,6 +282,8 @@ resize(); addEventListener('resize', resize);
 const rand = (a,b) => a + Math.random()*(b-a);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const ease = t => t<0?0:t>1?1:t*t*(3-2*t);
 const hash = n => { const s = Math.sin(n*127.1 + 311.7)*43758.5453; return s - Math.floor(s); };
 
 function rr(x,y,w,h,r){
@@ -141,10 +331,13 @@ const keys = {left:false, right:false, jump:false};
 let jumpQueued = false;
 const KEYMAP = {ArrowLeft:'left', KeyA:'left', ArrowRight:'right', KeyD:'right', ArrowUp:'jump', KeyW:'jump', Space:'jump'};
 addEventListener('keydown', e => {
+  const tag = e.target && e.target.tagName;
+  if(tag === 'INPUT') return;
+  if(tag === 'BUTTON' && (e.code === 'Enter' || e.code === 'Space') && S.state !== 'play') return;
   const k = KEYMAP[e.code];
   if(k){ e.preventDefault(); if(k==='jump' && !e.repeat) jumpQueued = true; keys[k] = true; }
   if((e.code==='KeyP' || e.code==='Escape') && S.state==='play') togglePause();
-  if(e.code==='Enter' && (S.state==='title' || S.state==='over' || S.state==='win')) startGame();
+  if(e.code==='Enter' && screen !== 'custom' && (S.state==='title' || S.state==='over' || S.state==='win')) startGame();
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if(k) keys[k] = false; });
 
@@ -166,7 +359,8 @@ function newGame(){
     player:{x:120, y:300, w:30, h:44, vx:0, vy:0, onGround:false, jumps:0, face:1, inv:0, anim:0, plat:null, splashed:false},
     plats:[], fruits:[], spiders:[], chests:[], hearts:[], animals:[], particles:[], texts:[],
     score:0, fruitCount:0, treasures:0, lives:3, dist:0,
-    genX:0, lastY:400, nextChestX:1300, lastSafe:null
+    genX:0, lastY:400, nextChestX:1000, chestsMade:0, lastSafe:null,
+    order:shuffle([...Array(GOAL).keys()]), found:Array(GOAL).fill(false), orbs:[], slotFlash:Array(GOAL).fill(0), endT:0
   };
   const first = {x:30, y:400, baseY:400, w:430, amp:0, phase:0, dy:0, seed:0.3};
   S.plats.push(first); S.lastSafe = first;
@@ -202,9 +396,10 @@ function genPlatform(){
 
 function populate(p){
   const d = p.x/1000;
-  if(p.x > S.nextChestX && p.w >= 120){
+  if(S.chestsMade < GOAL && p.x > S.nextChestX && p.w >= 120){
+    S.chestsMade++;
     S.chests.push({plat:p, ox:p.w/2-18, got:false});
-    S.nextChestX = p.x + rand(1500,2100);
+    S.nextChestX = p.x + rand(1000,1400);
     return;
   }
   const n = Math.floor(rand(0,3.6));
@@ -255,8 +450,17 @@ function endGame(won){
   let best = 0;
   try{ best = +localStorage.getItem('jungle_best') || 0; if(total > best){ best = total; localStorage.setItem('jungle_best', best); } }catch(e){ best = total; }
   S.best = best;
-  won ? sfx.win() : sfx.lose();
-  setTimeout(() => showScreen(won ? 'win' : 'over'), won ? 900 : 700);
+  bgmStop();
+  if(won) showScreen('win');
+  else { sfx.lose(); setTimeout(() => showScreen('over'), 700); }
+}
+function startEnding(){
+  S.state = 'ending'; S.endT = 0; bgmStop(); sfx.win();
+  Object.keys(keys).forEach(k => keys[k] = false);
+}
+function updateEnding(k){
+  S.time += k; S.endT += k; updateFx(k);
+  if(S.endT > 330 && S.state === 'ending') endGame(true);
 }
 
 function update(k){
@@ -340,11 +544,25 @@ function update(k){
     if(c.got) continue;
     const cx = c.plat.x + c.ox, cy = c.plat.y - 28;
     if(P.x < cx+36 && P.x+P.w > cx && P.y < cy+28 && P.y+P.h > cy){
-      c.got = true; S.treasures++; S.score += 100; sfx.chest(); S.shake = 5;
-      burst(cx+18, cy+10, '#f2c14e', 30, 6); floatText(cx+18, cy-20, `보물 ${S.treasures}/${GOAL}`, '#f2c14e');
-      if(S.treasures >= GOAL) endGame(true);
+      c.got = true; c.openAt = S.time; S.treasures++; S.score += 100; sfx.chest(); S.shake = 5;
+      if(!S.order.length) continue;
+      const slot = S.order.pop(), ch = WORD[slot];
+      burst(cx+18, cy+10, '#f2c14e', 26, 6); burst(cx+18, cy, '#c9b8ff', 18, 5);
+      S.orbs.push({slot, ch, wx:cx+18, wy:cy-6, t:0, fx:0, fy:0});
+      floatText(cx+18, cy-70, `'${ch}' 글자 발견!`, '#dccfff');
     }
   }
+  // 글자 구슬 날아가기
+  for(const o of S.orbs){
+    o.t += k;
+    if(o.t >= 50 && !o.fx){ o.fx = o.wx - S.camX; o.fy = o.wy - 80; }
+    if(o.t >= 100 && !o.done){
+      o.done = true; S.found[o.slot] = true; S.slotFlash[o.slot] = 50;
+      seq([1047,1319,1568], 80, 'sine', .06);
+      if(S.found.every(Boolean)) startEnding();
+    }
+  }
+  S.orbs = S.orbs.filter(o => !o.done);
   // 생명 하트
   for(const h of S.hearts){
     if(h.got) continue;
@@ -378,7 +596,7 @@ function update(k){
   S.plats = S.plats.filter(p => p.x + p.w > cut);
   S.fruits = S.fruits.filter(f => !f.got && pos(f)[0] > cut);
   S.spiders = S.spiders.filter(s => s.x > cut);
-  S.chests = S.chests.filter(c => c.plat.x + c.plat.w > cut && !c.got);
+  S.chests = S.chests.filter(c => c.plat.x + c.plat.w > cut);
   S.hearts = S.hearts.filter(h => !h.got && pos(h)[0] > cut);
   S.animals = S.animals.filter(a => pos(a)[0] > S.camX - 200 && !(a.kind==='butterfly' && a.life > 900));
 }
@@ -389,6 +607,7 @@ function updateFx(k){
   for(const t of S.texts){ t.y -= 0.8*k; t.life -= k; }
   S.texts = S.texts.filter(t => t.life > 0);
   S.shake = Math.max(0, S.shake - 0.6*k);
+  for(let i=0;i<GOAL;i++) if(S.slotFlash[i] > 0) S.slotFlash[i] -= k;
 }
 
 /* ================= 그리기: 배경 ================= */
@@ -575,6 +794,20 @@ function drawChest(c){
   if(x < -60 || x > W+60) return;
   const g = ctx.createRadialGradient(x+18,y+14,4,x+18,y+14,48);
   g.addColorStop(0,'rgba(255,220,120,.55)'); g.addColorStop(1,'rgba(255,220,120,0)');
+  if(c.got){
+    const age = S.time - c.openAt, beam = Math.max(0, 1 - age/90);
+    if(beam > 0){
+      const bg = ctx.createLinearGradient(0, y-120, 0, y+12);
+      bg.addColorStop(0,'rgba(200,180,255,0)'); bg.addColorStop(1,`rgba(220,205,255,${0.7*beam})`);
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.moveTo(x+6,y+12); ctx.lineTo(x+30,y+12); ctx.lineTo(x+48,y-120); ctx.lineTo(x-12,y-120); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#6b3f1f'; ctx.save(); ctx.translate(x, y+11); ctx.rotate(-0.5);
+    rr(0,-12,36,12,4); ctx.fill(); ctx.fillStyle = '#f2c14e'; ctx.fillRect(0,-3,36,3); ctx.restore();
+    ctx.fillStyle = '#8b5a2b'; rr(x, y+10, 36, 18, 3); ctx.fill();
+    ctx.fillStyle = '#2a1608'; ctx.fillRect(x+3, y+10, 30, 4);
+    ctx.fillStyle = '#f2c14e'; ctx.fillRect(x+7, y+10, 3, 18); ctx.fillRect(x+26, y+10, 3, 18);
+    return;
+  }
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x+18,y+14,48,0,6.29); ctx.fill();
   drawChestIcon(x, y, 1, true);
   for(let i=0;i<3;i++){
@@ -670,6 +903,19 @@ function drawPlayer(){
   const P = S.player;
   ctx.save();
   if(P.inv > 0 && Math.floor(P.inv/5)%2 === 0) ctx.globalAlpha = 0.35;
+  const pic = (!P.onGround && heroJump.ok) ? heroJump : hero;
+  if(pic.ok){
+    const img = pic.img, h = heroHeight, w = h * img.naturalWidth / img.naturalHeight;
+    const moving = P.onGround && Math.abs(P.vx) > 0.4;
+    const bob = moving ? -Math.abs(Math.sin(P.anim))*4 : 0;
+    const tilt = moving ? Math.sin(P.anim)*0.06 : (!P.onGround ? -0.08*Math.sign(P.vy) : 0);
+    ctx.translate(P.x - S.camX + P.w/2, P.y + P.h + bob);
+    ctx.scale(P.face, 1); ctx.rotate(tilt);
+    if(P.onGround){ ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, -bob, w*0.35, 3, 0, 0, 6.29); ctx.fill(); }
+    ctx.drawImage(img, -w/2, -h, w, h);
+    ctx.restore();
+    return;
+  }
   ctx.translate(P.x - S.camX + P.w/2, P.y); ctx.scale(P.face, 1);
   const run = P.onGround ? Math.sin(P.anim) : 0, air = !P.onGround;
   const leg = (tx, rot) => { ctx.save(); ctx.translate(tx,30); ctx.rotate(rot);
@@ -692,6 +938,68 @@ function drawPlayer(){
 }
 
 /* ---- HUD ---- */
+function drawOrb(x, y, r, ch, flash=0){
+  const pulse = 1 + Math.sin(S.time*0.08 + x*0.05)*0.07, glow = Math.min(1, flash/50);
+  ctx.save();
+  const ar = r*(2.1 + glow*0.8)*pulse;
+  const a = ctx.createRadialGradient(x, y, r*0.6, x, y, ar);
+  a.addColorStop(0, `rgba(185,165,255,${0.55 + glow*0.4})`); a.addColorStop(1, 'rgba(185,165,255,0)');
+  ctx.fillStyle = a; ctx.beginPath(); ctx.arc(x, y, ar, 0, 6.29); ctx.fill();
+  const g = ctx.createRadialGradient(x-r*0.35, y-r*0.4, r*0.08, x, y, r);
+  g.addColorStop(0, '#e4dcff'); g.addColorStop(0.3, '#8c6ff5'); g.addColorStop(1, '#22106b');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.29); ctx.fill();
+  ctx.strokeStyle = 'rgba(235,225,255,.9)'; ctx.lineWidth = Math.max(1.2, r*0.08); ctx.stroke();
+  const rot = S.time*0.04 + x*0.01;
+  ctx.strokeStyle = 'rgba(255,238,170,.85)'; ctx.lineWidth = Math.max(1, r*0.07); ctx.lineCap = 'round';
+  for(const o of [0, Math.PI]){ ctx.beginPath(); ctx.arc(x, y, r*1.24, rot+o, rot+o+1.1); ctx.stroke(); }
+  ctx.font = `${Math.round(r*1.15)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#fff3b0'; ctx.shadowBlur = r*0.7; ctx.fillStyle = '#fffbe8';
+  ctx.fillText(ch, x, y + r*0.07);
+  ctx.restore();
+}
+const SLOT_SP = 34, SLOT_GAP = 18;
+function slotPos(i){
+  const total = GOAL*SLOT_SP + SLOT_GAP;
+  return [W/2 - total/2 + SLOT_SP/2 + i*SLOT_SP + (i >= LINE1 ? SLOT_GAP : 0), 38];
+}
+function drawOrbsInFlight(){
+  for(const o of S.orbs){
+    let x, y, r;
+    if(o.t < 50){ const e = ease(o.t/50); x = o.wx - S.camX; y = o.wy - e*80; r = 8 + e*18; }
+    else { const e = ease((o.t-50)/50), [tx, ty] = slotPos(o.slot); x = o.fx + (tx-o.fx)*e; y = o.fy + (ty-o.fy)*e - Math.sin(e*Math.PI)*40; r = 26 - e*11; }
+    drawOrb(x, y, r, o.ch, 30);
+  }
+}
+function drawEnding(){
+  const t = S.endT;
+  ctx.save();
+  ctx.fillStyle = `rgba(8,4,30,${Math.min(0.78, t/70*0.78)})`; ctx.fillRect(0, 0, W, H);
+  const cx = W/2, cy = H/2 - 10;
+  if(t > 40){
+    const a = Math.min(1, (t-40)/60);
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(S.time*0.004);
+    for(let i=0;i<14;i++){
+      ctx.rotate(Math.PI*2/14);
+      ctx.fillStyle = `rgba(200,180,255,${0.10*a})`;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-40, -W); ctx.lineTo(40, -W); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  const R = 32, SP = 80;
+  for(let i=0;i<GOAL;i++){
+    const line2 = i >= LINE1, idx = line2 ? i-LINE1 : i, n = line2 ? GOAL-LINE1 : LINE1;
+    const tx = cx - (n-1)*SP/2 + idx*SP, ty = line2 ? cy + 48 : cy - 48;
+    const [sx, sy] = slotPos(i), e = ease((t - 20 - i*7)/70);
+    drawOrb(sx + (tx-sx)*e, sy + (ty-sy)*e, 15 + (R-15)*e, WORD[i], t > 120 + i*5 && t < 150 + i*5 ? 50 : 0);
+  }
+  if(t > 170){
+    const a = Math.min(1, (t-170)/40);
+    ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `34px ${FONT}`; ctx.fillStyle = '#f2c14e'; ctx.shadowColor = '#fff3b0'; ctx.shadowBlur = 16;
+    ctx.fillText('탐험 완성!', cx, cy + 140);
+  }
+  ctx.restore();
+}
 function drawHUD(){
   ctx.save();
   ctx.fillStyle = 'rgba(8,30,22,.6)'; rr(12,12,246,70,14); ctx.fill();
@@ -705,9 +1013,19 @@ function drawHUD(){
   ctx.fillText(`점수 ${S.score}`, 24, 72);
   ctx.fillStyle = '#f7d23c'; ctx.fillText(`열매 ${S.fruitCount}`, 150, 72);
 
-  const pw = GOAL*38 + 24, px = W/2 - pw/2;
-  ctx.fillStyle = 'rgba(8,30,22,.6)'; rr(px,12,pw,50,14); ctx.fill();
-  for(let i=0;i<GOAL;i++) drawChestIcon(px + 14 + i*38, 20, 0.85, i < S.treasures);
+  const pw = GOAL*SLOT_SP + SLOT_GAP + 20, px = W/2 - pw/2;
+  ctx.fillStyle = 'rgba(8,30,22,.6)'; rr(px,12,pw,52,14); ctx.fill();
+  for(let i=0;i<GOAL;i++){
+    const [sx, sy] = slotPos(i);
+    if(S.found[i]){ if(S.state !== 'ending') drawOrb(sx, sy, 14, WORD[i], S.slotFlash[i]); }
+    else {
+      ctx.strokeStyle = 'rgba(255,246,220,.25)'; ctx.lineWidth = 1.5; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.arc(sx, sy, 13, 0, 6.29); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = `15px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,246,220,.28)'; ctx.fillText(WORD[i], sx, sy+1);
+    }
+  }
+  ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'center'; ctx.font = `17px ${FONT}`; ctx.fillStyle = 'rgba(255,246,220,.85)';
   ctx.fillText(`${S.dist}m 탐험`, W/2, 82);
   ctx.restore();
@@ -735,6 +1053,8 @@ function render(){
   drawFG();
   ctx.restore();
   if(S.state !== 'title') drawHUD();
+  drawOrbsInFlight();
+  if(S.state === 'ending') drawEnding();
 }
 
 /* ================= 화면 전환 ================= */
@@ -743,41 +1063,94 @@ function showScreen(type){
   let html = '';
   if(type === 'title'){
     html = `<h1>정글 점프 탐험대</h1>
-      <p>나뭇가지를 밟고 뛰어다니며 정글 열매를 모으세요.<br>숨겨진 보물상자 ${GOAL}개를 모두 찾으면 탐험 성공!</p>
+      <p>나뭇가지를 밟고 뛰어다니며 정글 열매를 모으세요.<br>보물상자를 열면 신비롭게 빛나는 글자가 나와요.<br>글자를 모두 모아 '강원특수교육원 강릉분원'을 완성하세요!</p>
       <div class="legend"><span>🍌 바나나 10</span><span>🍒 체리 15</span><span>🥭 망고 20</span><span>🐉 용과 40</span><span>❤️ 생명 +1</span></div>
       <p class="bad">초록빛 해골 독열매와 매달린 독거미는 피하세요. 물에 빠져도 생명이 줄어요.</p>
       <p class="keys">← → 이동 · 스페이스/↑ 점프 (공중에서 한 번 더!) · P 일시정지</p>
-      <button class="go" id="goBtn">탐험 시작</button>`;
+      <div class="btnrow"><button class="go" id="goBtn">탐험 시작</button><button class="go alt" id="customBtn">꾸미기</button></div>`;
+  } else if(type === 'custom'){
+    html = `<h2>나만의 정글 꾸미기</h2>
+      <div class="slots">
+        <div class="slot"><div class="thumb" id="thHero"></div><b>주인공</b><small id="nmHero"></small>
+          <button class="sbtn" data-img="hero">불러오기</button><button class="sbtn ghost" data-clr="hero">기본으로</button></div>
+        <div class="slot"><div class="thumb" id="thJump"></div><b>점프 모습</b><small id="nmJump"></small>
+          <button class="sbtn" data-img="heroJump">불러오기</button><button class="sbtn ghost" data-clr="heroJump">지우기</button></div>
+        <div class="slot"><div class="thumb"><span class="note">♪</span></div><b>배경음악</b><small id="nmBgm"></small>
+          <button class="sbtn" id="audBtn">불러오기</button><button class="sbtn ghost" id="pvBtn">들어보기</button><button class="sbtn ghost" data-clr="bgm">지우기</button></div>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="optBg" ${autoBg ? 'checked' : ''}> 그림 배경 자동 지우기</label>
+        <label>캐릭터 크기 <input type="range" id="optSize" min="36" max="96" value="${heroHeight}"></label>
+      </div>
+      <p id="msg"></p>
+      <p class="keys">불러온 파일은 이 기기의 브라우저에 저장돼요. 다른 기기에서는 다시 불러와야 해요.</p>
+      <button class="go" id="goBtn">완료</button>`;
   } else if(type === 'pause'){
     html = `<h2>잠깐 쉬는 중</h2><p>정글이 기다리고 있어요.</p><button class="go" id="goBtn">계속하기</button>`;
   } else {
     const won = type === 'win', total = S.score + S.dist;
-    html = `<h2>${won ? '보물을 모두 찾았어요!' : '탐험 종료'}</h2>
+    html = `<h2>${won ? '강원특수교육원 강릉분원 완성!' : '탐험 종료'}</h2>
+      ${wordHTML()}
       <p class="big">최종 점수 ${total}</p>
-      <p>열매 ${S.fruitCount}개 · 보물 ${S.treasures}/${GOAL} · ${S.dist}m 탐험</p>
+      <p>열매 ${S.fruitCount}개 · 글자 ${S.treasures}/${GOAL} · ${S.dist}m 탐험</p>
       <p>최고 기록 ${S.best}</p>
       <button class="go" id="goBtn">${won ? '새 정글로 출발' : '다시 도전'}</button>`;
   }
+  screen = type;
   card.innerHTML = html;
   overlay.classList.add('show');
   const b = document.getElementById('goBtn');
-  b.onclick = type === 'pause' ? togglePause : startGame;
+  b.onclick = type === 'pause' ? togglePause : type === 'custom' ? () => { bgmStop(); showScreen('title'); } : startGame;
+  const cb = document.getElementById('customBtn');
+  if(cb) cb.onclick = () => showScreen('custom');
+  if(type === 'custom') wireCustom();
   b.focus();
 }
-function hideScreen(){ overlay.classList.remove('show'); }
+function wireCustom(){
+  card.querySelectorAll('[data-img]').forEach(el => el.onclick = () => { pickSlot = el.dataset.img; pickImg.click(); });
+  document.getElementById('audBtn').onclick = () => pickAud.click();
+  card.querySelectorAll('[data-clr]').forEach(el => el.onclick = async () => {
+    const k = el.dataset.clr;
+    if(k === 'bgm') applyBgm(null); else applyImg(k === 'hero' ? hero : heroJump, null);
+    try{ await idbSet(k, null); }catch(e){}
+    setMsg('기본 상태로 되돌렸어요.'); refreshCustom();
+  });
+  document.getElementById('pvBtn').onclick = () => {
+    if(previewing){ bgmStop(); }
+    else if(bgmOk && bgm.src){ previewing = true; bgm.currentTime = 0; bgm.volume = BGM_VOLUME; bgm.play().catch(() => { previewing = false; refreshCustom(); }); }
+    refreshCustom();
+  };
+  document.getElementById('optBg').onchange = e => { autoBg = e.target.checked; };
+  document.getElementById('optSize').oninput = e => {
+    heroHeight = +e.target.value;
+    try{ localStorage.setItem('jungle_hero_h', heroHeight); }catch(e){}
+  };
+  refreshCustom();
+}
+function wordHTML(){
+  const orb = i => `<span class="orb${S.found[i] ? '' : ' empty'}">${WORD[i]}</span>`;
+  const idx = [...Array(GOAL).keys()];
+  return `<div class="word"><div class="line">${idx.slice(0,LINE1).map(orb).join('')}</div><div class="line">${idx.slice(LINE1).map(orb).join('')}</div></div>`;
+}
+function hideScreen(){ overlay.classList.remove('show'); screen = ''; }
 function startGame(){
+  bgmStop(); screen = '';
   newGame(); S.state = 'play'; hideScreen();
   jumpQueued = false; Object.keys(keys).forEach(k => keys[k] = false);
   tone(1,0.01,'sine',0.0001); // 모바일 오디오 잠금 해제
+  bgmPlay(true);
 }
 function togglePause(){
   if(S.state !== 'play') return;
   S.paused = !S.paused;
-  S.paused ? showScreen('pause') : hideScreen();
+  S.paused ? (showScreen('pause'), bgmStop()) : (hideScreen(), bgmPlay(false));
 }
 document.getElementById('btnPause').onclick = e => { e.currentTarget.blur(); togglePause(); };
 const btnSound = document.getElementById('btnSound');
-btnSound.onclick = e => { soundOn = !soundOn; btnSound.style.opacity = soundOn ? 1 : 0.4; e.currentTarget.blur(); };
+btnSound.onclick = e => {
+  soundOn = !soundOn; btnSound.style.opacity = soundOn ? 1 : 0.4; e.currentTarget.blur();
+  if(!soundOn) bgmStop(); else if(S.state === 'play' && !S.paused) bgmPlay(false);
+};
 document.addEventListener('visibilitychange', () => { if(document.hidden && S.state === 'play' && !S.paused) togglePause(); });
 
 /* ================= 루프 ================= */
@@ -786,12 +1159,13 @@ function loop(now){
   const dt = Math.min(50, now - last); last = now;
   const k = dt / 16.667;
   if(S.state === 'play' && !S.paused) update(k);
+  else if(S.state === 'ending') updateEnding(k);
   else if(S.state === 'over' || S.state === 'win') updateFx(k);
   else if(S.state === 'title') S.time += k;
   render();
   requestAnimationFrame(loop);
 }
-newGame(); showScreen('title');
+newGame(); showScreen('title'); loadSaved();
 requestAnimationFrame(loop);
 })();
 </script>
