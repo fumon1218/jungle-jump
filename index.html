@@ -118,6 +118,24 @@
   button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 
   #topBtns{position:absolute;top:2.2%;right:1.4%;display:flex;gap:8px}
+  /* ---- 모바일: 버튼은 게임 화면 바깥 여백에 ---- */
+  body.touchui{padding:0;display:block}
+  .touchmode#wrap{position:absolute}
+  .touchmode canvas{border-radius:8px}
+  .touchmode #touch{position:fixed;inset:0;z-index:5}
+  .touchmode #overlay{position:fixed;inset:0;border-radius:0;z-index:20}
+  .touchmode.menuopen #touch, .touchmode.menuopen #topBtns{display:none}
+  .touchmode #topBtns{position:fixed;z-index:6;gap:var(--sg,8px)}
+  .touchmode #topBtns button{width:var(--sb,40px);height:var(--sb,40px);font-size:calc(var(--sb,40px)*0.42)}
+  .touchmode .tb{width:var(--B,64px);height:var(--B,64px);font-size:calc(var(--B,64px)*0.36);
+    background:rgba(255,246,220,.13);border:2px solid rgba(255,246,220,.5);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+  .touchmode .tb.pressed{background:rgba(242,193,78,.55);transform:scale(.93)}
+  .touchmode #pad{left:auto;bottom:auto;padding:0}
+  .touchmode #tS{right:auto;bottom:auto}
+  #tJ{position:absolute;display:none;pointer-events:auto;touch-action:none;flex-direction:column;border-color:rgba(242,193,78,.8)}
+  .touchmode #tJ{display:flex}
+  .touchmode #tJ small, .touchmode #tS small{font-size:calc(var(--B,64px)*0.16);margin-top:-2px}
+  .touchmode #tapHint{right:auto;bottom:auto;width:13em;font-size:13px}
   #topBtns button{width:clamp(32px,4.4vw,44px);height:clamp(32px,4.4vw,44px);border-radius:50%;border:2px solid rgba(255,255,255,.35);
     background:rgba(8,30,22,.55);color:#fff;font-family:var(--font);font-size:clamp(14px,2vw,20px);cursor:pointer}
 
@@ -138,7 +156,7 @@
     pointer-events:none;animation:ripple .4s ease-out forwards}
   @keyframes ripple{from{transform:scale(.3);opacity:1}to{transform:scale(1.3);opacity:0}}
   #btnFull{display:none}
-  #rotate{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;opacity:.7;display:none}
+  #rotate{position:fixed;left:0;right:0;top:calc(6px + env(safe-area-inset-top,0px));text-align:center;font-size:14px;opacity:.7;display:none}
   @media (orientation:portrait) and (pointer:coarse){#rotate{display:block}}
 </style>
 </head>
@@ -154,7 +172,8 @@
   <div id="touch">
     <div id="pad" aria-label="이동 버튼"><div class="tb" id="tL">◀</div><div class="tb" id="tR">▶</div></div>
     <div class="tb" id="tS">▼<small>슬라이딩</small></div>
-    <div id="tapHint"><i></i>화면을 탭하면 점프<br>두 번 탭하면 2단 점프<br>길게 누르면 글라이딩</div>
+    <div class="tb" id="tJ">▲<small>점프</small></div>
+    <div id="tapHint"><i></i>점프 버튼이나 화면을 탭하면 점프<br>두 번 누르면 2단 점프 · 꾹 누르면 글라이딩</div>
   </div>
   <div id="overlay" class="show"><div class="card" id="card"></div></div>
 </div>
@@ -742,10 +761,50 @@ addEventListener('keyup', e => { const k = KEYMAP[e.code]; if(k) keys[k] = false
 
 /* ---- 모바일 터치 조작 ---- */
 const wrapEl = document.getElementById('wrap');
-function applyBtnSize(){ wrapEl.style.setProperty('--tbs', {s:0.8, m:1, l:1.3}[SET.btn] || 1); }
+function applyBtnSize(){ wrapEl.style.setProperty('--tbs', {s:0.8, m:1, l:1.3}[SET.btn] || 1); try{ if(isTouch) layoutUI(); }catch(e){} }
 applyBtnSize();
 let isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-function enableTouch(){ isTouch = true; wrapEl.classList.add('touchmode'); }
+function enableTouch(){ isTouch = true; wrapEl.classList.add('touchmode'); document.body.classList.add('touchui'); layoutUI(); }
+const insetProbe = document.createElement('div');
+insetProbe.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+document.body.appendChild(insetProbe);
+function layoutUI(){
+  if(!isTouch) return;
+  const vv = window.visualViewport, vw = vv ? vv.width : innerWidth, vh = vv ? vv.height : innerHeight;
+  const cs = getComputedStyle(insetProbe), T = parseFloat(cs.paddingTop) || 0, R = parseFloat(cs.paddingRight) || 0, Bm = parseFloat(cs.paddingBottom) || 0, L = parseFloat(cs.paddingLeft) || 0;
+  const sc = {s:0.85, m:1, l:1.2}[SET.btn] || 1;
+  const B = Math.round(clamp(Math.min(vw, vh)*0.17, 48, 84)*sc), g = Math.round(B*0.16), pad = 10;
+  const sb = Math.round(clamp(B*0.6, 32, 46));
+  // ① 양옆 배치: 왼쪽 ◀ ▶ / 오른쪽 점프·슬라이딩
+  const leftW = L + pad*2 + B*2 + g, rightW = R + pad*2 + B;
+  const sAW = vw - leftW - rightW, sAH = vh - T - Bm;
+  const sW = Math.max(0, Math.min(sAW, sAH*16/9)), sH = sW*9/16;
+  // ② 아래 배치: 게임 화면 아래에 버튼 줄
+  const barH = pad*2 + B + Bm, bAW = vw - L - R, bAH = vh - T - barH;
+  const bW = Math.max(0, Math.min(bAW, bAH*16/9)), bH = bW*9/16;
+  const side = sW*sH >= bW*bH;
+  const cw = side ? sW : bW, ch = side ? sH : bH;
+  const cx = side ? leftW + (sAW - cw)/2 : L + (bAW - cw)/2, cy = side ? T + (sAH - ch)/2 : T + Math.max(0, (bAH - ch)/2);
+  Object.assign(wrapEl.style, {left:cx + 'px', top:cy + 'px', width:cw + 'px', height:ch + 'px'});
+  const touch = document.getElementById('touch'); touch.style.setProperty('--B', B + 'px');
+  const tJ = document.getElementById('tJ'), tSb = document.getElementById('tS'), padEl = document.getElementById('pad'), tb = document.getElementById('topBtns'), hint = document.getElementById('tapHint');
+  const bottomY = vh - Bm - pad - B;
+  Object.assign(padEl.style, {left:(L + pad) + 'px', top:bottomY + 'px', gap:g + 'px'});
+  tJ.style.left = (vw - R - pad - B) + 'px'; tJ.style.top = bottomY + 'px';
+  if(side){
+    const sB = Math.round(B*0.82);
+    Object.assign(tSb.style, {width:sB + 'px', height:sB + 'px', left:(vw - R - pad - B + (B - sB)/2) + 'px', top:(bottomY - sB - g) + 'px'});
+    Object.assign(tb.style, {left:(vw - R - pad - sb) + 'px', top:(T + pad) + 'px', right:'auto', flexDirection:'column'});
+  } else {
+    Object.assign(tSb.style, {width:B + 'px', height:B + 'px', left:(vw - R - pad - B*2 - g) + 'px', top:bottomY + 'px'});
+    Object.assign(tb.style, {left:(vw/2 - (sb*3 + 16)/2) + 'px', top:(bottomY + (B - sb)/2) + 'px', right:'auto', flexDirection:'row'});
+  }
+  tb.style.setProperty('--sb', sb + 'px');
+  Object.assign(hint.style, {left:Math.max(8, vw - R - pad - B - 220) + 'px', top:Math.max(T + 8, bottomY - 120) + 'px'});
+}
+addEventListener('resize', layoutUI);
+addEventListener('orientationchange', () => setTimeout(layoutUI, 250));
+if(window.visualViewport) visualViewport.addEventListener('resize', layoutUI);
 if(isTouch) enableTouch();
 addEventListener('pointerdown', e => { if(e.pointerType === 'touch' && !isTouch){ enableTouch(); if(screen === 'title') showScreen('title'); } }, true);
 
@@ -779,6 +838,14 @@ tapzone.addEventListener('pointerdown', e => {
   jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false;
 }));
 tapzone.addEventListener('contextmenu', e => e.preventDefault());
+const tJ = document.getElementById('tJ');
+tJ.addEventListener('pointerdown', e => {
+  e.preventDefault(); tJ.classList.add('pressed');
+  if(S.state !== 'play' || S.paused) return;
+  jumpPointers.add(e.pointerId); keys.jump = true; jumpQueued = Math.min(2, jumpQueued + 1);
+  if(++tapCount >= 3) hideTapHint();
+});
+['pointerup','pointercancel','pointerleave'].forEach(ev => tJ.addEventListener(ev, e => { tJ.classList.remove('pressed'); jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false; }));
 const tS = document.getElementById('tS');
 tS.addEventListener('pointerdown', e => { e.preventDefault(); if(S.state === 'play' && !S.paused) slideQueued = 1; tS.classList.add('pressed'); });
 ['pointerup','pointercancel','pointerleave'].forEach(ev => tS.addEventListener(ev, () => tS.classList.remove('pressed')));
@@ -849,9 +916,9 @@ function tutSteps(){
   const P = S.player, tp = S.tutPlats;
   return [
     {text: isTouch ? '◀ ▶ 버튼으로 오른쪽으로 걸어가요' : '→ 키로 오른쪽으로 걸어가요', done: () => P.x > 380},
-    {text: isTouch ? '화면을 탭해서 점프! 틈을 건너요' : '스페이스로 점프! 틈을 건너요', done: () => P.onGround && P.plat === tp[1]},
+    {text: isTouch ? '▲ 버튼이나 화면을 탭해서 점프! 틈을 건너요' : '스페이스로 점프! 틈을 건너요', done: () => P.onGround && P.plat === tp[1]},
     {text: '높은 발판이에요. 공중에서 한 번 더 누르면 2단 점프!', done: () => P.onGround && P.plat === tp[2]},
-    {text: isTouch ? '넓은 틈! 떨어질 때 화면을 꾹 누르면 글라이딩' : '넓은 틈! 떨어질 때 스페이스를 꾹 누르면 글라이딩', done: () => P.onGround && P.plat === tp[3]},
+    {text: isTouch ? '넓은 틈! 떨어질 때 ▲ 버튼을 꾹 누르면 글라이딩' : '넓은 틈! 떨어질 때 스페이스를 꾹 누르면 글라이딩', done: () => P.onGround && P.plat === tp[3]},
     {text: isTouch ? '가시 덩굴! ▼ 버튼으로 미끄러져 아래로 지나가요' : '가시 덩굴! ↓ 키로 미끄러져 아래로 지나가요', done: () => P.x > tp[3].x + 230},
     {text: '보물상자를 열면 빛나는 글자가 나와요', done: () => S.chests.some(c => c.forceLetter && c.got)},
     {text: '연습 끝! 이제 진짜 탐험을 시작해요', done: () => P.x > TUT_END + 250}
@@ -1016,11 +1083,36 @@ function hurt(){
   if(S.lives <= 0) endGame(false);
   return true;
 }
+function findSafePlat(){   // 지금 화면 안에 실제로 있는 튼튼한 발판 찾기
+  const P = S.player, ok = p => p && !p.falling && !p.crumble && S.plats.includes(p);
+  const inView = p => p.x + p.w > S.camX + 30 && p.x < S.camX + W - 80;
+  if(ok(S.lastSafe) && inView(S.lastSafe)) return S.lastSafe;
+  const tx = clamp(Number.isFinite(P.x) ? P.x : S.camX + 200, S.camX + 120, S.camX + W - 200);
+  let best = null, bd = Infinity;
+  for(const p of S.plats){
+    if(!ok(p) || p.amp || !inView(p) || p.w < 70) continue;
+    const d = Math.abs(p.x + p.w/2 - tx) + (p.x > tx ? 60 : 0);
+    if(d < bd){ bd = d; best = p; }
+  }
+  if(best) return best;
+  const x = S.camX + 140;   // 없으면 비상 안전지대 발판을 만들어요
+  const p = {x, y:380, baseY:380, w:260, amp:0, phase:0, dy:0, seed:Math.random(), zone:zoneAtX(x)};
+  S.plats.push(p);
+  return p;
+}
 function respawn(){
-  const P = S.player, p = S.lastSafe;
-  P.x = p.x + Math.min(30, p.w/2 - P.w/2); P.y = p.y - P.h - 2;
-  P.vx = 0; P.vy = 0; P.inv = 120; P.plat = p; P.splashed = false;
+  const P = S.player, p = findSafePlat();
+  S.lastSafe = p;
+  P.x = p.x + Math.max(8, Math.min(40, p.w/2 - P.w/2)); P.y = p.y - P.h - 2;
+  P.vx = 0; P.vy = 0; P.inv = 120; P.plat = p; P.splashed = false; P.onGround = false;
+  P.launchT = 0; P.boostT = 0; P.slide = 0; P.gliding = false; P.glide = GLIDE_MAX;
+  S.swing = null; S.ride = null;
   S.camX = Math.max(0, P.x - 320);
+  p.safeT = 150;   // 안전지대 표시
+  const cx = P.x + P.w/2;   // 다시 시작하는 곳 바로 옆 위험은 치워요
+  for(const sp of S.spiders) if(!sp.dead && Math.abs(sp.x - cx) < 130){ sp.dead = true; sp.vy = -2; sp.rot = 0; }
+  for(const f of S.fruits) if(f.type === 'poison' && Math.abs(pos(f)[0] - cx) < 130) f.got = true;
+  for(const c of S.customs || []) if((c.d.type === 'hazard' || c.d.type === 'enemy') && Math.abs(pos(c)[0] - cx) < 130) c.got = true;
 }
 function endGame(won){
   S.state = won ? 'win' : 'over';
@@ -1522,6 +1614,7 @@ function update(k){
 
   // 가지: 움직이는 가지 · 부서지는 가지
   for(const p of S.plats){
+    if(p.safeT > 0) p.safeT -= k;
     if(p.amp){ const ny = p.baseY + Math.sin(S.time*0.03 + p.phase)*p.amp; p.dy = ny - p.y; p.y = ny; }
     else p.dy = 0;
     if(p.crumbleT > 0){
@@ -1553,7 +1646,11 @@ function update(k){
     const v = S.swing, th = v.amp*Math.sin(v.w*S.time + v.ph), dth = v.amp*v.w*Math.cos(v.w*S.time + v.ph);
     const ex = v.ax + v.L*Math.sin(th), ey = v.ay + v.L*Math.cos(th);
     P.x = ex - P.w/2; P.y = ey - 6; P.vx = 0; P.vy = 0; P.onGround = false; P.face = dth >= 0 ? 1 : -1;
+    S.swingT = (S.swingT || 0) + k;
+    if(S.swingT > 150 && !S.hints.swingJump){ S.hints.swingJump = true; floatText(ex, ey - 40, isTouch ? '▲ 버튼으로 놓아요!' : '스페이스로 놓아요!', '#e3ffb0'); }
+    if(S.swingT > 420 || (S.chase && P.x < S.camX + 60)) jumpQueued = 1;   // 너무 오래 매달리면 자동으로 놓기
     if(jumpQueued){
+      S.swingT = 0;
       jumpQueued = 0; S.swing = null; P.swingCd = 25; P.jumps = 1; P.launchT = 50; P.face = 1; P.boostT = 30;
       const fwd = Math.sin(th);
       if(fwd > 0.25){   // 앞으로 가장 멀리 흔들렸을 때 → 대각선 위로 크게
@@ -1645,7 +1742,7 @@ function update(k){
       for(const v of S.swings){
         const th = v.amp*Math.sin(v.w*S.time + v.ph), ex = v.ax + v.L*Math.sin(th), ey = v.ay + v.L*Math.cos(th);
         if(Math.hypot(P.x + P.w/2 - ex, P.y + 10 - ey) < 26){
-          S.swing = v; P.gliding = false; tone(440,.12,'triangle',.05,660); addTot('swing');
+          S.swing = v; S.swingT = 0; P.gliding = false; tone(440,.12,'triangle',.05,660); addTot('swing');
           if(!S.hints.swing){ S.hints.swing = true; floatText(ex, ey - 50, '앞으로 크게 흔들릴 때 점프!', '#e3ffb0'); }
           break;
         }
@@ -1689,6 +1786,7 @@ function update(k){
   if(zi !== S.zoneIdx){ S.zoneIdx = zi; if(zi % 4 === 3) unlock('stage4'); S.banner = {text:ZONES[zi % ZONES.length].name, t:0}; seq([523,659,784], 110, 'sine', .05); }
   if(S.banner){ S.banner.t += k; if(S.banner.t > 210) S.banner = null; }
 
+  if(!Number.isFinite(P.x) || !Number.isFinite(P.y) || !Number.isFinite(P.vx) || !Number.isFinite(P.vy)){ P.x = S.camX + 200; respawn(); }
   // 파트너가 한 번 구해줌
   if(!S.easy && S.petKey !== 'none' && !S.petUsed && !S.ride && P.vy > 0 && P.y + P.h > WATER_Y - 6 && S.state === 'play'){
     S.petUsed = true;
@@ -1706,11 +1804,11 @@ function update(k){
   }
   if(P.y > H + 60){
     S.combo = 0; S.comboT = 0;
-    if(S.easy || (S.tutorial && P.x < TUT_END + 150)){ floatText(S.lastSafe.x+40, S.lastSafe.y-70, lava ? '앗 뜨거! 다시 해봐요' : '풍덩! 다시 해봐요', lava ? '#ffb347' : '#bfeee0'); respawn(); }
+    if(S.easy || (S.tutorial && P.x < TUT_END + 150)){ respawn(); floatText(P.x + P.w/2, P.y - 30, lava ? '앗 뜨거! 안전지대에서 다시' : '풍덩! 안전지대에서 다시', lava ? '#ffb347' : '#bfeee0'); }
     else {
       S.lives--; S.shake = 10; lostLife(lava ? 'lava' : 'water');
       if(S.lives <= 0){ P.y = H + 60; endGame(false); }
-      else { floatText(S.lastSafe.x+40, S.lastSafe.y-70, lava ? '앗 뜨거!' : '풍덩!', lava ? '#ffb347' : '#bfeee0'); respawn(); }
+      else { respawn(); floatText(P.x + P.w/2, P.y - 30, lava ? '앗 뜨거! 안전지대에서 다시' : '풍덩! 안전지대에서 다시', lava ? '#ffb347' : '#bfeee0'); }
     }
   }
 
@@ -2180,6 +2278,16 @@ function drawFG(){
 function drawPlatform(p){
   let x = p.x - S.camX; const y = p.y, w = p.w;
   if(x > W+20 || x+w < -20 || y > H + 40) return;
+  if(p.safeT > 0){   // 안전지대: 초록빛 테두리 + 깃발
+    const a = Math.min(1, p.safeT/40);
+    ctx.save(); ctx.globalAlpha = a;
+    const g = ctx.createLinearGradient(0, y - 60, 0, y + 10); g.addColorStop(0, 'rgba(140,255,160,0)'); g.addColorStop(1, 'rgba(140,255,160,.45)');
+    ctx.fillStyle = g; ctx.fillRect(x, y - 60, w, 70);
+    ctx.strokeStyle = '#8f6a3a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + w - 20, y - 4); ctx.lineTo(x + w - 20, y - 46); ctx.stroke();
+    ctx.fillStyle = '#7dff9a'; ctx.beginPath(); ctx.moveTo(x + w - 19, y - 46); ctx.lineTo(x + w + 6, y - 39); ctx.lineTo(x + w - 19, y - 32); ctx.fill();
+    ctx.font = `14px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#eaffef'; ctx.fillText('안전지대', x + w/2, y - 50);
+    ctx.restore();
+  }
   if(p.crumbleT > 0) x += Math.sin(S.time*1.7)*2.2;
   ctx.save(); ctx.lineJoin = 'round';
   if(p.crumble){
@@ -3302,7 +3410,7 @@ function showScreen(type){
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="tutBtn">연습하기</button><button class="go alt sm" id="dailyBtn">오늘의 도전${dailyDone ? ' ✓' : ''}</button><button class="go alt sm" id="duoBtn">2인 대결</button></div>
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="helpBtn">게임 방법</button><button class="go alt sm" id="dexBtn">도감</button><button class="go alt sm" id="wardBtn">옷장</button><button class="go alt sm" id="rankBtn">순위표</button><button class="go alt sm" id="customBtn">꾸미기</button><button class="go alt sm" id="myItemsBtn">내 아이템</button><button class="go alt sm" id="setBtn">설정</button></div>
       <p class="coins">🪙 ${DEX.coins} 코인</p>
-      <p class="keys">${isTouch ? '◀ ▶ 이동 · 화면 탭 점프 (두 번 탭 2단 점프, 길게 누르면 글라이딩) · ▼ 슬라이딩' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · ↓ 슬라이딩 · P 일시정지'}</p>`;
+      <p class="keys">${isTouch ? '◀ ▶ 이동 · ▲ 버튼이나 화면 탭으로 점프 (두 번 = 2단 점프, 꾹 = 글라이딩) · ▼ 슬라이딩' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · ↓ 슬라이딩 · P 일시정지'}</p>`;
   } else if(type === 'myitems'){
     const off = ciRepoOff(), mine = CUSTOM.filter(d => !d.repo).length;
     const cardH = d => {
@@ -3466,7 +3574,7 @@ function showScreen(type){
   }
   screen = type;
   card.innerHTML = html;
-  overlay.classList.add('show');
+  overlay.classList.add('show'); wrapEl.classList.add('menuopen');
   const b = document.getElementById('goBtn');
   const back = () => { bgmStop(); showScreen('title'); };
   const again = () => startGame(S.daily ? {daily:true, seed:+todayKey()} : {});
@@ -3670,7 +3778,7 @@ function wireWardrobe(){
     const sc = card.scrollTop; showScreen('wardrobe'); card.scrollTop = sc;
   });
 }
-function hideScreen(){ overlay.classList.remove('show'); screen = ''; }
+function hideScreen(){ overlay.classList.remove('show'); wrapEl.classList.remove('menuopen'); screen = ''; }
 function startGame(opts = {}){
   bgmStop(); screen = '';
   stopRainSound();
