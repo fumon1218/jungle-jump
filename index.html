@@ -120,35 +120,31 @@
   button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 
   #topBtns{position:absolute;top:2.2%;right:1.4%;display:flex;gap:8px}
-  /* ---- 모바일: 버튼은 게임 화면 바깥 여백에 ---- */
+  /* ---- 모바일: 게임 화면을 전체로, 왼쪽 = 조이스틱 / 오른쪽 = 점프 ---- */
   html:has(body.touchui){overflow:hidden;height:100%}
-  body.touchui{padding:0;display:block;position:fixed;inset:0;overflow:hidden;width:100%;height:100%;overscroll-behavior:none}
+  body.touchui{padding:0;display:block;position:fixed;inset:0;overflow:hidden;width:100%;height:100%;overscroll-behavior:none;background:#000}
   .touchmode#wrap{position:absolute}
-  .touchmode canvas{border-radius:8px}
+  .touchmode canvas{border-radius:0;box-shadow:none}
+  .touchmode #tapzone{display:none!important}
   .touchui #touch{display:block;position:fixed;inset:0;z-index:5;pointer-events:none}
   .touchmode #overlay{position:fixed;inset:0;border-radius:0;z-index:20}
   .touchui.menuopen #touch, .touchui.menuopen #topBtns{display:none}
-  .touchui #topBtns{position:fixed;z-index:6;gap:var(--sg,8px)}
-  .touchui #topBtns button{width:var(--sb,40px);height:var(--sb,40px);font-size:calc(var(--sb,40px)*0.42)}
-  .touchui .tb{width:var(--B,64px);height:var(--B,64px);font-size:calc(var(--B,64px)*0.36);
-    background:rgba(255,246,220,.13);border:2px solid rgba(255,246,220,.5);box-shadow:0 3px 0 rgba(0,0,0,.35)}
-  .touchui .tb.pressed{background:rgba(242,193,78,.55);transform:scale(.93)}
-  .touchui #pad{left:auto;bottom:auto;padding:0}
-  .touchui #tS{right:auto;bottom:auto}
-  #tJ{position:absolute;display:none;pointer-events:auto;touch-action:none;flex-direction:column;border-color:rgba(242,193,78,.8)}
-  .touchui #tJ{display:flex}
-  .touchui #tJ small, .touchui #tS small{font-size:calc(var(--B,64px)*0.16);margin-top:-2px}
-  #joyZone{position:absolute;left:0;top:0;bottom:0;width:50%;display:none;pointer-events:auto;touch-action:none}
-  .touchui.joy #joyZone{display:block}
-  .touchui.joy #pad{display:none}
-  #joyBase{position:absolute;border-radius:50%;border:3px solid rgba(255,246,220,.6);background:radial-gradient(circle, rgba(20,50,40,.15), rgba(20,50,40,.4));
-    pointer-events:none;opacity:.28;transition:opacity .12s}
-  #joyBase.on{opacity:1}
-  #joyKnob{position:absolute;left:50%;top:50%;border-radius:50%;background:radial-gradient(circle at 35% 30%, #8fe8ff, #1e88c5);
-    border:3px solid rgba(255,255,255,.85);box-shadow:0 3px 8px rgba(0,0,0,.45);transform:translate(-50%,-50%)}
-  #joyHint{position:absolute;color:#fff6dc;font-size:14px;text-align:center;line-height:1.4;text-shadow:0 1px 3px #000;pointer-events:none;opacity:0;transition:opacity .4s}
-  #joyHint.show{opacity:.95}
-  .touchui #tapHint{right:auto;bottom:auto;width:13em;font-size:13px}
+  .touchui #topBtns{position:fixed;z-index:6;gap:8px}
+  .touchui #topBtns button{width:var(--sb,38px);height:var(--sb,38px);font-size:calc(var(--sb,38px)*0.42);background:rgba(8,30,22,.45);border-color:rgba(255,255,255,.35)}
+  #joyZone, #jumpZone{position:absolute;top:0;bottom:0;pointer-events:auto;touch-action:none}
+  #joyZone{left:0;width:50%} #jumpZone{right:0;width:50%}
+  #joyBase{position:absolute;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:radial-gradient(circle, rgba(255,255,255,.06), rgba(255,255,255,.16));
+    pointer-events:none;opacity:0;transform:scale(.7);transition:opacity .12s, transform .12s}
+  #joyBase.on{opacity:1;transform:scale(1)}
+  #joyKnob{position:absolute;left:50%;top:50%;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffffff, #cfe8ff 45%, #7fb6e0);
+    border:2px solid rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(0,0,0,.35);transform:translate(-50%,-50%)}
+  .jumpRipple{position:absolute;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;border:3px solid rgba(255,240,170,.9);pointer-events:none;animation:ripple .35s ease-out forwards}
+  #ctlHint{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s}
+  #ctlHint.show{opacity:1}
+  #ctlHint > div{position:absolute;top:52%;transform:translate(-50%,-50%);text-align:center;color:#fff;font-size:15px;line-height:1.5;
+    background:rgba(8,30,22,.6);border:1.5px solid rgba(255,255,255,.35);border-radius:16px;padding:10px 16px;text-shadow:0 1px 2px #000}
+  #ctlHint b{display:block;font-weight:400;font-size:20px;color:#f2c14e}
+  #ctlHint .hl{left:25%} #ctlHint .hr{left:75%}
   #topBtns button{width:clamp(32px,4.4vw,44px);height:clamp(32px,4.4vw,44px);border-radius:50%;border:2px solid rgba(255,255,255,.35);
     background:rgba(8,30,22,.55);color:#fff;font-family:var(--font);font-size:clamp(14px,2vw,20px);cursor:pointer}
 
@@ -183,11 +179,9 @@
     <button id="btnFull" aria-label="전체 화면">⛶</button>
   </div>
   <div id="touch">
-    <div id="joyZone" aria-label="이동 조이스틱 영역"><div id="joyBase"><div id="joyKnob"></div></div><div id="joyHint">왼쪽 아무 곳이나 누르고<br>좌우로 밀면 이동</div></div>
-    <div id="pad" aria-label="이동 버튼"><div class="tb" id="tL">◀</div><div class="tb" id="tR">▶</div></div>
-    <div class="tb" id="tS">▼<small>슬라이딩</small></div>
-    <div class="tb" id="tJ">▲<small>점프</small></div>
-    <div id="tapHint"><i></i>점프 버튼이나 화면을 탭하면 점프<br>두 번 누르면 2단 점프 · 꾹 누르면 글라이딩</div>
+    <div id="joyZone" aria-label="이동: 왼쪽을 누르고 밀기"><div id="joyBase"><div id="joyKnob"></div></div></div>
+    <div id="jumpZone" aria-label="점프: 오른쪽을 탭"></div>
+    <div id="ctlHint"><div class="hl"><b>이동</b>왼쪽을 누른 채<br>좌우로 밀어요</div><div class="hr"><b>점프</b>오른쪽을 탭<br>두 번 = 2단 점프 · 꾹 = 글라이딩</div></div>
   </div>
   <div id="overlay" class="show"><div class="card" id="card"></div></div>
 </div>
@@ -205,7 +199,7 @@ function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch
 const SET = Object.assign({bgm:0.45, sfx:1, shake:true, flash:true, btn:'m', perf:'auto', move:'joy'}, loadJSON('jungle_settings'));
 function saveSet(){ saveJSON('jungle_settings', SET); }
 let LIGHT = SET.perf === 'on';   // 가벼운 모드 (효과 줄이기)
-const W = 960, H = 540;
+let W = 960; const H = 540;   // 모바일에선 화면 비율에 맞춰 W가 넓어져요 (전체 화면)
 const FONT = '"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
 const WORD = ['강','원','특','수','교','육','원','강','릉','분','원']; // 완성할 글자 (앞 7글자 / 뒤 4글자)
 const LINE1 = 7;                                   // 첫 줄(강원특수교육원) 글자 수
@@ -798,50 +792,26 @@ function layoutUI(){
 function layoutUIinner(){
   if(!isTouch) return;
   const de = document.documentElement;
-  const vw = de.clientWidth || innerWidth, vh = de.clientHeight || innerHeight;   // 실제 화면(레이아웃 뷰포트) 크기
+  const vw = de.clientWidth || innerWidth, vh = de.clientHeight || innerHeight;   // 실제 화면 크기
   if(window.scrollX || window.scrollY) window.scrollTo(0, 0);
   const cs = getComputedStyle(insetProbe), T = parseFloat(cs.paddingTop) || 0, R = parseFloat(cs.paddingRight) || 0, Bm = parseFloat(cs.paddingBottom) || 0, L = parseFloat(cs.paddingLeft) || 0;
+  // 노치를 뺀 영역을 게임 화면으로 꽉 채우기: 화면이 넓으면 게임 세계도 옆으로 넓게 보여요
+  const aw = vw - L - R, ah = vh;
+  const newW = clamp(Math.round(H*aw/ah), 720, 1700);
+  if(newW !== W){ W = newW; resize(); }
+  let cw = aw, ch = aw*H/W;
+  if(ch > ah){ ch = ah; cw = ah*W/H; }
+  Object.assign(wrapEl.style, {left:(L + (aw - cw)/2) + 'px', top:((ah - ch)/2) + 'px', width:cw + 'px', height:ch + 'px'});
+  // 조이스틱 크기 (설정의 크기 반영)
   const sc = {s:0.85, m:1, l:1.2}[SET.btn] || 1;
-  const B = Math.round(clamp(Math.min(vw, vh)*0.17, 48, 84)*sc), g = Math.round(B*0.16), pad = 10;
-  const sb = Math.round(clamp(B*0.6, 32, 46));
-  // ① 양옆 배치: 왼쪽 ◀ ▶ / 오른쪽 점프·슬라이딩
-  const joy = SET.move !== 'btn';
-  document.body.classList.toggle('joy', joy);
-  const leftW = joy ? L + pad : L + pad*2 + B*2 + g, rightW = R + pad*2 + B;
-  const sAW = vw - leftW - rightW, sAH = vh - T - Bm;
-  const sW = Math.max(0, Math.min(sAW, sAH*16/9)), sH = sW*9/16;
-  // ② 아래 배치: 게임 화면 아래에 버튼 줄
-  const barH = pad*2 + B + Bm, bAW = vw - L - R, bAH = vh - T - barH;
-  const bW = Math.max(0, Math.min(bAW, bAH*16/9)), bH = bW*9/16;
-  const side = sW*sH >= bW*bH;
-  const cw = side ? sW : bW, ch = side ? sH : bH;
-  const cx = side ? clamp((vw - cw)/2, leftW, vw - rightW - cw) : L + (bAW - cw)/2, cy = side ? T + (sAH - ch)/2 : T + Math.max(0, (bAH - ch)/2);
-  Object.assign(wrapEl.style, {left:cx + 'px', top:cy + 'px', width:cw + 'px', height:ch + 'px'});
-  const touch = document.getElementById('touch'); touch.style.setProperty('--B', B + 'px');
-  const tJ = document.getElementById('tJ'), tSb = document.getElementById('tS'), padEl = document.getElementById('pad'), tb = document.getElementById('topBtns'), hint = document.getElementById('tapHint');
-  const bottomY = vh - Bm - pad - B;
-  Object.assign(padEl.style, {left:(L + pad) + 'px', top:bottomY + 'px', gap:g + 'px'});
-  joyR = Math.round(B*0.95); joyHome = {x:L + pad + joyR + 14, y:vh - Bm - pad - joyR - 8};
-  const jz = document.getElementById('joyZone'); jz.style.width = Math.round(vw*0.5) + 'px';
+  joyR = Math.round(clamp(Math.min(vw, vh)*0.15, 48, 80)*sc);
   const jb = document.getElementById('joyBase'), jk = document.getElementById('joyKnob');
-  Object.assign(jb.style, {width:joyR*2 + 'px', height:joyR*2 + 'px'}); Object.assign(jk.style, {width:Math.round(joyR*0.95) + 'px', height:Math.round(joyR*0.95) + 'px'});
-  if(joyId === null) joyPlace(joyHome.x, joyHome.y);
-  Object.assign(document.getElementById('joyHint').style, {left:(L + pad) + 'px', top:(joyHome.y - joyR - 58) + 'px', width:'14em'});
-  tJ.style.left = (vw - R - pad - B) + 'px'; tJ.style.top = bottomY + 'px';
-  if(side){
-    const sB = Math.round(B*0.82);
-    Object.assign(tSb.style, {width:sB + 'px', height:sB + 'px', left:(vw - R - pad - B + (B - sB)/2) + 'px', top:(bottomY - sB - g) + 'px'});
-    Object.assign(tb.style, {left:(vw - R - pad - sb) + 'px', top:(T + pad) + 'px', right:'auto', flexDirection:'column'});
-  } else {
-    Object.assign(tSb.style, {width:B + 'px', height:B + 'px', left:(vw - R - pad - B*2 - g) + 'px', top:bottomY + 'px'});
-    Object.assign(tb.style, {left:(vw/2 - (sb*3 + 16)/2) + 'px', top:(bottomY + (B - sb)/2) + 'px', right:'auto', flexDirection:'row'});
-  }
+  Object.assign(jb.style, {width:joyR*2 + 'px', height:joyR*2 + 'px'});
+  Object.assign(jk.style, {width:Math.round(joyR*0.9) + 'px', height:Math.round(joyR*0.9) + 'px'});
+  // 일시정지·소리 버튼: 오른쪽 위 작게
+  const tb = document.getElementById('topBtns'), sb = Math.round(clamp(Math.min(vw, vh)*0.09, 32, 44));
   tb.style.setProperty('--sb', sb + 'px');
-  for(const el of [padEl, tJ, tSb, tb]){   // 혹시라도 화면 밖으로 나가지 않게
-    const x = parseFloat(el.style.left) || 0, y = parseFloat(el.style.top) || 0;
-    el.style.left = clamp(x, 0, Math.max(0, vw - 40)) + 'px'; el.style.top = clamp(y, 0, Math.max(0, vh - 40)) + 'px';
-  }
-  Object.assign(hint.style, {left:Math.max(8, vw - R - pad - B - 220) + 'px', top:Math.max(T + 8, bottomY - 120) + 'px'});
+  Object.assign(tb.style, {left:'auto', right:(R + 10) + 'px', top:(T + 8) + 'px', flexDirection:'row'});
 }
 addEventListener('resize', layoutUI);
 addEventListener('orientationchange', () => setTimeout(layoutUI, 250));
@@ -878,19 +848,6 @@ if(window.ResizeObserver) new ResizeObserver(() => layoutUI()).observe(document.
 if(isTouch) enableTouch();
 addEventListener('pointerdown', e => { if(e.pointerType === 'touch' && !isTouch){ enableTouch(); if(screen === 'title') showScreen('title'); } }, true);
 
-// 이동 패드: 손가락을 떼지 않고 ◀ ▶ 사이를 미끄러져도 방향이 바뀜
-const pad = document.getElementById('pad'), tL = document.getElementById('tL'), tR = document.getElementById('tR');
-let padId = null;
-function padSet(e){
-  const r = pad.getBoundingClientRect(), right = e.clientX > r.left + r.width/2;
-  keys.left = !right; keys.right = right;
-  tL.classList.toggle('pressed', !right); tR.classList.toggle('pressed', right);
-}
-function padClear(){ padId = null; keys.left = keys.right = false; tL.classList.remove('pressed'); tR.classList.remove('pressed'); }
-pad.addEventListener('pointerdown', e => { e.preventDefault(); padId = e.pointerId; try{ pad.setPointerCapture(e.pointerId); }catch(_){} padSet(e); });
-pad.addEventListener('pointermove', e => { if(e.pointerId === padId) padSet(e); });
-['pointerup','pointercancel','lostpointercapture'].forEach(ev => pad.addEventListener(ev, e => { if(e.pointerId === padId) padClear(); }));
-
 // 화면 탭 = 점프 (두 번 탭 = 2단 점프, 길게 누르면 더 높이)
 const tapzone = document.getElementById('tapzone'), jumpPointers = new Set();
 let tapCount = 0;
@@ -919,12 +876,10 @@ function joyMove(e){
   const dead = joyR*0.2;
   keys.right = dx > dead; keys.left = dx < -dead;
   joyMag = Math.min(1, Math.abs(dx)/(joyR*0.8));
-  if(dy > joyR*0.6 && Math.abs(dx) < joyR*0.8){ if(!joySlideLatch){ joySlideLatch = true; slideQueued = 1; } }   // 아래로 당기면 슬라이딩
-  else if(dy < joyR*0.3) joySlideLatch = false;
 }
 function joyEnd(){
   joyId = null; keys.left = keys.right = false; joyMag = 0; joySlideLatch = false;
-  joyBase.classList.remove('on'); joyKnobAt(0, 0); joyPlace(joyHome.x, joyHome.y);
+  joyBase.classList.remove('on'); joyKnobAt(0, 0);
 }
 joyZone.addEventListener('pointerdown', e => {
   e.preventDefault();
@@ -933,24 +888,36 @@ joyZone.addEventListener('pointerdown', e => {
   const vw = document.documentElement.clientWidth || innerWidth, vh = document.documentElement.clientHeight || innerHeight;
   joyPlace(clamp(e.clientX, joyR + 4, vw - joyR - 4), clamp(e.clientY, joyR + 4, vh - joyR - 4));
   joyBase.classList.add('on'); joyMove(e);
-  if(!joyUsed){ joyUsed = true; document.getElementById('joyHint').classList.remove('show'); }
+  hintUsed('l');
 });
 joyZone.addEventListener('pointermove', e => { if(e.pointerId === joyId) joyMove(e); });
 ['pointerup','pointercancel','lostpointercapture'].forEach(ev => joyZone.addEventListener(ev, e => { if(e.pointerId === joyId) joyEnd(); }));
-function showJoyHint(){ if(SET.move !== 'btn' && !joyUsed){ const h = document.getElementById('joyHint'); h.classList.add('show'); setTimeout(() => h.classList.remove('show'), 6000); } }
-const tJ = document.getElementById('tJ');
-tJ.addEventListener('pointerdown', e => {
-  e.preventDefault(); tJ.classList.add('pressed');
+/* ---- 오른쪽 탭 = 점프 (두 번 = 2단 점프, 꾹 = 글라이딩) ---- */
+const jumpZone = document.getElementById('jumpZone');
+jumpZone.addEventListener('pointerdown', e => {
+  e.preventDefault();
   if(S.state !== 'play' || S.paused) return;
-  jumpPointers.add(e.pointerId); keys.jump = true; jumpQueued = Math.min(2, jumpQueued + 1);
-  if(++tapCount >= 3) hideTapHint();
+  jumpPointers.add(e.pointerId); keys.jump = true;
+  jumpQueued = Math.min(2, jumpQueued + 1);
+  const d = document.createElement('div'); d.className = 'jumpRipple'; d.style.left = e.clientX + 'px'; d.style.top = e.clientY + 'px';
+  document.getElementById('touch').appendChild(d); setTimeout(() => d.remove(), 380);
+  hintUsed('r');
 });
-['pointerup','pointercancel','pointerleave'].forEach(ev => tJ.addEventListener(ev, e => { tJ.classList.remove('pressed'); jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false; }));
-const tS = document.getElementById('tS');
-tS.addEventListener('pointerdown', e => { e.preventDefault(); if(S.state === 'play' && !S.paused) slideQueued = 1; tS.classList.add('pressed'); });
-['pointerup','pointercancel','pointerleave'].forEach(ev => tS.addEventListener(ev, () => tS.classList.remove('pressed')));
+['pointerup','pointercancel','pointerleave'].forEach(ev => jumpZone.addEventListener(ev, e => { jumpPointers.delete(e.pointerId); if(!jumpPointers.size) keys.jump = false; }));
+jumpZone.addEventListener('contextmenu', e => e.preventDefault());
+/* ---- 처음 한 번 조작 안내 ---- */
+const hintDone = {l:false, r:false}; let hintTimer2 = 0;
+function showCtlHint(){
+  const h = document.getElementById('ctlHint'); hintDone.l = hintDone.r = false;
+  h.classList.add('show'); clearTimeout(hintTimer2); hintTimer2 = setTimeout(() => h.classList.remove('show'), 5000);
+}
+function hintUsed(side){
+  hintDone[side] = true;
+  if(hintDone.l && hintDone.r) document.getElementById('ctlHint').classList.remove('show');
+}
+function vibe(ms){ if(SET.vibe !== false && navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
 
-const tapHint = document.getElementById('tapHint');
+const tapHint = {classList:{add(){}, remove(){}}};   // (예전 안내, 더 이상 쓰지 않음)
 let hintTimer = 0;
 function showTapHint(){ tapCount = 0; tapHint.classList.add('show'); clearTimeout(hintTimer); hintTimer = setTimeout(hideTapHint, 6000); }
 function hideTapHint(){ tapHint.classList.remove('show'); }
@@ -1000,7 +967,7 @@ function newGame(opts = {}){
   if(opts.resume) restoreFrom(opts.resume);
 }
 /* ---- 연습 구간 ---- */
-const TUT_END = 2160;
+const TUT_END = 2160, TUT_N = 6;   // 연습 단계 수
 function buildTutorial(){
   const L = [[30,400,560],[650,400,220],[1010,300,220],[1480,400,330],[1880,380,280]];
   S.plats = L.map(([x,y,w],i) => ({x, y, baseY:y, w, amp:0, phase:0, dy:0, seed:0.21 + i*0.13, zone:'lagoon'}));
@@ -1008,18 +975,16 @@ function buildTutorial(){
   S.lastSafe = S.plats[0]; S.genX = 1880 + 280; S.lastY = 380;
   S.animals = [{kind:'monkey', plat:S.plats[0], ox:470, t:0, flip:-1}];
   for(let i=0;i<5;i++) S.coins.push({plat:S.plats[0], ox:200 + i*24, oy:-40});
-  S.vines.push({plat:S.plats[3], ox:200, hinted:true});
   S.chests.push({plat:S.plats[4], ox:140 - 18, got:false, forceLetter:true});
   S.nextChestX = TUT_END + 700; S.nextBonusX = TUT_END + 1200; S.nextPortalX = TUT_END + 2600;
 }
 function tutSteps(){
   const P = S.player, tp = S.tutPlats;
   return [
-    {text: isTouch ? (SET.move !== 'btn' ? '왼쪽을 누른 채 오른쪽으로 밀어서 걸어가요' : '◀ ▶ 버튼으로 오른쪽으로 걸어가요') : '→ 키로 오른쪽으로 걸어가요', done: () => P.x > 380},
-    {text: isTouch ? '▲ 버튼이나 화면을 탭해서 점프! 틈을 건너요' : '스페이스로 점프! 틈을 건너요', done: () => P.onGround && P.plat === tp[1]},
+    {text: isTouch ? '화면 왼쪽을 누른 채 오른쪽으로 밀어서 걸어가요' : '→ 키로 오른쪽으로 걸어가요', done: () => P.x > 380},
+    {text: isTouch ? '화면 오른쪽을 탭해서 점프! 틈을 건너요' : '스페이스로 점프! 틈을 건너요', done: () => P.onGround && P.plat === tp[1]},
     {text: '높은 발판이에요. 공중에서 한 번 더 누르면 2단 점프!', done: () => P.onGround && P.plat === tp[2]},
-    {text: isTouch ? '넓은 틈! 떨어질 때 ▲ 버튼을 꾹 누르면 글라이딩' : '넓은 틈! 떨어질 때 스페이스를 꾹 누르면 글라이딩', done: () => P.onGround && P.plat === tp[3]},
-    {text: isTouch ? '가시 덩굴! ▼ 버튼으로 미끄러져 아래로 지나가요' : '가시 덩굴! ↓ 키로 미끄러져 아래로 지나가요', done: () => P.x > tp[3].x + 230},
+    {text: isTouch ? '넓은 틈! 떨어질 때 오른쪽을 꾹 누르면 글라이딩' : '넓은 틈! 떨어질 때 스페이스를 꾹 누르면 글라이딩', done: () => P.onGround && P.plat === tp[3]},
     {text: '보물상자를 열면 빛나는 글자가 나와요', done: () => S.chests.some(c => c.forceLetter && c.got)},
     {text: '연습 끝! 이제 진짜 탐험을 시작해요', done: () => P.x > TUT_END + 250}
   ];
@@ -1123,7 +1088,7 @@ function populate(p){
   }
   if(p.x > 2000 && gr() < 0.025) S.fruits.push({plat:p, ox:grand(20,p.w-20), oy:-grand(50,80), type:'gold'});
   let vine = false;
-  if(p.x > 1200 && p.w >= 150 && !p.amp && !p.crumble && gr() < (ez ? 0.08 : 0.13)){
+  if(false && p.x > 1200 && p.w >= 150 && !p.amp && !p.crumble && gr() < (ez ? 0.08 : 0.13)){   // 가시 덩굴은 뺐어요
     S.vines.push({plat:p, ox:grand(p.w*0.45, p.w*0.8), hinted:false}); vine = true;
   }
   if(!vine && p.x > S.nextPortalX && p.w >= 120 && !p.amp && !p.crumble){   // 비밀 동굴 포탈 (드물게)
@@ -1177,7 +1142,7 @@ function hurt(){
     burst(P.x+P.w/2, P.y+P.h/2, '#ffc36b', 22, 5); floatText(P.x+P.w/2, P.y-14, '거인 방패!', '#ffc36b');
     return true;
   }
-  S.lives--; P.inv = 120; S.shake = 12; P.vy = -7; sfx.hurt(); lostLife(S.hurtCause || 'etc'); S.hurtCause = '';
+  S.lives--; P.inv = 120; S.shake = 12; P.vy = -7; sfx.hurt(); vibe(40); lostLife(S.hurtCause || 'etc'); S.hurtCause = '';
   S.combo = 0; S.comboT = 0;
   floatText(P.x+P.w/2, P.y-10, '아야!', '#ff8a80');
   if(S.lives <= 0) endGame(false);
@@ -1700,11 +1665,11 @@ function update(k){
   if(S.bossPending > 0){ S.bossPending -= k; if(S.bossPending <= 0){ startBoss(); return; } }
   S.time += k; S.playTime += k;
   if(Math.floor(S.playTime/180) !== Math.floor((S.playTime - k)/180)) saveProgress();
-  if(S.tutorial && S.tutStep < 7){
+  if(S.tutorial && S.tutStep < TUT_N){
     const st = tutSteps()[S.tutStep];
     if(st.done()){
       S.tutStep++; S.tutOk = 70; seq([784,1047], 70, 'triangle', .05);
-      if(S.tutStep >= 6 && !DEX.tutorialDone){ DEX.tutorialDone = true; saveDex(); }
+      if(S.tutStep >= TUT_N - 1 && !DEX.tutorialDone){ DEX.tutorialDone = true; saveDex(); }
     }
   }
   if(S.tutOk > 0) S.tutOk -= k;
@@ -1747,7 +1712,7 @@ function update(k){
     const ex = v.ax + v.L*Math.sin(th), ey = v.ay + v.L*Math.cos(th);
     P.x = ex - P.w/2; P.y = ey - 6; P.vx = 0; P.vy = 0; P.onGround = false; P.face = dth >= 0 ? 1 : -1;
     S.swingT = (S.swingT || 0) + k;
-    if(S.swingT > 150 && !S.hints.swingJump){ S.hints.swingJump = true; floatText(ex, ey - 40, isTouch ? '▲ 버튼으로 놓아요!' : '스페이스로 놓아요!', '#e3ffb0'); }
+    if(S.swingT > 150 && !S.hints.swingJump){ S.hints.swingJump = true; floatText(ex, ey - 40, isTouch ? '오른쪽을 탭해서 놓아요!' : '스페이스로 놓아요!', '#e3ffb0'); }
     if(S.swingT > 420 || (S.chase && P.x < S.camX + 60)) jumpQueued = 1;   // 너무 오래 매달리면 자동으로 놓기
     if(jumpQueued){
       S.swingT = 0;
@@ -1780,16 +1745,19 @@ function update(k){
       if(wet && Math.abs(P.vx) > 2 && Math.random() < 0.3*k) S.particles.push({x:P.x+P.w/2, y:P.y+P.h-1, vx:-P.vx*0.3, vy:rand(-1.5,-0.5), g:0.1, life:15, max:15, color:'rgba(190,225,255,.9)', size:2});
     }
 
-    // 점프 (공중 2단 점프)
-    if(jumpQueued){
-      if(P.onGround){ P.vy = JUMP; P.jumps = 1; P.onGround = false; P.slide = 0; P.sx = 0.8; P.sy = 1.22; sfx.jump(); }
+    // 점프 (공중 2단 점프) — 발판 끝에서 살짝 늦게 눌러도(코요테 타임), 착지 직전에 미리 눌러도(예약) 점프
+    if(P.onGround) P.coyote = 7; else if(P.coyote > 0) P.coyote -= k;
+    if(jumpQueued && !P.onGround && P.jumps >= 2){ P.jumpBuf = (P.jumpBuf || 0) + k; if(P.jumpBuf < 9) jumpQueued = Math.max(jumpQueued, 1); else { P.jumpBuf = 0; jumpQueued = 0; } }
+    if(jumpQueued && (P.onGround || P.jumps < 2)){
+      P.jumpBuf = 0; vibe(8);
+      if(P.onGround || (P.coyote > 0 && P.jumps === 0)){ P.vy = JUMP; P.jumps = 1; P.onGround = false; P.slide = 0; P.sx = 0.8; P.sy = 1.22; sfx.jump(); }
       else if(P.jumps < 2){
         P.vy = JUMP2; P.jumps = 2; sfx.jump2(); P.sx = 0.84; P.sy = 1.18; P.happyT = 40;
         S.rings.push({x:P.x+P.w/2, y:P.y+P.h, t:0});   // 발밑 바람 고리
         for(const d of [-1,1]) for(let i=0;i<3;i++) S.particles.push({x:P.x+P.w/2+d*6, y:P.y+P.h-2+i*2, vx:d*rand(1.6,2.8), vy:rand(0,0.6), g:0, life:18, max:18, color:'rgba(235,250,255,.9)', size:2.2});
       }
-      jumpQueued--;
-    }
+      jumpQueued--; P.coyote = 0;
+    } else if(jumpQueued && P.jumps < 2) jumpQueued--;
     if(P.boostT > 0) P.boostT -= k;
     else if(!keys.jump && P.vy < -3) P.vy += 0.45*k; // 짧게 누르면 낮은 점프 (버섯·덩굴로 튕길 땐 제외)
 
@@ -3402,7 +3370,7 @@ function drawToast(){
 }
 function drawExtraHUD(){
   ctx.save(); ctx.textBaseline = 'middle';
-  if(S.tutorial && S.tutStep < 7){
+  if(S.tutorial && S.tutStep < TUT_N){
     const st = tutSteps()[S.tutStep], ok = S.tutOk > 0;
     ctx.font = `20px ${FONT}`; const w = Math.max(ctx.measureText(st.text).width, 120) + 60;
     ctx.fillStyle = 'rgba(8,30,22,.8)'; rr(W/2 - w/2, 134, w, 44, 14); ctx.fill();
@@ -3510,7 +3478,7 @@ function showScreen(type){
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="tutBtn">연습하기</button><button class="go alt sm" id="dailyBtn">오늘의 도전${dailyDone ? ' ✓' : ''}</button><button class="go alt sm" id="duoBtn">2인 대결</button></div>
       <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="helpBtn">게임 방법</button><button class="go alt sm" id="dexBtn">도감</button><button class="go alt sm" id="wardBtn">옷장</button><button class="go alt sm" id="rankBtn">순위표</button><button class="go alt sm" id="customBtn">꾸미기</button><button class="go alt sm" id="myItemsBtn">내 아이템</button><button class="go alt sm" id="setBtn">설정</button></div>
       <p class="coins">🪙 ${DEX.coins} 코인</p>
-      <p class="keys">${isTouch ? (SET.move !== 'btn' ? '왼쪽을 누르고 밀어서 이동 (아래로 당기면 슬라이딩)' : '◀ ▶ 이동') + ' · ▲ 버튼이나 화면 탭으로 점프 (두 번 = 2단 점프, 꾹 = 글라이딩) · ▼ 슬라이딩' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · ↓ 슬라이딩 · P 일시정지'}</p>`;
+      <p class="keys">${isTouch ? '왼쪽을 누르고 밀어서 이동 · 오른쪽을 탭하면 점프 (두 번 = 2단 점프, 꾹 = 글라이딩)' : '← → 이동 · 스페이스 점프 (길게 누르면 글라이딩) · P 일시정지'}</p>`;
   } else if(type === 'myitems'){
     const off = ciRepoOff(), mine = CUSTOM.filter(d => !d.repo).length;
     const cardH = d => {
@@ -3559,8 +3527,8 @@ function showScreen(type){
       <div class="setrow"><span>효과음 크기</span><input type="range" id="sSfx" min="0" max="1" step="0.05" value="${SET.sfx}"></div>
       <div class="setrow"><span>화면 흔들림</span><input type="checkbox" id="sShake" ${SET.shake ? 'checked' : ''}></div>
       <div class="setrow"><span>번쩍이는 효과 (붉은 경고 깜빡임 등)</span><input type="checkbox" id="sFlash" ${SET.flash ? 'checked' : ''}></div>
-      <div class="setrow"><span>이동 조작 (모바일)</span>${seg('move', [['joy','조이스틱'],['btn','화살표 버튼']])}</div>
-      <div class="setrow"><span>조작 버튼 크기</span>${seg('btn', [['s','작게'],['m','보통'],['l','크게']])}</div>
+      <div class="setrow"><span>진동 (지원하는 폰)</span><input type="checkbox" id="sVibe" ${SET.vibe !== false ? 'checked' : ''}></div>
+      <div class="setrow"><span>조이스틱 크기</span>${seg('btn', [['s','작게'],['m','보통'],['l','크게']])}</div>
       <div class="setrow"><span>가벼운 모드 (효과 줄이기)</span>${seg('perf', [['auto','자동'],['on','켜기'],['off','끄기']])}</div>
       <h3 class="wtitle">플레이 통계 (밸런스 점검용)</h3>
       <div class="stat">
@@ -3596,8 +3564,8 @@ function showScreen(type){
       <h3>목표</h3><p>보물상자를 열어 빛나는 글자 11개를 모으면 '강원특수교육원 강릉분원'이 완성돼요.</p>
       <h3>점수</h3><p>🍌 10 · 🍒 15 · 🥭 20 · 🐉 40. 열매를 끊기지 않게 먹으면 콤보! 5콤보부터 ×2, 10콤보부터 ×3.</p>
       <h3>생명</h3><p>생명 5개로 시작해요(최대 8개). 하트를 먹거나, 보물상자에서 생명 상자가 나오거나, 한 판에 코인을 100개 모을 때마다, 고릴라 추격전에서 도망치면 생명이 하나씩 늘어요. 비밀 동굴과 보스전에도 하트가 나와요.</p>
-      <h3>조심해요</h3><p>해골 독열매, 매달린 독거미, 늪 물, 금 간 가지(밟으면 곧 부서져요).</p>
-      <h3>탐험가 기술</h3><p>글라이딩: 떨어질 때 점프를 계속 누르면 나뭇잎 낙하산으로 천천히 내려와요. 슬라이딩: ${isTouch ? '▼ 버튼' : '↓ 키'}로 미끄러져 가시 덩굴 아래를 지나가요.</p>
+      <h3>조심해요</h3><p>해골 독열매, 매달린 독거미, 늪 물, 금 간 통나무(밟으면 곧 부서져요).</p>
+      <h3>탐험가 기술</h3><p>글라이딩: 떨어질 때 ${isTouch ? '화면 오른쪽을' : '점프를'} 계속 누르면 나뭇잎 낙하산으로 천천히 내려와요.</p>
       <h3>황금 열매 · 코인</h3><p>황금 열매를 먹으면 10초 동안 커지고, 부딪히는 장애물을 부수고, 열매와 코인을 끌어당겨요. 코인을 모아 옷장에서 캐릭터·잔상·파트너를 살 수 있어요.</p>
       <h3>정글의 장치들</h3><p>빨간 점프 버섯은 아주 높이 튕겨 줘요(하늘에 코인이 있어요). 공중의 줄타기 덩굴에 닿으면 매달리고, 앞으로 크게 흔들릴 때 점프하면 멀리 날아가요. 무지개 포탈은 10초 동안 코인과 열매가 쏟아지는 비밀 동굴로 이어져요. 코인을 연달아 먹으면 도레미 음이 올라가고, 8개째마다 폭죽 보너스!</p>
       <h3>조심! 추격전과 소나기</h3><p>900m쯤에서 분노한 고릴라가 쫓아와요. 화면이 저절로 흘러가니 뒤처지지 말고 달려요. 소나기가 오면 발판이 미끄러워져 잘 멈추지 않아요.</p>
@@ -3785,6 +3753,7 @@ function wireSettings(){
   g('sSfx').onchange = () => tone(880,.12,'triangle',.08);
   g('sShake').onchange = e => { SET.shake = e.target.checked; saveSet(); };
   g('sFlash').onchange = e => { SET.flash = e.target.checked; saveSet(); };
+  g('sVibe').onchange = e => { SET.vibe = e.target.checked; saveSet(); vibe(20); };
   card.querySelectorAll('[data-set]').forEach(b => b.onclick = () => {
     SET[b.dataset.set] = b.dataset.v; saveSet();
     if(b.dataset.set === 'btn' || b.dataset.set === 'move') applyBtnSize();
@@ -3889,7 +3858,7 @@ function startGame(opts = {}){
   S.banner = {text:opts.testItem ? '아이템 시험 중: ' + ((CUSTOM.find(c => c.id === opts.testItem) || {}).name || '') : S.tutorial ? '연습 구간' : opts.resume ? '이어서 탐험!' : opts.daily ? '오늘의 도전!' : ZONES[S.zoneIdx % 4].name, t:0};
   if(S.duo) S.toast = {text:`${S.duo.names[S.duo.idx]} 차례예요!`, t:0};
   jumpQueued = 0; Object.keys(keys).forEach(k => keys[k] = false); jumpPointers.clear();
-  if(isTouch){ showTapHint(); showJoyHint(); if(joyId !== null) joyEnd(); }
+  if(isTouch){ if(!DEX.ctlHintSeen || S.tutorial){ showCtlHint(); DEX.ctlHintSeen = true; saveDex(); } if(joyId !== null) joyEnd(); }
   tone(1,0.01,'sine',0.0001); // 모바일 오디오 잠금 해제
   bgmPlay(true);
 }
