@@ -107,12 +107,25 @@
   .treas{display:flex;flex-direction:column;gap:6px;text-align:left;max-width:32em;margin:.4em auto}
   .tr2{display:flex;gap:10px;align-items:center;background:rgba(255,246,220,.08);border-radius:12px;padding:6px 10px}
   .tr2 .ti{font-size:30px} .tr2 b{font-weight:400;font-size:17px;color:var(--gold)} .tr2 em{font-style:normal;color:#fff6dc;margin-left:6px} .tr2 small{display:block;font-size:12px;opacity:.85}
+  .inlobby #topBtns{display:none!important}
+  .inlobby #overlay{background:rgba(10,22,40,.9)}
   #townBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:9;display:none;gap:clamp(4px,1.2vw,10px);align-items:flex-end}
   #townBar button{font-family:var(--font);width:clamp(48px,7.5vw,68px);height:clamp(48px,7.5vw,68px);border-radius:50%;border:3px solid #e0b060;background:radial-gradient(circle at 40% 35%, #6d4424, #3a220f);color:#fff6dc;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 0 rgba(0,0,0,.4);touch-action:manipulation;padding:0}
   #townBar button span{font-size:clamp(18px,3vw,26px);line-height:1} #townBar button b{font-weight:400;font-size:clamp(10px,1.5vw,13px)}
   #townBar button.adv{width:clamp(62px,10vw,90px);height:clamp(62px,10vw,90px);border-color:#ffe07a;background:radial-gradient(circle at 40% 35%, #43a047, #1b5e20);margin-left:clamp(6px,2vw,20px)}
   #townBar button.adv span{font-size:clamp(24px,4vw,36px)}
   #townBar button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+  .pmodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(120px,20vw,160px),1fr));gap:10px;margin:.5em 0}
+  .pmode{font-family:var(--font);border:0;border-radius:20px;padding:10px 6px;cursor:pointer;background:var(--c);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.28);text-shadow:0 1px 2px rgba(0,0,0,.3)}
+  .pmode:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)} .pmode span{display:block;font-size:clamp(30px,6vw,44px)} .pmode b{display:block;font-weight:400;font-size:clamp(15px,2.5vw,19px)} .pmode small{display:block;font-size:12px;opacity:.95}
+  .porder{background:rgba(184,255,122,.15);border:2px dashed rgba(184,255,122,.6);border-radius:14px;padding:.4em .8em;margin:.4em auto;max-width:36em}
+  .pguide{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;background:rgba(63,169,255,.14);border-radius:14px;padding:.4em .6em;margin:.4em 0;font-size:clamp(12px,2vw,14px)}
+  .pguide b{font-weight:400;color:var(--gold)} .pguide span{background:rgba(0,0,0,.2);border-radius:999px;padding:.15em .7em}
+  .parea{border:2px solid var(--c);border-radius:18px;padding:.3em .6em .6em;margin:.5em 0;background:rgba(0,0,0,.18)} .parea h3{margin:.2em 0;color:var(--c)}
+  .pstages{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+  .pst{font-family:var(--font);width:clamp(62px,12vw,84px);border-radius:16px;border:3px solid var(--c);background:rgba(255,255,255,.1);color:#fff;padding:6px 2px;cursor:pointer}
+  .pst b{display:block;font-size:22px;font-weight:400} .pst small{display:block;color:#ffe07a;font-size:13px} .pst i{display:block;font-style:normal;font-size:11px;opacity:.85;min-height:1.2em}
+  .pst.done{background:rgba(255,224,122,.18)} .pst.lock{opacity:.4;cursor:default}
   .pangtitle{font-size:clamp(40px,8vw,64px)!important;letter-spacing:.05em;-webkit-text-stroke:2px #2b3a67;text-shadow:0 4px 0 #fff, 0 7px 0 #2b3a67}
   .pangrule{background:rgba(63,169,255,.14);border-radius:16px;padding:.4em .9em;text-align:left;max-width:34em;margin:.4em auto} .pangrule p{margin:.35em 0}
   .tabs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:.4em 0}
@@ -1966,6 +1979,8 @@ const lobbyW = () => TOWN.w;
 function doorX(i){ return DOORS[i].x; }
 function enterLobby(){
   if(overLimit()){ restFrom = null; showScreen('limit'); return; }
+  if(typeof PG !== 'undefined' && PG && !PG.stopped) pangStop();
+  if(typeof RH !== 'undefined' && RH && !RH.stopped) rhyStop();
   stopRainSound(); bgmStop();
   newGame(); S.state = 'lobby';
   S.lobby = {near:null, t:0, px:TOWN_START.x, py:TOWN_START.y, cx:0, cy:0, route:null, target:null, npcs:townNpcs(), tip:null, far:!!DEX.townFar};
@@ -2012,7 +2027,7 @@ townBar.querySelectorAll('[data-tb]').forEach(b => b.addEventListener('pointerdo
   else if(k === 'settings'){ settingsFrom = 'lobbyBack'; showScreen('settings'); }
   else showScreen(k);
 }));
-function townBarUpdate(){ townBar.style.display = S && S.state === 'lobby' && !screen ? 'flex' : 'none'; }
+function townBarUpdate(){ townBar.style.display = S && S.state === 'lobby' && !screen ? 'flex' : 'none'; document.body.classList.toggle('inlobby', !!(S && S.state === 'lobby')); }
 const doorBtn = document.createElement('button');
 doorBtn.id = 'doorBtn'; doorBtn.className = 'go';
 doorBtn.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;display:none;font-size:clamp(16px,2.6vw,22px);padding:.45em 1.3em;touch-action:manipulation';
@@ -2028,7 +2043,7 @@ function doorBtnUpdate(){
   if(d) doorBtn.textContent = d.id === 'jungle' ? '🌴 정글 모험 출발!' : `🚪 ${d.name} 들어가기`;
 }
 /* ---- 마을 (강릉분원 디오라마) ---- */
-const CHAR_SCALE = 0.5;   // 디오라마 크기에 맞춰 주인공을 작게
+const CHAR_SCALE = 0.7;   // 디오라마 크기에 맞춰 주인공을 작게
 const townZoom = () => (S && S.lobby && S.lobby.far) ? H/(TOWN.y1 - TOWN.y0 + 20) : H/400;
 function townNpcs(){
   return [
@@ -2193,7 +2208,6 @@ function renderLobby(){
   ctx.fillStyle = 'rgba(0,0,0,.45)'; rr(82, 46, 210, 12, 6); ctx.fill(); ctx.fillStyle = '#ffd54f'; rr(82, 46, 210*clamp(lvl.f, 0, 1), 12, 6); ctx.fill();
   const pills = [['🪙', DEX.coins], ['⚡', `${vit()}/20`], ['❤️', `+${DEX.bonusLives || 0}`], ['🎒', bagCount()]];
   pills.forEach(([ic, v], i) => { const px = W - 190, py = 14 + i*36; ctx.fillStyle = 'rgba(30,20,10,.7)'; rr(px, py, 176, 30, 15); ctx.fill(); ctx.font = '18px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(ic, px + 8, py + 16); ctx.font = `17px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'right'; ctx.fillText(String(v), px + 166, py + 16); });
-  ctx.font = `14px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(40,24,10,.75)'; ctx.fillText('강원특별자치도교육청특수교육원 강릉분원 마을', 16, H - 14);
   ctx.restore();
   drawToast();
 }
@@ -4191,6 +4205,8 @@ function showScreen(type){
     html = esportsHTML();
   } else if(type === 'pangResult'){
     html = pangResultHTML();
+  } else if(type === 'pangMap'){
+    html = pangMapHTML();
   } else if(type === 'club'){
     html = clubHTML();
   } else if(type === 'rhyResult'){
@@ -4393,7 +4409,7 @@ function showScreen(type){
   }
   screen = type;
   card.innerHTML = html;
-  card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult'].includes(type));
+  card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult','pangMap'].includes(type));
   overlay.classList.add('show'); document.body.classList.add('menuopen'); if(typeof doorBtnUpdate === 'function') doorBtnUpdate();
   const b = document.getElementById('goBtn') || {focus(){}};   // 학습 화면엔 없을 수 있어요
   const back = () => { if(S.state === 'lobby'){ hideScreen(); return; } bgmStop(); showScreen('title'); };
@@ -4406,7 +4422,8 @@ function showScreen(type){
     : type === 'learnMenu' || type === 'stages' || type === 'install' ? back
     : type === 'rhyResult' ? () => showScreen('club')
     : type === 'esports' ? () => { if(S.state === 'lobby') hideScreen(); else back(); }
-    : type === 'pangResult' ? () => { if(S.state === 'lobby') hideScreen(); else showScreen('esports'); }
+    : type === 'pangResult' ? () => showScreen('esports')
+    : type === 'pangMap' ? () => showScreen('esports')
     : type === 'profiles' ? () => showScreen('title')
     : type === 'profNew' ? () => { const d = window.PDRAFT, name = (d.name || '').trim(); if(!name){ setMsg('이름을 적어 주세요'); return; } const id = 'p' + Date.now(); PROF.list.push({id, name:name.slice(0, 8), icon:d.icon}); saveProf(); window.PDRAFT = null; switchProfile(id); }
     : type === 'pin' || type === 'pinNew' ? () => { pinNext = null; if(!TEACH.pin && window.__oldPin){ TEACH.pin = window.__oldPin; window.__oldPin = ''; } showScreen('title'); }
@@ -4459,8 +4476,7 @@ function showScreen(type){
   on('teachBtn', () => askPin(() => showScreen('teacher')));
   if(type === 'barista' || type === 'cook') wireRoom(type);
   if(type === 'club') wireClub();
-  on('pangGo', () => pangStart());
-  on('pangAgain', () => pangStart());
+  wirePang(type);
   wireClass(type);
   if(type === 'safety'){
     card.querySelectorAll('[data-learn]').forEach(b => b.onclick = () => openLearn(b.dataset.learn, false, 'safety'));
@@ -4493,7 +4509,8 @@ function showScreen(type){
     showScreen('title');
   });
   if(type === 'custom') wireCustom();
-  if(type !== 'learn') b.focus();
+  card.scrollTop = 0;
+  if(type !== 'learn'){ try{ b.focus({preventScroll:true}); }catch(e){} }
 }
 let settingsFrom = 'title', DUO = null;
 function escapeHTML(t){ return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -4596,7 +4613,7 @@ function fruitPic(t){   // 게임 속 과일 그림을 학습 카드용 그림�
   try{
     x.translate(64, 66); x.scale(3.4, 3.4);
     const cam = S.camX, lights = S.lights; S.lights = [];
-    if(hasItem(t)) drawItemImg(t, 0, 0, 34); else drawFruit({x:cam, y:0, ox:0, type:t, still:true});
+    if(hasItem(t)) drawItemImg(t, 0, 0, 34); else { x.scale(1/3.4, 1/3.4); if(!drawFancyFruit(x, t, 112)){ x.scale(3.4, 3.4); drawFruit({x:cam, y:0, ox:0, type:t, still:true}); } }
     S.lights = lights;
   }catch(e){} finally { ctx = keep; }
   try{ return fruitPicCache[key] = c.toDataURL(); }catch(e){ return ''; }
@@ -4912,6 +4929,7 @@ function roomHTML(type){
       <div class="cards">${DEX.orders.map((o, i) => { const r = RECIPES.find(x => x.id === o.r), ok = hasAll(r.need), it = BAG_ITEMS[r.give];
         return `<div class="rc${ok ? ' can' : ''}"><div class="order"><span class="guest">${o.g}</span><span class="dish">${r.dish}</span></div><b>${r.name}</b><small>받는 것: ${it.icon} ${it.name}</small>${needHTML(r.need)}
         <button data-cook="${i}" ${ok ? '' : 'disabled'}>${ok ? '요리하기' : '재료 부족'}</button></div>`; }).join('')}</div>
+      ${(() => { if(!DEX.pangOrder){ DEX.pangOrder = {g:pick(GUESTS), t:pick(PANG_TYPES), n:8 + Math.floor(Math.random()*8)}; saveDex(); } const o = DEX.pangOrder; return `<div class="porder">${o.g} <b>과일팡 주문</b>: ${FRUIT_INFO[o.t].ko} ${o.n}개를 터뜨려 주세요! → 재료 3개 + 🪙10 <button class="dbtn" style="--c:#7a5cff;color:#fff" id="toEsports">🎮 과일팡 하러 가기</button></div>`; })()}
       <div class="btnrow"><button class="go alt sm" id="mathBtn">🧮 과일 값 계산하기 (코인 받기)</button></div>
       <p class="keys">재료(🥚 알 · 🍯 꿀 · 🥥 코코넛 · 🌾 밀)는 정글 발판 위에서 가끔 찾을 수 있어요. 🎒 가방: ${bagCount()}개</p>
       <button class="go" id="goBtn">로비로</button>`;
@@ -4929,6 +4947,7 @@ function wireRoom(type){
     seq([523,659,784,1047], 80, 'triangle', .06); ROOM = null; re(); setMsg(`⚡ 활력이 ${d.vit} 올랐어요! (지금 ${vit()})`);
   };
   const mb = g('mathBtn'); if(mb) mb.onclick = () => openLearn('math', false, 'cook');
+  const te = g('toEsports'); if(te) te.onclick = () => { ROOM = null; showScreen('esports'); };
   const sv = g('rmServe'); if(sv) sv.onclick = () => {
     const r = RECIPES.find(x => x.id === ROOM.id);
     DEX.items[r.give] = (DEX.items[r.give] || 0) + 1;
@@ -5235,6 +5254,7 @@ function rhyLoop(){
   if(screen !== 'rhythm'){ RH.raf = requestAnimationFrame(rhyLoop); return; }
   resizeStage();
   const w = stage.clientWidth, h = stage.clientHeight, x = sctx2, now = RH.loading ? -1 : rhyNow(), n = RH.lanes, cols = LANE_COLS[n], G = roadGeom(w, h, n);
+  x.lineJoin = 'round'; x.miterLimit = 2;
   // 판정: 놓친 음표 · 길게 누르기 끝
   if(!RH.paused && !RH.loading){
     for(const nt of RH.notes){ if(!nt.judged && now > nt.t + 0.17){ nt.judged = true; nt.res = 'miss'; RH.miss++; RH.combo = 0; RH.fever = Math.max(0, RH.fever - 12); RH.judge = {res:'miss', t:now}; } }
@@ -5348,7 +5368,7 @@ function drawRhyHud(x, w, h, now){
   x.font = `${13*s}px ${FONT}`; x.fillStyle = '#c9d6ff'; x.fillText('SCORE:', 14, 12 + 64*s); x.font = `bold ${20*s}px ${FONT}`; x.fillStyle = '#ffd23f'; x.fillText(RH.score.toLocaleString(), 14 + 58*s, 12 + 64*s);
   const fw = 200*s, fy = 12 + 80*s, fv = RH.feverT > 0 ? RH.feverT/8 : RH.fever/100;
   x.fillStyle = 'rgba(255,255,255,.15)'; rrOn(x, 14, fy, fw, 12*s, 6*s); x.fill();
-  const fg = x.createLinearGradient(14, 0, 14 + fw, 0); fg.addColorStop(0, '#ff3f7f'); fg.addColorStop(1, '#ffe07a'); x.fillStyle = fg; rrOn(x, 14, fy, Math.max(2, fw*fv), 12*s, 6*s); x.fill();
+  const fg = x.createLinearGradient(14, 0, 14 + fw, 0); fg.addColorStop(0, '#ff3f7f'); fg.addColorStop(1, '#ffe07a'); x.fillStyle = fg; if(fw*fv >= 12*s) { rrOn(x, 14, fy, fw*fv, 12*s, 6*s); x.fill(); }
   x.font = `bold ${12*s}px ${FONT}`; x.fillStyle = RH.feverT > 0 ? '#ffe07a' : '#8fb0ff'; x.fillText(RH.feverT > 0 ? '🔥 FEVER x2!' : `FEVER ${Math.round(RH.fever)}%`, 14, fy + 24*s);
   // 가운데 제목
   x.textAlign = 'center';
@@ -5460,7 +5480,7 @@ function wireRhyResult(){
 }
 /* ================= 교실 운영: 프로필 · 선생님 화면 · 이용 시간 · 백업 · 기기 점검 ================= */
 const SESSION = {sec:0, saveT:0};
-const ROOM_SCREENS = ['barista','cook','club','rhythm','rhyResult','learn','safety','learnMenu','bag','esports','pang','pangResult'];
+const ROOM_SCREENS = ['barista','cook','club','rhythm','rhyResult','learn','safety','learnMenu','bag','esports','pang','pangResult','pangMap'];
 function isActive(){ return S && ((S.state === 'play' && !S.paused) || (S.state === 'lobby' && !screen) || ROOM_SCREENS.includes(screen)); }
 function todaySec(){ return DEX.today && DEX.today.d === todayKey() ? DEX.today.sec : 0; }
 function todayExtra(){ return DEX.today && DEX.today.d === todayKey() ? (DEX.today.extra || 0) : 0; }
@@ -5676,30 +5696,133 @@ function wireClass(type){
     on('dVib', () => { if(navigator.vibrate) navigator.vibrate(200); });
   }
 }
-/* ================= e스포츠체험실: 과일팡 (같은 과일 3개 이상 맞추기) ================= */
+/* ================= 세련된 과일 아이콘 (그라데이션 · 광택 · 그림자) ================= */
+function drawFancyFruit(x, t, s){   // (0,0) 중심, 지름 약 s
+  const k = s/100; x.save(); x.scale(k, k);
+  const rad = (cx, cy, r, stops) => { const g = x.createRadialGradient(cx - r*0.35, cy - r*0.4, r*0.1, cx, cy, r*1.05); stops.forEach(([o, c]) => g.addColorStop(o, c)); return g; };
+  const shine = (cx, cy, rx, ry, a = 0.75) => { x.fillStyle = `rgba(255,255,255,${a})`; x.beginPath(); x.ellipse(cx, cy, rx, ry, -0.5, 0, 6.29); x.fill(); };
+  const leaf = (lx, ly, rot, sz = 1) => { x.save(); x.translate(lx, ly); x.rotate(rot); x.scale(sz, sz); const g = x.createLinearGradient(0, -10, 0, 10); g.addColorStop(0, '#8be36a'); g.addColorStop(1, '#2e8b3a');
+    x.fillStyle = g; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(14, -14, 30, 0); x.quadraticCurveTo(14, 12, 0, 0); x.fill(); x.strokeStyle = 'rgba(20,80,30,.5)'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(2, 0); x.lineTo(26, 0); x.stroke(); x.restore(); };
+  x.fillStyle = 'rgba(0,0,0,.18)'; x.beginPath(); x.ellipse(0, 40, 30, 7, 0, 0, 6.29); x.fill();
+  switch(t){
+    case 'apple':
+      x.fillStyle = rad(0, 8, 42, [[0, '#ff8a80'], [0.55, '#e53935'], [1, '#a31515']]);
+      x.beginPath(); x.moveTo(0, -22); x.bezierCurveTo(22, -40, 46, -18, 40, 8); x.bezierCurveTo(36, 34, 16, 42, 0, 36); x.bezierCurveTo(-16, 42, -36, 34, -40, 8); x.bezierCurveTo(-46, -18, -22, -40, 0, -22); x.fill();
+      x.strokeStyle = '#6d4c2f'; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(0, -20); x.quadraticCurveTo(2, -34, 8, -40); x.stroke();
+      leaf(6, -34, -0.5, 0.9); shine(-18, -8, 9, 15); shine(-8, -22, 4, 3, 0.9); break;
+    case 'banana':
+      x.rotate(-0.3);
+      for(const [oy, sc, dark] of [[-10, 0.92, true], [4, 1, false]]){   // 바나나 두 개 (뒤 · 앞)
+        x.save(); x.translate(0, oy); x.scale(sc, sc);
+        x.fillStyle = dark ? rad(0, 0, 50, [[0, '#ffe082'], [0.6, '#f9c22e'], [1, '#d99100']]) : rad(0, 0, 50, [[0, '#fff8b0'], [0.5, '#ffdd4a'], [1, '#f2a900']]);
+        x.beginPath(); x.moveTo(-42, -14); x.bezierCurveTo(-34, 34, 26, 40, 44, -4); x.quadraticCurveTo(46, -12, 38, -10); x.bezierCurveTo(22, 14, -20, 12, -32, -20); x.closePath(); x.fill();
+        x.strokeStyle = 'rgba(170,110,0,.5)'; x.lineWidth = 2.5; x.beginPath(); x.moveTo(-36, -10); x.bezierCurveTo(-26, 20, 20, 26, 40, -4); x.stroke();
+        x.fillStyle = '#5d4037'; x.beginPath(); x.ellipse(-38, -18, 5.5, 7, 0.6, 0, 6.29); x.fill(); x.beginPath(); x.ellipse(42, -8, 4, 3.5, 0, 0, 6.29); x.fill();
+        if(!dark) shine(-14, 10, 13, 4, 0.65);
+        x.restore();
+      }
+      break;
+    case 'grape': {
+      const pts = [[-20,-14],[0,-16],[20,-14],[-12,4],[10,4],[-2,22],[-24,6],[22,6],[0,-2]];
+      for(const [px, py] of pts.slice().sort((a, b) => a[1] - b[1])){ x.fillStyle = rad(px, py, 14, [[0, '#d1a3ff'], [0.5, '#8e44ad'], [1, '#4a1a6b']]); x.beginPath(); x.arc(px, py, 13.5, 0, 6.29); x.fill(); shine(px - 4, py - 5, 4, 2.5, 0.8); }
+      x.strokeStyle = '#6d4c2f'; x.lineWidth = 4; x.beginPath(); x.moveTo(0, -28); x.lineTo(2, -40); x.stroke(); leaf(2, -34, -0.3, 0.9); break; }
+    case 'strawberry':
+      x.fillStyle = rad(0, 6, 44, [[0, '#ff8fa3'], [0.5, '#f5304f'], [1, '#a8102a']]);
+      x.beginPath(); x.moveTo(0, 40); x.bezierCurveTo(-26, 28, -44, 2, -36, -16); x.bezierCurveTo(-26, -30, 26, -30, 36, -16); x.bezierCurveTo(44, 2, 26, 28, 0, 40); x.fill();
+      x.fillStyle = '#ffe9a6'; for(const [sx, sy] of [[-18,-8],[0,-12],[18,-8],[-24,8],[-8,4],[8,4],[24,8],[-12,20],[4,18],[16,22],[-2,30]]){ x.beginPath(); x.ellipse(sx, sy, 1.8, 3, 0, 0, 6.29); x.fill(); }
+      x.fillStyle = '#2e8b3a'; for(let i=0;i<6;i++){ x.save(); x.translate(0, -22); x.rotate(-1.6 + i*0.64); x.beginPath(); x.ellipse(0, -10, 5, 13, 0, 0, 6.29); x.fill(); x.restore(); }
+      x.fillStyle = '#4caf50'; x.beginPath(); x.arc(0, -24, 6, 0, 6.29); x.fill(); shine(-16, -6, 7, 11, 0.55); break;
+    case 'orange':
+      x.fillStyle = rad(0, 4, 42, [[0, '#ffe0a3'], [0.5, '#ff9f1c'], [1, '#d35400']]); x.beginPath(); x.arc(0, 4, 38, 0, 6.29); x.fill();
+      x.fillStyle = 'rgba(160,70,0,.25)'; for(let i=0;i<30;i++){ const a = hash(i)*6.28, r = 8 + hash(i*3)*26; x.beginPath(); x.arc(Math.cos(a)*r, 4 + Math.sin(a)*r, 1.2, 0, 6.29); x.fill(); }
+      x.fillStyle = '#6d4c2f'; x.beginPath(); x.arc(0, -32, 3.5, 0, 6.29); x.fill(); leaf(2, -33, -0.3, 0.85); shine(-15, -10, 9, 13); break;
+    case 'watermelon':
+      x.rotate(0.12);
+      x.fillStyle = '#1b5e20'; x.beginPath(); x.arc(0, -10, 46, 0.05, Math.PI - 0.05); x.closePath(); x.fill();
+      x.fillStyle = '#c5e1a5'; x.beginPath(); x.arc(0, -10, 40, 0.05, Math.PI - 0.05); x.closePath(); x.fill();
+      x.fillStyle = rad(0, -4, 40, [[0, '#ff8a80'], [0.6, '#f44336'], [1, '#c62828']]); x.beginPath(); x.arc(0, -10, 35, 0.05, Math.PI - 0.05); x.closePath(); x.fill();
+      x.fillStyle = '#212121'; for(const [sx, sy] of [[-18,2],[0,8],[18,2],[-8,18],[10,18],[0,-2]]){ x.beginPath(); x.ellipse(sx, sy, 2.6, 4.2, 0, 0, 6.29); x.fill(); x.fillStyle = 'rgba(255,255,255,.5)'; x.beginPath(); x.arc(sx - 1, sy - 1.5, 0.9, 0, 6.29); x.fill(); x.fillStyle = '#212121'; }
+      x.strokeStyle = 'rgba(255,255,255,.4)'; x.lineWidth = 3; x.beginPath(); x.moveTo(-30, -8); x.lineTo(30, -8); x.stroke(); break;
+    case 'cherry':
+      x.strokeStyle = '#5d8a2e'; x.lineWidth = 4; x.lineCap = 'round'; x.beginPath(); x.moveTo(-14, 10); x.quadraticCurveTo(-6, -24, 6, -36); x.moveTo(16, 14); x.quadraticCurveTo(12, -16, 6, -36); x.stroke(); leaf(6, -36, -0.2, 0.8);
+      for(const [cx, cy] of [[-16, 14], [16, 18]]){ x.fillStyle = rad(cx, cy, 18, [[0, '#ff8a9a'], [0.5, '#e0102f'], [1, '#8a0018']]); x.beginPath(); x.arc(cx, cy, 17, 0, 6.29); x.fill(); shine(cx - 6, cy - 6, 5, 7); } break;
+    case 'mango':
+      x.rotate(-0.4); { const g = x.createLinearGradient(-40, -30, 40, 30); g.addColorStop(0, '#ff7043'); g.addColorStop(0.5, '#ffb300'); g.addColorStop(1, '#fff176'); x.fillStyle = g; }
+      x.beginPath(); x.ellipse(0, 4, 42, 32, 0, 0, 6.29); x.fill(); leaf(-30, -20, -2.4, 0.8); shine(-12, -12, 14, 8, 0.6); break;
+    case 'pineapple':
+      x.fillStyle = '#2e8b3a'; for(let i=0;i<7;i++){ x.save(); x.translate(0, -22); x.rotate(-1.05 + i*0.35); x.beginPath(); x.moveTo(-5, 0); x.lineTo(0, -30 + Math.abs(i - 3)*4); x.lineTo(5, 0); x.fill(); x.restore(); }
+      x.fillStyle = rad(0, 12, 36, [[0, '#fff176'], [0.5, '#fbc02d'], [1, '#c77800']]); x.beginPath(); x.ellipse(0, 12, 28, 32, 0, 0, 6.29); x.fill();
+      x.save(); x.beginPath(); x.ellipse(0, 12, 28, 32, 0, 0, 6.29); x.clip(); x.strokeStyle = 'rgba(140,80,0,.55)'; x.lineWidth = 2;
+      for(let i=-6;i<=6;i++){ x.beginPath(); x.moveTo(-40, 12 + i*10 - 30); x.lineTo(40, 12 + i*10 + 30); x.stroke(); x.beginPath(); x.moveTo(40, 12 + i*10 - 30); x.lineTo(-40, 12 + i*10 + 30); x.stroke(); } x.restore();
+      shine(-10, 0, 6, 12, 0.5); break;
+    case 'dragon':
+      x.fillStyle = rad(0, 4, 42, [[0, '#ff9ed2'], [0.55, '#ec407a'], [1, '#ad1457']]); x.beginPath(); x.ellipse(0, 6, 34, 36, 0, 0, 6.29); x.fill();
+      for(const [sx, sy, a] of [[-26,-10,-2.4],[26,-10,-0.7],[-30,14,-2.9],[30,14,-0.2],[0,-30,-1.57],[-14,32,2.2],[14,32,0.9]]){ x.save(); x.translate(sx, sy); x.rotate(a); const g = x.createLinearGradient(0, 0, 18, 0); g.addColorStop(0, '#ec407a'); g.addColorStop(1, '#8bc34a'); x.fillStyle = g; x.beginPath(); x.moveTo(0, -6); x.quadraticCurveTo(12, -2, 18, 0); x.quadraticCurveTo(12, 2, 0, 6); x.fill(); x.restore(); }
+      shine(-12, -8, 8, 12, 0.55); break;
+    default: x.restore(); return false;
+  }
+  x.restore(); return true;
+}
+
+/* ================= e스포츠체험실: 과일팡 2 ================= */
 const PANG_TYPES = ['apple','banana','grape','strawberry','orange','watermelon'];
-const PANG_TIME = 60, PANG_COLS = 8, PANG_ROWS = 7;
+const PANG_TIME = 60;
+const PANG_AREAS = [{name:'경포대', icon:'🏯', col:'#e57373'}, {name:'안목 커피거리', icon:'☕', col:'#a1887f'}, {name:'오죽헌', icon:'🎋', col:'#66bb6a'}, {name:'정동진', icon:'🌅', col:'#ffb74d'}];
+const PANG_STAGES = 20;
+const PANG_SKILL = {none:{icon:'🧒', name:'탐험가', desc:'💣 폭탄 과일 하나를 만들어요'}, bird:{icon:'🐦', name:'새', desc:'과일 6개를 콕콕 쪼아 터뜨려요'}, pixie:{icon:'🧚', name:'요정', desc:'과일 3개를 🚀 줄무늬로 바꿔요'}, owl:{icon:'🦉', name:'부엉이', desc:'시간 +5초 (스테이지는 +3번)'}};
+const PANG_SHAPES = {apple:'circle', banana:'square', grape:'diamond', strawberry:'heart', orange:'hex', watermelon:'tri'};
 let PG = null, pangImgs = {}, pangBg = null, pangBgKey = '';
 const pstage = document.createElement('canvas');
 pstage.id = 'pangStage';
 pstage.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:30;display:none;touch-action:none;background:#7fd3ff';
 document.body.appendChild(pstage);
 const pctx = pstage.getContext('2d');
-function pangImg(t){ if(!pangImgs[t]){ const im = new Image(); im.src = fruitPic(t); pangImgs[t] = im; } return pangImgs[t]; }
+function pangImg(t){
+  if(!pangImgs[t]){ const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d');
+    if(x){ x.translate(80, 80); if(!drawFancyFruit(x, t, 140)){ const keep = ctx; ctx = x; try{ x.scale(3.6, 3.6); drawFruit({x:S.camX, y:0, ox:0, type:t, still:true}); }catch(e){} ctx = keep; } }
+    c.complete = true; c.naturalWidth = 160; pangImgs[t] = c; }
+  return pangImgs[t];
+}
+function pangOpt(){ DEX.pangOpt = Object.assign({big:false, shapes:false}, DEX.pangOpt); return DEX.pangOpt; }
+function weekKey(){ const d = new Date(), s = new Date(d.getFullYear(), 0, 1); return `${d.getFullYear()}-W${Math.ceil(((d - s)/86400000 + s.getDay() + 1)/7)}`; }
+function pangStageDef(n){
+  const a = Math.floor((n - 1)/5), kinds = ['fruit','ice','stone','seed'], kind = n <= 2 ? 'fruit' : kinds[(n + a) % 4];
+  const goals = [];
+  if(kind === 'fruit') goals.push({type:'fruit', t:PANG_TYPES[(n*3) % 6], n:10 + n});
+  if(kind === 'ice') goals.push({type:'ice', layers:n > 10 ? 2 : 1});
+  if(kind === 'stone') goals.push({type:'stone', n:n > 15 ? 5 + a : 5 + a*2, hp:n > 15 ? 2 : 1});
+  if(kind === 'seed') goals.push({type:'seed', n:2 + (a >= 2 ? 1 : 0)});
+  if(n >= 12 && kind !== 'fruit') goals.push({type:'fruit', t:PANG_TYPES[(n*5) % 6], n:10});
+  return {n, area:a, moves:24 - a + (n % 5 === 0 ? 4 : 0) + (kind === 'seed' || kind === 'ice' || kind === 'stone' ? 4 : 0), goals};
+}
 let pangId = 0;
-function pangTile(t, r, c, fromY){ return {t, x:c, y:fromY === undefined ? r : fromY, s:1, pop:0, id:++pangId}; }
-function pangStart(){
-  const nt = ACCS.assist ? 5 : 6, types = PANG_TYPES.slice(0, nt);
-  const g = [];
-  for(let r=0;r<PANG_ROWS;r++){ g.push([]); for(let c=0;c<PANG_COLS;c++){ let t; do{ t = pick(types); }while((c >= 2 && g[r][c-1].t === t && g[r][c-2].t === t) || (r >= 2 && g[r-1][c].t === t && g[r-2][c].t === t)); g[r].push(pangTile(t, r, c, r - PANG_ROWS - 2)); } }
-  PG = {g, types, score:0, time:PANG_TIME, combo:0, comboT:0, maxCombo:0, fever:0, feverT:0, phase:'fall', swap:null, sel:null, drag:null,
-    bombs:1, hints:1, bombArm:false, hint:null, hintT:0, fx:[], texts:[], fruits:{}, over:false, last:performance.now(), started:false, readyT:1.6, pangs:0};
-  for(const t of types) pangImg(t);
+function pangTile(t, sp){ return {t, sp:sp || null, x:0, y:0, pop:0, id:++pangId, land:0, blink:rand(1, 4), hp:1}; }
+function pangStart(mode = 'time', stageN = 0){
+  const opt = pangOpt(), big = opt.big, rows = big ? 6 : 7, cols = big ? 6 : 8;
+  const nt = (ACCS.assist || big) ? 5 : 6, types = PANG_TYPES.slice(0, nt);
+  const daily = mode === 'daily', rng = daily ? mulberry32(+todayKey()*7 + 3) : Math.random;
+  PG = {mode, rows, cols, types, rng, g:[], cell:[], score:0, shown:0, time:PANG_TIME, moves:0, combo:0, comboT:0, maxCombo:0, fever:0, feverT:0,
+    phase:'fall', swap:null, sel:null, drag:null, bombs:1, hints:1, bombArm:false, hint:null, hintT:0, idleT:0, fx:[], texts:[], beams:[], bolts:[], shake:0,
+    fruits:{}, cleared:{}, over:false, win:false, last:performance.now(), readyT:1.6, pangs:0, skill:0, pet:equipped('pet') || 'none', petSay:null, lastTick:99,
+    stage:null, goalDone:{}, seedsOut:0, seedsGot:0, order:DEX.pangOrder || null, orderDone:false, fw:[]};
+  if(mode === 'stage'){ PG.stage = pangStageDef(stageN); PG.moves = PG.stage.moves; }
+  const g = PG.g;
+  for(let r=0;r<rows;r++){ g.push([]); PG.cell.push([]); for(let c=0;c<cols;c++){ let t; do{ t = types[Math.floor(rng()*types.length)]; }while((c >= 2 && g[r][c-1].t === t && g[r][c-2].t === t) || (r >= 2 && g[r-1][c].t === t && g[r-2][c].t === t));
+    const tile = pangTile(t); tile.x = c; tile.y = r - rows - 1; g[r].push(tile); PG.cell[r].push({ice:0}); } }
+  if(PG.stage){
+    for(const gl of PG.stage.goals){
+      if(gl.type === 'ice'){ for(let r=rows - 3;r<rows;r++) for(let c=2;c<cols-2;c++) PG.cell[r][c].ice = (r === rows - 1 && gl.layers > 1) ? 2 : 1; gl.n = PG.cell.flat().filter(c => c.ice).length; }
+      if(gl.type === 'stone'){ let placed = 0, tries = 0; while(placed < gl.n && tries++ < 200){ const r = Math.floor(rows/2) + Math.floor(Math.random()*(rows - Math.floor(rows/2))), c = Math.floor(Math.random()*cols); if(g[r][c].t !== 'stone'){ const s = pangTile('stone'); s.hp = gl.hp; s.x = c; s.y = r - rows - 1; g[r][c] = s; placed++; } } }
+      if(gl.type === 'seed'){ const c = Math.floor(cols/2), r0 = Math.floor(rows/2) - 1, s = pangTile('seed'); s.x = c; s.y = r0 - rows - 1; g[r0][c] = s; PG.seedsOut = 1; }
+    }
+  }
+  pangImg('stone'); for(const t of types) pangImg(t);
   screen = 'pang'; overlay.classList.remove('show'); document.body.classList.add('menuopen'); if(typeof doorBtnUpdate === 'function') doorBtnUpdate();
-  bgmStop(); pstage.style.display = 'block'; pangResize();
+  bgmStop(); if(soundOn && SET.bgm > 0) startSongBgm(pick(['mac','saints','yankee','susanna']));
+  pstage.style.display = 'block'; pangResize();
   PG.raf = requestAnimationFrame(pangLoop);
 }
-function pangStop(){ if(!PG) return; if(PG.raf) cancelAnimationFrame(PG.raf); PG.stopped = true; pstage.style.display = 'none'; }
+function pangStop(){ if(!PG) return; if(PG.raf) cancelAnimationFrame(PG.raf); PG.stopped = true; pstage.style.display = 'none'; stopSongBgm(); }
 function pangResize(){
   const dpr = LIGHT ? 1 : Math.min(2, window.devicePixelRatio || 1), w = pstage.clientWidth || innerWidth, h = pstage.clientHeight || innerHeight;
   if(pstage.width !== Math.round(w*dpr) || pstage.height !== Math.round(h*dpr)){ pstage.width = Math.round(w*dpr); pstage.height = Math.round(h*dpr); }
@@ -5707,7 +5830,7 @@ function pangResize(){
   const key = `${w}x${h}`; if(key !== pangBgKey){ pangBgKey = key; pangBg = makePangBg(w, h); }
 }
 addEventListener('resize', () => { if(pstage.style.display === 'block') pangResize(); });
-function makePangBg(w, h){   // 하늘 · 구름 · 언덕 · 나무 (한 번만 그리기)
+function makePangBg(w, h){
   const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
   const x = c.getContext('2d'); if(!x) return null;
   const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#4fc3ff'); g.addColorStop(0.6, '#bfeaff'); g.addColorStop(1, '#e8f8ff');
@@ -5716,207 +5839,452 @@ function makePangBg(w, h){   // 하늘 · 구름 · 언덕 · 나무 (한 번만
   for(const [cx, cy, s] of [[w*0.12, h*0.18, 1], [w*0.35, h*0.1, 0.8], [w*0.72, h*0.14, 1.1], [w*0.9, h*0.3, 0.7]]){ for(const [ox, oy, r] of [[0,0,34],[38,6,28],[-36,8,26],[12,-18,26]]){ x.beginPath(); x.arc(cx + ox*s, cy + oy*s, r*s, 0, 6.29); x.fill(); } }
   x.fillStyle = '#8fd46a'; x.beginPath(); x.moveTo(0, h*0.75); x.quadraticCurveTo(w*0.25, h*0.62, w*0.5, h*0.74); x.quadraticCurveTo(w*0.75, h*0.84, w, h*0.7); x.lineTo(w, h); x.lineTo(0, h); x.fill();
   x.fillStyle = '#6fbf4a'; x.beginPath(); x.moveTo(0, h*0.85); x.quadraticCurveTo(w*0.4, h*0.76, w, h*0.88); x.lineTo(w, h); x.lineTo(0, h); x.fill();
-  const tree = (tx, ty, s) => { x.fillStyle = '#7a5230'; x.fillRect(tx - 7*s, ty - 40*s, 14*s, 44*s); x.fillStyle = '#3f9a3a'; for(const [ox, oy, r] of [[0,-70,34],[-26,-50,26],[26,-50,26],[0,-100,24]]){ x.beginPath(); x.arc(tx + ox*s, ty + oy*s, r*s, 0, 6.29); x.fill(); } x.fillStyle = 'rgba(255,255,255,.15)'; x.beginPath(); x.arc(tx - 10*s, ty - 88*s, 12*s, 0, 6.29); x.fill(); };
+  const tree = (tx, ty, s) => { x.fillStyle = '#7a5230'; x.fillRect(tx - 7*s, ty - 40*s, 14*s, 44*s); x.fillStyle = '#3f9a3a'; for(const [ox, oy, r] of [[0,-70,34],[-26,-50,26],[26,-50,26],[0,-100,24]]){ x.beginPath(); x.arc(tx + ox*s, ty + oy*s, r*s, 0, 6.29); x.fill(); } };
   const pine = (tx, ty, s) => { x.fillStyle = '#2f7d3a'; for(const [yy, ww] of [[0, 34], [-26, 28], [-50, 20]]){ x.beginPath(); x.moveTo(tx - ww*s, ty + yy*s); x.lineTo(tx, ty + (yy - 40)*s); x.lineTo(tx + ww*s, ty + yy*s); x.fill(); } };
-  const s0 = h/500;
-  tree(w*0.05, h*0.8, 1.5*s0); pine(w*0.13, h*0.86, 1.2*s0); tree(w*0.96, h*0.78, 1.6*s0); pine(w*0.87, h*0.88, 1.1*s0);
+  const s0 = h/500; tree(w*0.05, h*0.8, 1.5*s0); pine(w*0.13, h*0.86, 1.2*s0); tree(w*0.96, h*0.78, 1.6*s0); pine(w*0.87, h*0.88, 1.1*s0);
   return c;
 }
 function pangGeom(w, h){
-  const top = Math.max(h*0.14, 48), cell = Math.floor(Math.min((h - top - Math.max(h*0.12, 44))/PANG_ROWS, (w*0.56)/PANG_COLS)), bw = cell*PANG_COLS, bh = cell*PANG_ROWS;
+  const R = PG.rows, C = PG.cols, top = Math.max(h*0.14, 48), cell = Math.floor(Math.min((h - top - Math.max(h*0.12, 44))/R, (w*0.54)/C)), bw = cell*C, bh = cell*R;
   return {cell, bx:Math.round(w/2 - bw/2), by:Math.round(top + 6), bw, bh};
 }
-function pangMatches(g){
-  const hit = new Set(), groups = [];
-  for(let r=0;r<PANG_ROWS;r++){ let run = 1; for(let c=1;c<=PANG_COLS;c++){ if(c < PANG_COLS && g[r][c] && g[r][c-1] && g[r][c].t === g[r][c-1].t) run++; else { if(run >= 3){ const cells = []; for(let k=c-run;k<c;k++){ hit.add(r*PANG_COLS + k); cells.push([r, k]); } groups.push({t:g[r][c-1].t, cells}); } run = 1; } } }
-  for(let c=0;c<PANG_COLS;c++){ let run = 1; for(let r=1;r<=PANG_ROWS;r++){ if(r < PANG_ROWS && g[r][c] && g[r-1][c] && g[r][c].t === g[r-1][c].t) run++; else { if(run >= 3){ const cells = []; for(let k=r-run;k<r;k++){ hit.add(k*PANG_COLS + c); cells.push([k, c]); } groups.push({t:g[r-1][c].t, cells}); } run = 1; } } }
-  return {hit, groups};
+const matchable = t => t && !t.pop && PANG_TYPES.includes(t.t);
+function pangGroups(g){
+  const R = PG.rows, C = PG.cols, groups = [];
+  for(let r=0;r<R;r++){ let run = 1; for(let c=1;c<=C;c++){ if(c < C && matchable(g[r][c]) && matchable(g[r][c-1]) && g[r][c].t === g[r][c-1].t) run++; else { if(run >= 3){ const cells = []; for(let k=c-run;k<c;k++) cells.push([r, k]); groups.push({t:g[r][c-1].t, cells, dir:'h'}); } run = 1; } } }
+  for(let c=0;c<C;c++){ let run = 1; for(let r=1;r<=R;r++){ if(r < R && matchable(g[r][c]) && matchable(g[r-1][c]) && g[r][c].t === g[r-1][c].t) run++; else { if(run >= 3){ const cells = []; for(let k=r-run;k<r;k++) cells.push([k, c]); groups.push({t:g[r-1][c].t, cells, dir:'v'}); } run = 1; } } }
+  return groups;
 }
-function pangFindMove(g){
-  const sw = (a, b) => { const t = g[a[0]][a[1]]; g[a[0]][a[1]] = g[b[0]][b[1]]; g[b[0]][b[1]] = t; };
-  for(let r=0;r<PANG_ROWS;r++) for(let c=0;c<PANG_COLS;c++) for(const [dr, dc] of [[0,1],[1,0]]){
-    const r2 = r + dr, c2 = c + dc; if(r2 >= PANG_ROWS || c2 >= PANG_COLS) continue;
-    sw([r, c], [r2, c2]); const m = pangMatches(g).groups.length; sw([r, c], [r2, c2]);
-    if(m) return [[r, c], [r2, c2]];
+const swappable = t => t && t.t !== 'stone';
+function pangSwapValid(a, b){
+  const g = PG.g, A = g[a[0]][a[1]], B = g[b[0]][b[1]];
+  if(!swappable(A) || !swappable(B)) return false;
+  if(A.t === 'rainbow' || B.t === 'rainbow') return true;
+  if((A.t === 'seed' && b[0] === a[0] + 1) || (B.t === 'seed' && a[0] === b[0] + 1)) return true;   // 씨앗을 아래로 내리기
+  if(A.sp && B.sp) return true;
+  g[a[0]][a[1]] = B; g[b[0]][b[1]] = A; const ok = pangGroups(g).length > 0; g[a[0]][a[1]] = A; g[b[0]][b[1]] = B;
+  return ok;
+}
+function pangFindMove(){
+  for(let r=0;r<PG.rows;r++) for(let c=0;c<PG.cols;c++) for(const [dr, dc] of [[0,1],[1,0]]){
+    const r2 = r + dr, c2 = c + dc; if(r2 >= PG.rows || c2 >= PG.cols) continue;
+    if(pangSwapValid([r, c], [r2, c2])) return [[r, c], [r2, c2]];
   }
   return null;
 }
 function pangTrySwap(a, b){
   if(!PG || PG.phase !== 'idle' || PG.over || PG.readyT > 0) return;
   if(Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) !== 1) return;
-  const g = PG.g, t = g[a[0]][a[1]]; g[a[0]][a[1]] = g[b[0]][b[1]]; g[b[0]][b[1]] = t;
-  PG.swap = {a, b, t:0, back:false}; PG.phase = 'swap'; PG.sel = null; PG.hint = null;
+  const g = PG.g, A = g[a[0]][a[1]], B = g[b[0]][b[1]];
+  if(!swappable(A) || !swappable(B)){ tone(200, .06, 'sine', .03); return; }
+  g[a[0]][a[1]] = B; g[b[0]][b[1]] = A;
+  PG.swap = {a, b, back:false}; PG.phase = 'swap'; PG.sel = null; PG.hint = null; PG.idleT = 0;
   tone(620, .05, 'triangle', .04);
 }
-function pangResolve(){
-  const {hit, groups} = pangMatches(PG.g);
-  if(!groups.length) return false;
-  PG.combo++; PG.comboT = 2.0; PG.maxCombo = Math.max(PG.maxCombo, PG.combo);
-  const G = pangGeom(pstage.clientWidth, pstage.clientHeight), mult = PG.feverT > 0 ? 2 : 1;
-  for(const gr of groups){
-    const len = gr.cells.length, pts = Math.round(len*100*(1 + Math.min(PG.combo, 20)*0.1)*mult);
-    PG.score += pts; PG.pangs++;
-    PG.fruits[gr.t] = (PG.fruits[gr.t] || 0) + 1;
-    if(len >= 4) PG.time = Math.min(PANG_TIME + 30, PG.time + (len - 3));
-    if(len >= 5){ PG.bombs++; PG.texts.push({x:G.bx + G.bw/2, y:G.by + G.bh*0.3, text:'💣 폭탄 +1', col:'#ff8a3d', t:0}); }
-    if(PG.feverT <= 0){ PG.fever += 7 + len*2; if(PG.fever >= 100){ PG.fever = 0; PG.feverT = 8; seq([784,988,1175,1568], 60, 'square', .05); } }
-    const mid = gr.cells[Math.floor(len/2)], cx = G.bx + (mid[1] + 0.5)*G.cell, cy = G.by + (mid[0] + 0.5)*G.cell;
-    PG.texts.push({x:cx, y:cy - G.cell*0.6, text:`PANG! +${pts}`, col:'#ffd23f', t:0});
-    for(const [r, c] of gr.cells) for(let i=0;i<(LIGHT ? 3 : 6);i++){ const a = rand(0, 6.28), sp = rand(1.5, 5); PG.fx.push({x:G.bx + (c + 0.5)*G.cell, y:G.by + (r + 0.5)*G.cell, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 1, life:1, col:FRUIT_COL[gr.t] || '#fff'}); }
+function pangAddText(x, y, text, col, big){ PG.texts.push({x, y, text, col, t:0, big}); }
+function pangCellXY(r, c){ const G = pangGeom(pstage.clientWidth, pstage.clientHeight); return [G.bx + (c + 0.5)*G.cell, G.by + (r + 0.5)*G.cell, G]; }
+/* 특수 과일이 터질 때 닿는 칸 */
+function pangEffect(r, c, tile, queue, clear, extra){
+  const R = PG.rows, C = PG.cols, add = (rr, cc) => { if(rr < 0 || cc < 0 || rr >= R || cc >= C) return; const k = rr*C + cc; if(!clear.has(k)){ clear.add(k); const t = PG.g[rr][cc]; if(t && t.sp && !t.act) queue.push([rr, cc]); } };
+  const [x, y] = pangCellXY(r, c);
+  if(tile.sp === 'h' || tile.sp === 'x'){ for(let cc=0;cc<C;cc++) add(r, cc); PG.beams.push({dir:'h', r, t:0, col:FRUIT_COL[tile.t] || '#fff'}); }
+  if(tile.sp === 'v' || tile.sp === 'x'){ for(let rr=0;rr<R;rr++) add(rr, c); PG.beams.push({dir:'v', c, t:0, col:FRUIT_COL[tile.t] || '#fff'}); }
+  if(tile.sp === 'b'){ const rad = tile.big ? 2 : 1; for(let dr=-rad;dr<=rad;dr++) for(let dc=-rad;dc<=rad;dc++) add(r + dr, c + dc); PG.fx.push({ring:true, x, y, r:0, max:(tile.big ? 2.6 : 1.6), life:1}); PG.shake = Math.max(PG.shake, 8); }
+  if(tile.t === 'rainbow'){
+    const target = extra || pangCommonType();
+    for(let rr=0;rr<R;rr++) for(let cc=0;cc<C;cc++){ const t = PG.g[rr][cc]; if(t && t.t === target){ add(rr, cc); const [tx, ty] = pangCellXY(rr, cc); PG.bolts.push({x1:x, y1:y, x2:tx, y2:ty, t:0}); } }
+    add(r, c); PG.shake = Math.max(PG.shake, 10);
   }
-  for(const k of hit){ const r = Math.floor(k/PANG_COLS), c = k % PANG_COLS; if(PG.g[r][c]) PG.g[r][c].pop = 0.001; }
+}
+function pangCommonType(){ const cnt = {}; for(const row of PG.g) for(const t of row) if(matchable(t)) cnt[t.t] = (cnt[t.t] || 0) + 1; return Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || PANG_TYPES[0]; }
+/* 한 번 터뜨리기: 맞춘 줄 + 특수 과일 연쇄 + 특수 과일 만들기 */
+function pangResolve(){
+  const g = PG.g, R = PG.rows, C = PG.cols, clear = new Set(), creates = [], queue = [];
+  const sw = PG.swap && !PG.swap.back && !PG.swap.used ? PG.swap : null; if(sw) sw.used = true;
+  // ① 특수 과일끼리 바꾼 경우
+  if(sw){
+    const A = g[sw.a[0]][sw.a[1]], B = g[sw.b[0]][sw.b[1]], [ar, ac] = sw.a, [br, bc] = sw.b;
+    if(A && B && (A.t === 'rainbow' || B.t === 'rainbow')){
+      const rb = A.t === 'rainbow' ? A : B, other = rb === A ? B : A, [rr, rc] = rb === A ? sw.a : sw.b;
+      rb.act = true; clear.add(rr*C + rc);
+      if(other.t === 'rainbow'){ for(let r=0;r<R;r++) for(let c=0;c<C;c++) clear.add(r*C + c); pangAddText(...pangCellXY(rr, rc).slice(0, 2), '🌈 무지개 대폭발!', '#fff', true); PG.shake = 16; }
+      else if(other.sp){ for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const t = g[r][c]; if(t && t.t === other.t){ t.sp = other.sp === 'b' ? 'b' : (Math.random() < 0.5 ? 'h' : 'v'); clear.add(r*C + c); queue.push([r, c]); } } pangAddText(...pangCellXY(rr, rc).slice(0, 2), '🌈 무지개 콤보!', '#fff', true); }
+      else pangEffect(rr, rc, rb, queue, clear, other.t);
+    } else if(A && B && A.sp && B.sp){
+      const sps = [A.sp, B.sp].sort().join('');
+      A.act = B.act = true; clear.add(ar*C + ac); clear.add(br*C + bc);
+      if(sps === 'bb'){ const t = {sp:'b', big:true, t:A.t}; pangEffect(br, bc, t, queue, clear); pangAddText(...pangCellXY(br, bc).slice(0, 2), '💥 초대형 폭발!', '#ffb74d', true); }
+      else if(sps.includes('b')){ for(const d of [-1, 0, 1]){ pangEffect(br + d, bc, {sp:'h', t:A.t}, queue, clear); pangEffect(br, bc + d, {sp:'v', t:B.t}, queue, clear); } pangAddText(...pangCellXY(br, bc).slice(0, 2), '🚀 대형 십자!', '#8ff7ff', true); }
+      else { pangEffect(br, bc, {sp:'x', t:B.t}, queue, clear); pangAddText(...pangCellXY(br, bc).slice(0, 2), '✨ 십자 폭발!', '#8ff7ff', true); }
+    }
+  }
+  // ② 줄 맞추기 → 무리 나누기 · 특수 과일 만들기
+  const groups = pangGroups(g);
+  const par = groups.map((_, i) => i), find = i => par[i] === i ? i : (par[i] = find(par[i]));
+  for(let i=0;i<groups.length;i++) for(let j=i+1;j<groups.length;j++) if(groups[i].t === groups[j].t && groups[i].cells.some(a => groups[j].cells.some(b => a[0] === b[0] && a[1] === b[1]))) par[find(i)] = find(j);
+  const clusters = {}; groups.forEach((gr, i) => (clusters[find(i)] = clusters[find(i)] || []).push(gr));
+  for(const grs of Object.values(clusters)){
+    const cells = new Map(); grs.forEach(gr => gr.cells.forEach(([r, c]) => cells.set(r*C + c, [r, c])));
+    const maxLen = Math.max(...grs.map(gr => gr.cells.length)), dirs = new Set(grs.map(gr => gr.dir)), t = grs[0].t;
+    let sp = maxLen >= 5 ? 'r' : dirs.size > 1 ? 'b' : maxLen === 4 ? grs.find(gr => gr.cells.length === 4).dir : null;
+    let at = null;
+    if(sp){ const swapCells = sw ? [sw.a, sw.b] : []; at = swapCells.find(([r, c]) => cells.has(r*C + c)) || (() => { const lg = grs.slice().sort((a, b) => b.cells.length - a.cells.length)[0]; return lg.cells[Math.floor(lg.cells.length/2)]; })();
+      creates.push({r:at[0], c:at[1], sp, t}); }
+    for(const [k, rc] of cells){ if(at && rc[0] === at[0] && rc[1] === at[1]) continue; clear.add(k); const tt = g[rc[0]][rc[1]]; if(tt && tt.sp && !tt.act) queue.push(rc); }
+    const [x, y] = pangCellXY(...[...cells.values()][Math.floor(cells.size/2)]);
+    const mult = PG.feverT > 0 ? 2 : 1;
+    pangAddText(x, y - 20, `PANG! +${Math.round(cells.size*100*(1 + Math.min(PG.combo, 20)*0.1)*mult)}`, '#ffd23f');
+    if(sp){ pangAddText(x, y + 16, sp === 'r' ? '🌈 무지개 과일!' : sp === 'b' ? '💥 폭탄 과일!' : '🚀 줄무늬 과일!', '#ffffff'); tone(1175, .12, 'triangle', .06); }
+  }
+  // ③ 특수 과일 연쇄
+  while(queue.length){ const [r, c] = queue.shift(), t = g[r][c]; if(!t || t.act) continue; t.act = true; pangEffect(r, c, t, queue, clear); }
+  if(!clear.size && !creates.length) return false;
+  // ④ 돌은 옆에서 터지면 깨져요
+  const hitStone = new Set();
+  for(const k of clear){ const r = Math.floor(k/C), c = k % C; for(const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]){ const rr = r + dr, cc = c + dc; if(rr >= 0 && cc >= 0 && rr < R && cc < C && g[rr][cc] && g[rr][cc].t === 'stone' && !clear.has(rr*C + cc)) hitStone.add(rr*C + cc); } }
+  for(const k of hitStone){ const t = g[Math.floor(k/C)][k % C]; t.hp--; if(t.hp <= 0) clear.add(k); else { t.crack = 1; tone(160, .08, 'square', .04); } }
+  // ⑤ 점수 · 목표 · 효과
+  PG.combo++; PG.comboT = 2.0; PG.maxCombo = Math.max(PG.maxCombo, PG.combo); PG.pangs++;
+  const mult = PG.feverT > 0 ? 2 : 1; let n = 0;
+  for(const k of clear){
+    const r = Math.floor(k/C), c = k % C, t = g[r][c]; if(!t || t.pop) continue;
+    if(creates.some(cr => cr.r === r && cr.c === c)) continue;
+    if(t.t === 'seed') continue;   // 씨앗은 바닥까지 가야 모여요
+    t.pop = 0.001; n++;
+    if(PANG_TYPES.includes(t.t)){ PG.cleared[t.t] = (PG.cleared[t.t] || 0) + 1; PG.fruits[t.t] = (PG.fruits[t.t] || 0) + 1; }
+    if(t.t === 'stone') PG.cleared.stone = (PG.cleared.stone || 0) + 1;
+    if(PG.cell[r][c].ice > 0){ PG.cell[r][c].ice--; if(!PG.cell[r][c].ice) PG.cleared.ice = (PG.cleared.ice || 0) + 1; }
+    const [x, y] = pangCellXY(r, c);
+    for(let i=0;i<(LIGHT ? 2 : 5);i++){ const a = rand(0, 6.28), sp = rand(1.5, 5); PG.fx.push({x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 1, life:1, col:FRUIT_COL[t.t] || '#fff', star:i === 0}); }
+  }
+  for(const cr of creates){ const t = g[cr.r][cr.c]; if(!t) continue; t.pop = 0; t.act = false; if(cr.sp === 'r'){ t.t = 'rainbow'; t.sp = null; } else t.sp = cr.sp; t.land = 1; }
+  PG.score += Math.round(n*100*(1 + Math.min(PG.combo, 20)*0.1)*mult);
+  if(PG.feverT <= 0){ PG.fever += n*2.2; if(PG.fever >= 100){ PG.fever = 0; PG.feverT = 8; pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.4, '🔥 FEVER! 점수 2배!', '#ff6bd6', true); seq([784,988,1175,1568], 60, 'square', .05); } }
+  PG.skill = Math.min(100, PG.skill + n*1.6);
+  if(n >= 10) PG.shake = Math.max(PG.shake, 10);
+  const praise = {3:'좋아요!', 5:'멋져요!', 8:'최고예요!', 12:'대단해요!', 16:'환상적이에요!'}[PG.combo];
+  if(praise){ pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.3, praise, '#fff3a0', true); if(SET.tts) say(praise, 'ko-KR'); PG.petSay = {text:praise, t:2}; }
+  const base = 523*Math.pow(2, Math.min(PG.combo - 1, 14)/12); seq([base, base*1.26, base*1.5], 45, 'triangle', .06);
+  vibe(n >= 10 ? 30 : 10);
   PG.phase = 'pop'; PG.popT = 0;
-  const base = 523*Math.pow(2, Math.min(PG.combo - 1, 12)/12); seq([base, base*1.26, base*1.5], 45, 'triangle', .06);
-  vibe(12);
   return true;
 }
+function pangSeedDown(sw){ const g = PG.g, A = g[sw.a[0]][sw.a[1]], B = g[sw.b[0]][sw.b[1]]; return (B && B.t === 'seed' && sw.b[0] === sw.a[0] + 1) || (A && A.t === 'seed' && sw.a[0] === sw.b[0] + 1); }
+function pangSpawnType(){
+  if(PG.stage){ const sg = PG.stage.goals.find(gl => gl.type === 'seed'); if(sg && PG.seedsOut < sg.n && PG.seedsOut - PG.seedsGot < 1 && PG.rng() < 0.3){ PG.seedsOut++; return 'seed'; } }
+  return PG.types[Math.floor(PG.rng()*PG.types.length)];
+}
 function pangCollapse(){
-  const g = PG.g;
-  for(let c=0;c<PANG_COLS;c++){
-    const keep = []; for(let r=PANG_ROWS-1;r>=0;r--) if(g[r][c] && !g[r][c].pop) keep.push(g[r][c]);
+  const g = PG.g, R = PG.rows, C = PG.cols;
+  for(let c=0;c<C;c++){
+    const keep = []; for(let r=R-1;r>=0;r--) if(g[r][c] && !g[r][c].pop) keep.push(g[r][c]);
     let spawn = 0;
-    for(let r=PANG_ROWS-1, i=0; r>=0; r--, i++){
+    for(let r=R-1, i=0; r>=0; r--, i++){
       if(i < keep.length) g[r][c] = keep[i];
-      else { spawn++; g[r][c] = pangTile(pick(PG.types), r, c, -spawn); }
+      else { spawn++; const t = pangTile(pangSpawnType()); t.x = c; t.y = -spawn; g[r][c] = t; }
     }
   }
   PG.phase = 'fall';
 }
+function pangSeedsCheck(){   // 씨앗이 바닥에 닿으면 모아요
+  let got = false;
+  for(let c=0;c<PG.cols;c++){ const t = PG.g[PG.rows - 1][c]; if(t && t.t === 'seed' && !t.pop){ t.pop = 0.001; PG.seedsGot++; PG.cleared.seed = (PG.cleared.seed || 0) + 1; const [x, y] = pangCellXY(PG.rows - 1, c); pangAddText(x, y - 20, '🌱 씨앗 도착!', '#b8ff7a', true); seq([659,880,1175], 70, 'triangle', .06); got = true; } }
+  if(got){ PG.phase = 'pop'; PG.popT = 0; }
+  return got;
+}
+function pangGoalProgress(gl){
+  if(gl.type === 'fruit') return Math.min(gl.n, PG.cleared[gl.t] || 0);
+  if(gl.type === 'ice') return PG.cleared.ice || 0;
+  if(gl.type === 'stone') return Math.min(gl.n, PG.cleared.stone || 0);
+  if(gl.type === 'seed') return Math.min(gl.n, PG.cleared.seed || 0);
+  return 0;
+}
+const pangGoalsMet = () => PG.stage && PG.stage.goals.every(gl => pangGoalProgress(gl) >= gl.n);
 function pangShuffle(){
-  const all = []; for(const row of PG.g) for(const t of row) all.push(t.t);
+  const tiles = []; for(const row of PG.g) for(const t of row) if(t && PANG_TYPES.includes(t.t) && !t.sp) tiles.push(t);
   let tries = 0;
-  do{ shuffle(all); let i = 0; for(let r=0;r<PANG_ROWS;r++) for(let c=0;c<PANG_COLS;c++){ PG.g[r][c].t = all[i++]; } tries++; }
-  while((pangMatches(PG.g).groups.length || !pangFindMove(PG.g)) && tries < 60);
-  PG.texts.push({x:pstage.clientWidth/2, y:pstage.clientHeight*0.45, text:'🔀 섞었어요!', col:'#fff', t:0});
+  do{ const types = tiles.map(t => t.t); shuffle(types); tiles.forEach((t, i) => t.t = types[i]); tries++; }while((pangGroups(PG.g).length || !pangFindMove()) && tries < 60);
+  pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.45, '🔀 섞었어요!', '#fff', true);
 }
 function pangBomb(r, c){
-  const G = pangGeom(pstage.clientWidth, pstage.clientHeight); let n = 0;
-  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){ const rr2 = r + dr, cc = c + dc; if(rr2 < 0 || cc < 0 || rr2 >= PANG_ROWS || cc >= PANG_COLS) continue; const t = PG.g[rr2][cc]; t.pop = 0.001; n++; PG.fruits[t.t] = (PG.fruits[t.t] || 0) + 0.34;
-    for(let i=0;i<5;i++){ const a = rand(0, 6.28), sp = rand(2, 6); PG.fx.push({x:G.bx + (cc + 0.5)*G.cell, y:G.by + (rr2 + 0.5)*G.cell, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1, col:'#ffb74d'}); } }
-  PG.score += n*120*(PG.feverT > 0 ? 2 : 1); PG.bombs--; PG.bombArm = false; PG.phase = 'pop'; PG.popT = 0;
-  PG.texts.push({x:G.bx + (c + 0.5)*G.cell, y:G.by + r*G.cell, text:'💥 펑!', col:'#ff8a3d', t:0});
+  const t = PG.g[r][c]; if(!t || PG.bombs <= 0) return;
+  const clear = new Set(), queue = [];
+  pangEffect(r, c, {sp:'b', t:t.t}, queue, clear);
+  PG.bombs--; PG.bombArm = false;
+  pangApplyClear(clear, queue);
+  pangAddText(...pangCellXY(r, c).slice(0, 2), '💥 펑!', '#ff8a3d', true);
   tone(90, .3, 'sawtooth', .08, 40); vibe(40);
+}
+function pangApplyClear(clear, queue){   // 스킬·폭탄: 칸들을 바로 터뜨리기
+  const g = PG.g, C = PG.cols;
+  while(queue.length){ const [r, c] = queue.shift(), t = g[r][c]; if(!t || t.act) continue; t.act = true; pangEffect(r, c, t, queue, clear); }
+  PG.swap = null;
+  for(const k of clear){ const r = Math.floor(k/C), c = k % C, t = g[r][c]; if(!t || t.pop || t.t === 'seed') continue; if(t.t === 'stone'){ t.hp--; if(t.hp > 0){ t.crack = 1; continue; } PG.cleared.stone = (PG.cleared.stone || 0) + 1; }
+    t.pop = 0.001; if(PANG_TYPES.includes(t.t)){ PG.cleared[t.t] = (PG.cleared[t.t] || 0) + 1; PG.fruits[t.t] = (PG.fruits[t.t] || 0) + 1; }
+    if(PG.cell[r][c].ice > 0){ PG.cell[r][c].ice--; if(!PG.cell[r][c].ice) PG.cleared.ice = (PG.cleared.ice || 0) + 1; }
+    PG.score += 120*(PG.feverT > 0 ? 2 : 1); }
+  PG.phase = 'pop'; PG.popT = 0;
+}
+function pangUseSkill(){
+  if(!PG || PG.skill < 100 || PG.phase !== 'idle' || PG.over) return;
+  PG.skill = 0; const pet = PG.pet, g = PG.g, all = [];
+  for(let r=0;r<PG.rows;r++) for(let c=0;c<PG.cols;c++) if(matchable(g[r][c]) && !g[r][c].sp) all.push([r, c]);
+  shuffle(all);
+  PG.petSay = {text:PANG_SKILL[pet].desc, t:2.5}; seq([660,880,1320], 70, 'triangle', .07);
+  if(pet === 'owl'){ if(PG.stage) PG.moves += 3; else if(PG.mode !== 'relax') PG.time += 5; pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.4, PG.stage ? '🦉 +3번!' : '🦉 +5초!', '#fff', true); return; }
+  if(pet === 'pixie'){ for(const [r, c] of all.slice(0, 3)){ g[r][c].sp = Math.random() < 0.5 ? 'h' : 'v'; g[r][c].land = 1; } pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.4, '🧚 줄무늬 과일 3개!', '#fff', true); return; }
+  if(pet === 'bird'){ const clear = new Set(); for(const [r, c] of all.slice(0, 6)){ clear.add(r*PG.cols + c); const [x, y] = pangCellXY(r, c); PG.bolts.push({x1:x, y1:-20, x2:x, y2:y, t:0}); } pangApplyClear(clear, []); pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.4, '🐦 콕콕콕!', '#fff', true); return; }
+  if(all.length){ const [r, c] = all[0]; g[r][c].sp = 'b'; g[r][c].land = 1; pangAddText(pstage.clientWidth/2, pstage.clientHeight*0.4, '🧒 폭탄 과일!', '#fff', true); }
+}
+function pangEnd(win){ if(PG.over) return; PG.over = true; PG.win = win; PG.overT = 0; if(win){ seq([523,659,784,1047,1319], 110, 'triangle', .07); } else seq([784,659,523,392], 120, 'triangle', .06); }
+/* ---- 그리기 도우미 ---- */
+function pangShapePath(x, shape, cx, cy, r){
+  x.beginPath();
+  if(shape === 'circle') x.arc(cx, cy, r, 0, 6.29);
+  else if(shape === 'square') x.rect(cx - r*0.9, cy - r*0.9, r*1.8, r*1.8);
+  else if(shape === 'diamond'){ x.moveTo(cx, cy - r*1.1); x.lineTo(cx + r*1.1, cy); x.lineTo(cx, cy + r*1.1); x.lineTo(cx - r*1.1, cy); x.closePath(); }
+  else if(shape === 'heart'){ x.moveTo(cx, cy + r); x.bezierCurveTo(cx - r*1.4, cy, cx - r*0.8, cy - r*1.1, cx, cy - r*0.4); x.bezierCurveTo(cx + r*0.8, cy - r*1.1, cx + r*1.4, cy, cx, cy + r); }
+  else if(shape === 'hex'){ for(let i=0;i<6;i++){ const a = i*Math.PI/3; i ? x.lineTo(cx + Math.cos(a)*r, cy + Math.sin(a)*r) : x.moveTo(cx + Math.cos(a)*r, cy + Math.sin(a)*r); } x.closePath(); }
+  else { x.moveTo(cx, cy - r*1.05); x.lineTo(cx + r, cy + r*0.8); x.lineTo(cx - r, cy + r*0.8); x.closePath(); }
+}
+function pangDrawTile(x, t, cx, cy, sz, r, c, now){
+  const sel = PG.sel && PG.sel[0] === r && PG.sel[1] === c;
+  if(t.t === 'stone'){
+    const g = x.createRadialGradient(cx - sz*0.15, cy - sz*0.2, sz*0.05, cx, cy, sz*0.5); g.addColorStop(0, '#cfd8dc'); g.addColorStop(1, '#607d8b');
+    x.fillStyle = g; x.beginPath(); x.moveTo(cx - sz*0.4, cy + sz*0.3); x.lineTo(cx - sz*0.42, cy - sz*0.1); x.lineTo(cx - sz*0.15, cy - sz*0.4); x.lineTo(cx + sz*0.3, cy - sz*0.35); x.lineTo(cx + sz*0.42, cy + sz*0.05); x.lineTo(cx + sz*0.3, cy + sz*0.36); x.closePath(); x.fill();
+    x.fillStyle = '#7cb342'; x.beginPath(); x.ellipse(cx - sz*0.1, cy - sz*0.3, sz*0.2, sz*0.07, -0.2, 0, 6.29); x.fill();
+    if(t.hp > 1 || t.crack){ x.strokeStyle = 'rgba(40,40,40,.6)'; x.lineWidth = 2; x.beginPath(); x.moveTo(cx - sz*0.1, cy - sz*0.25); x.lineTo(cx, cy); x.lineTo(cx - sz*0.08, cy + sz*0.2); if(t.crack){ x.moveTo(cx, cy); x.lineTo(cx + sz*0.2, cy + sz*0.05); } x.stroke(); }
+    if(t.hp > 1){ x.fillStyle = '#fff'; x.font = `bold ${sz*0.22}px ${FONT}`; x.textAlign = 'center'; x.fillText('×2', cx + sz*0.25, cy + sz*0.3); }
+    return;
+  }
+  if(t.t === 'seed'){
+    x.fillStyle = '#8d6e63'; x.beginPath(); x.ellipse(cx, cy + sz*0.08, sz*0.26, sz*0.3, 0, 0, 6.29); x.fill();
+    x.fillStyle = '#5d4037'; x.beginPath(); x.ellipse(cx, cy - sz*0.12, sz*0.3, sz*0.13, 0, 0, 6.29); x.fill();
+    x.fillStyle = '#7cb342'; x.beginPath(); x.ellipse(cx - sz*0.1, cy - sz*0.32, sz*0.12, sz*0.06, -0.6, 0, 6.29); x.ellipse(cx + sz*0.1, cy - sz*0.34, sz*0.12, sz*0.06, 0.6, 0, 6.29); x.fill();
+    x.fillStyle = 'rgba(255,255,255,.5)'; x.beginPath(); x.ellipse(cx - sz*0.08, cy, sz*0.05, sz*0.1, 0, 0, 6.29); x.fill();
+    x.font = `bold ${sz*0.2}px ${FONT}`; x.fillStyle = '#fff'; x.textAlign = 'center'; x.fillText('⬇', cx, cy + sz*0.5);
+    return;
+  }
+  if(t.t === 'rainbow'){
+    const cols = ['#ff5252','#ffab40','#ffee58','#69f0ae','#40c4ff','#b388ff'], rot = now/400;
+    for(let i=0;i<6;i++){ x.fillStyle = cols[i]; x.beginPath(); x.moveTo(cx, cy); x.arc(cx, cy, sz*0.42, rot + i*Math.PI/3, rot + (i + 1)*Math.PI/3); x.closePath(); x.fill(); }
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(cx, cy, sz*0.16, 0, 6.29); x.fill();
+    x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.ellipse(cx - sz*0.14, cy - sz*0.2, sz*0.1, sz*0.06, -0.5, 0, 6.29); x.fill();
+    x.font = `${sz*0.22}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('⭐', cx, cy + 1);
+    return;
+  }
+  if(pangOpt().shapes){ x.fillStyle = 'rgba(255,255,255,.14)'; x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 2; pangShapePath(x, PANG_SHAPES[t.t], cx, cy, sz*0.44); x.fill(); x.stroke(); }
+  if(t.sp === 'b'){ const pul = 0.5 + Math.sin(now/150)*0.5; x.fillStyle = `rgba(255,170,60,${0.35 + pul*0.25})`; x.beginPath(); x.arc(cx, cy, sz*0.5, 0, 6.29); x.fill(); }
+  const im = pangImg(t.t); if(im) x.drawImage(im, cx - sz*0.5, cy - sz*0.5, sz, sz);
+  // 얼굴 (표정)
+  const blink = (now/1000 + t.blink) % 5 < 0.12, happy = t.pop > 0 || (PG.comboT > 1.6 && PG.combo >= 3), surprised = sel;
+  const ey = cy + sz*0.02, ex = sz*0.1, er = sz*0.038;
+  x.fillStyle = '#2b1b10'; x.strokeStyle = '#2b1b10'; x.lineWidth = Math.max(1.2, sz*0.028); x.lineCap = 'round';
+  if(happy){ for(const d of [-1, 1]){ x.beginPath(); x.arc(cx + d*ex, ey + er*0.6, er*1.2, Math.PI*1.15, Math.PI*1.85); x.stroke(); } }
+  else if(blink){ for(const d of [-1, 1]){ x.beginPath(); x.moveTo(cx + d*ex - er, ey); x.lineTo(cx + d*ex + er, ey); x.stroke(); } }
+  else { for(const d of [-1, 1]){ x.beginPath(); x.arc(cx + d*ex, ey, surprised ? er*1.4 : er, 0, 6.29); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.arc(cx + d*ex + er*0.35, ey - er*0.35, er*0.4, 0, 6.29); x.fill(); x.fillStyle = '#2b1b10'; } }
+  if(surprised){ x.beginPath(); x.ellipse(cx, cy + sz*0.11, sz*0.035, sz*0.05, 0, 0, 6.29); x.fill(); }
+  else { x.beginPath(); x.arc(cx, cy + sz*0.07, sz*0.05, 0.2, Math.PI - 0.2); x.stroke(); }
+  x.fillStyle = 'rgba(255,110,140,.45)'; x.beginPath(); x.arc(cx - sz*0.18, cy + sz*0.09, sz*0.045, 0, 6.29); x.arc(cx + sz*0.18, cy + sz*0.09, sz*0.045, 0, 6.29); x.fill();
+  // 특수 표시
+  if(t.sp === 'h' || t.sp === 'v' || t.sp === 'x'){
+    x.save(); x.beginPath(); x.arc(cx, cy, sz*0.44, 0, 6.29); x.clip(); x.strokeStyle = 'rgba(255,255,255,.75)'; x.lineWidth = sz*0.07;
+    for(let i=-1;i<=1;i++){ x.beginPath(); if(t.sp !== 'v'){ x.moveTo(cx - sz*0.5, cy + i*sz*0.22); x.lineTo(cx + sz*0.5, cy + i*sz*0.22); } if(t.sp !== 'h'){ x.moveTo(cx + i*sz*0.22, cy - sz*0.5); x.lineTo(cx + i*sz*0.22, cy + sz*0.5); } x.stroke(); }
+    x.restore(); x.font = `${sz*0.26}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t.sp === 'h' ? '↔️' : t.sp === 'v' ? '↕️' : '✳️', cx + sz*0.3, cy - sz*0.32);
+  }
+  if(t.sp === 'b'){ x.font = `${sz*0.28}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('💥', cx + sz*0.3, cy - sz*0.32); }
 }
 function pangLoop(){
   if(!PG || PG.stopped) return;
   if(screen !== 'pang'){ PG.raf = requestAnimationFrame(pangLoop); return; }
   pangResize();
-  const nowT = performance.now(), dt = Math.min(0.05, (nowT - PG.last)/1000); PG.last = nowT;
-  const w = pstage.clientWidth, h = pstage.clientHeight, x = pctx, G = pangGeom(w, h), g = PG.g;
-  // ---- 움직임 ----
+  const nowT = performance.now(), dt = Math.min(0.05, Math.max(0, (nowT - PG.last)/1000)); PG.last = nowT;
+  const w = pstage.clientWidth, h = pstage.clientHeight, x = pctx, G = pangGeom(w, h), g = PG.g, R = PG.rows, C = PG.cols;
+  x.lineJoin = 'round'; x.miterLimit = 2;
+  // ---- 시간 ----
   if(PG.readyT > 0) PG.readyT -= dt;
-  else if(!PG.over){ PG.time -= dt; if(PG.feverT > 0) PG.feverT -= dt; }
+  else if(!PG.over){
+    if(PG.mode === 'time' || PG.mode === 'daily'){ PG.time -= dt; const sec = Math.ceil(PG.time); if(sec <= 10 && sec >= 1 && sec !== PG.lastTick){ PG.lastTick = sec; tone(sec <= 3 ? 1200 : 900, .05, 'square', .04); } }
+    if(PG.feverT > 0) PG.feverT -= dt;
+  }
   if(PG.comboT > 0){ PG.comboT -= dt; if(PG.comboT <= 0) PG.combo = 0; }
   if(PG.hintT > 0){ PG.hintT -= dt; if(PG.hintT <= 0) PG.hint = null; }
+  if(PG.petSay){ PG.petSay.t -= dt; if(PG.petSay.t <= 0) PG.petSay = null; }
+  if(PG.phase === 'idle' && !PG.over && PG.readyT <= 0){ PG.idleT += dt; if(PG.idleT > 5 && !PG.hint){ PG.hint = pangFindMove(); PG.hintT = 99; PG.autoHint = true; } }
+  PG.shown += (PG.score - PG.shown)*Math.min(1, dt*8);
+  // ---- 움직임 ----
   let settled = true;
-  for(let r=0;r<PANG_ROWS;r++) for(let c=0;c<PANG_COLS;c++){ const t = g[r][c]; if(!t) continue;
-    const sp = 14*dt; if(t.x !== c){ const d = c - t.x; t.x += Math.sign(d)*Math.min(Math.abs(d), sp*0.9); if(t.x !== c) settled = false; }
-    if(t.y !== r){ const d = r - t.y; t.y += Math.sign(d)*Math.min(Math.abs(d), sp*(PG.phase === 'fall' ? 1 : 0.9)); if(Math.abs(t.y - r) > 0.001) settled = false; else t.y = r; } }
+  for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const t = g[r][c]; if(!t) continue;
+    const sp = 15*dt;
+    if(t.x !== c){ const d = c - t.x; t.x += Math.sign(d)*Math.min(Math.abs(d), sp*0.9); if(Math.abs(t.x - c) < 0.001) t.x = c; else settled = false; }
+    if(t.y !== r){ const d = r - t.y; t.fallV = (t.fallV || 0) + dt*40; t.y += Math.sign(d)*Math.min(Math.abs(d), Math.max(sp*0.6, t.fallV*dt)); if(Math.abs(t.y - r) < 0.001){ t.y = r; if(t.fallV > 4) t.land = 1; t.fallV = 0; } else settled = false; }
+    if(t.land > 0) t.land = Math.max(0, t.land - dt*5);
+  }
   if(PG.phase === 'swap' && settled){
     if(PG.swap.back){ PG.phase = 'idle'; PG.swap = null; }
-    else if(!pangResolve()){ const {a, b} = PG.swap; const t = g[a[0]][a[1]]; g[a[0]][a[1]] = g[b[0]][b[1]]; g[b[0]][b[1]] = t; PG.swap.back = true; tone(200, .08, 'sine', .04); }
+    else if(pangResolve()){ if(PG.stage) PG.moves--; }
+    else if(pangSeedDown(PG.swap)){ if(PG.stage) PG.moves--; PG.swap = null; PG.phase = 'fall'; }
+    else { const {a, b} = PG.swap; const t = g[a[0]][a[1]]; g[a[0]][a[1]] = g[b[0]][b[1]]; g[b[0]][b[1]] = t; PG.swap.back = true; tone(200, .08, 'sine', .04); }
   } else if(PG.phase === 'pop'){
-    PG.popT += dt; for(const row of g) for(const t of row) if(t.pop) t.pop = Math.min(1, PG.popT/0.28);
-    if(PG.popT >= 0.28) pangCollapse();
+    PG.popT += dt; for(const row of g) for(const t of row) if(t && t.pop) t.pop = Math.min(1, PG.popT/0.26);
+    if(PG.popT >= 0.26) pangCollapse();
   } else if(PG.phase === 'fall' && settled){
-    if(!pangResolve()){ PG.phase = 'idle'; if(!pangFindMove(g)) pangShuffle(); }
+    PG.swap = null;
+    if(!pangSeedsCheck() && !pangResolve()){
+      PG.phase = 'idle'; PG.idleT = 0; if(PG.autoHint){ PG.hint = null; PG.autoHint = false; }
+      if(!pangFindMove()) pangShuffle();
+    }
   }
-  if(PG.phase === 'idle' && PG.time <= 0 && !PG.over){ PG.over = true; PG.overT = 0; seq([784,659,523,392], 120, 'triangle', .06); }
-  if(PG.over){ PG.overT += dt; if(PG.overT > 1.6){ pangFinish(); return; } }
+  // 끝 조건
+  if(PG.phase === 'idle' && !PG.over && PG.readyT <= 0){
+    if(PG.stage){ if(pangGoalsMet()) pangEnd(true); else if(PG.moves <= 0) pangEnd(false); }
+    else if((PG.mode === 'time' || PG.mode === 'daily') && PG.time <= 0) pangEnd(true);
+  }
+  if(PG.order && !PG.orderDone && (PG.cleared[PG.order.t] || 0) >= PG.order.n){ PG.orderDone = true; pangAddText(w/2, h*0.5, `${PG.order.g} 주문 완료!`, '#b8ff7a', true); seq([784,988,1175], 70, 'triangle', .06); }
+  if(PG.over){ PG.overT += dt; if(PG.win && !LIGHT && Math.random() < 0.15) PG.fw.push({x:rand(w*0.2, w*0.8), y:rand(h*0.15, h*0.5), t:0, col:pick(['#ff5fa2','#ffd23f','#3fa9ff','#b8ff7a'])}); if(PG.overT > 2.2){ pangFinish(); return; } }
   // ---- 그리기 ----
+  const sh = PG.shake > 0 ? (PG.shake -= dt*40, rand(-1, 1)*PG.shake*0.6) : 0;
+  x.save(); x.translate(sh, sh*0.6);
   if(pangBg) x.drawImage(pangBg, 0, 0, w, h); else { x.fillStyle = '#7fd3ff'; x.fillRect(0, 0, w, h); }
-  if(PG.feverT > 0){ x.fillStyle = `hsla(${(nowT/10) % 360},90%,60%,.18)`; x.fillRect(0, 0, w, h); }
-  // 제목 로고
+  if(PG.feverT > 0){   // 피버: 밤하늘 불꽃놀이
+    x.fillStyle = 'rgba(20,10,60,.55)'; x.fillRect(0, 0, w, h);
+    if(Math.random() < 0.08) PG.fw.push({x:rand(w*0.05, w*0.95), y:rand(h*0.08, h*0.45), t:0, col:pick(['#ff5fa2','#ffd23f','#3fa9ff','#b8ff7a','#ff8a3d'])});
+  }
+  for(const f of PG.fw){ f.t += dt; const a = 1 - f.t/1.2; if(a <= 0) continue; x.globalAlpha = a; x.fillStyle = f.col; for(let i=0;i<14;i++){ const an = i/14*6.28, rr = f.t*90; x.beginPath(); x.arc(f.x + Math.cos(an)*rr, f.y + Math.sin(an)*rr + f.t*f.t*30, 2.5, 0, 6.29); x.fill(); } }
+  x.globalAlpha = 1; PG.fw = PG.fw.filter(f => f.t < 1.2);
+  // 로고
   const ts = Math.max(26, Math.min(h*0.1, 58)), letters = [['과', '#ff5fa2'], ['일', '#ffb347'], ['팡', '#3fa9ff']];
   x.save(); x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `900 ${ts}px ${FONT}`;
   const ly = Math.max(ts*0.62, G.by/2 - 2); let lx = w/2 - ts*1.05;
-  for(const [ch, col] of letters){ x.lineJoin = 'round'; x.lineWidth = ts*0.26; x.strokeStyle = '#2b3a67'; x.strokeText(ch, lx, ly); x.lineWidth = ts*0.14; x.strokeStyle = '#ffffff'; x.strokeText(ch, lx, ly);
-    const lg = x.createLinearGradient(0, ly - ts/2, 0, ly + ts/2); lg.addColorStop(0, '#ffffff'); lg.addColorStop(0.35, col); lg.addColorStop(1, col); x.fillStyle = lg; x.fillText(ch, lx, ly); lx += ts*1.05; }
+  letters.forEach(([ch, col], i) => { const by2 = ly + Math.sin(nowT/300 + i)*3; x.lineJoin = 'round'; x.lineWidth = ts*0.26; x.strokeStyle = '#2b3a67'; x.strokeText(ch, lx, by2); x.lineWidth = ts*0.14; x.strokeStyle = '#ffffff'; x.strokeText(ch, lx, by2);
+    const lg = x.createLinearGradient(0, by2 - ts/2, 0, by2 + ts/2); lg.addColorStop(0, '#ffffff'); lg.addColorStop(0.35, col); lg.addColorStop(1, col); x.fillStyle = lg; x.fillText(ch, lx, by2); lx += ts*1.05; });
   x.restore();
   // 판
-  x.fillStyle = 'rgba(20,70,90,.9)'; x.strokeStyle = '#8fe3ff'; x.lineWidth = 4; rrOn(x, G.bx - 8, G.by - 8, G.bw + 16, G.bh + 16, 16); x.fill(); x.stroke();
-  for(let r=0;r<PANG_ROWS;r++) for(let c=0;c<PANG_COLS;c++){ x.fillStyle = (r + c) % 2 ? 'rgba(12,48,60,.95)' : 'rgba(18,58,72,.95)'; rrOn(x, G.bx + c*G.cell + 2, G.by + r*G.cell + 2, G.cell - 4, G.cell - 4, G.cell*0.18); x.fill(); }
+  x.fillStyle = PG.feverT > 0 ? 'rgba(60,20,90,.92)' : 'rgba(20,70,90,.9)'; x.strokeStyle = PG.feverT > 0 ? `hsl(${nowT/5 % 360},90%,65%)` : '#8fe3ff'; x.lineWidth = 4; rrOn(x, G.bx - 8, G.by - 8, G.bw + 16, G.bh + 16, 16); x.fill(); x.stroke();
+  for(let r=0;r<R;r++) for(let c=0;c<C;c++){ x.fillStyle = (r + c) % 2 ? 'rgba(12,48,60,.95)' : 'rgba(18,58,72,.95)'; rrOn(x, G.bx + c*G.cell + 2, G.by + r*G.cell + 2, G.cell - 4, G.cell - 4, G.cell*0.18); x.fill();
+    const ice = PG.cell[r][c].ice; if(ice){ x.fillStyle = ice > 1 ? 'rgba(200,240,255,.75)' : 'rgba(170,225,255,.5)'; rrOn(x, G.bx + c*G.cell + 3, G.by + r*G.cell + 3, G.cell - 6, G.cell - 6, G.cell*0.16); x.fill(); x.strokeStyle = 'rgba(255,255,255,.8)'; x.lineWidth = 2; x.beginPath(); x.moveTo(G.bx + c*G.cell + G.cell*0.2, G.by + r*G.cell + G.cell*0.3); x.lineTo(G.bx + c*G.cell + G.cell*0.4, G.by + r*G.cell + G.cell*0.15); x.stroke(); } }
   x.save(); rrOn(x, G.bx - 4, G.by - 4, G.bw + 8, G.bh + 8, 12); x.clip();
-  for(let r=0;r<PANG_ROWS;r++) for(let c=0;c<PANG_COLS;c++){ const t = g[r][c]; if(!t) continue;
+  for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const t = g[r][c]; if(!t) continue;
     const cx = G.bx + (t.x + 0.5)*G.cell, cy = G.by + (t.y + 0.5)*G.cell; if(cy < G.by - G.cell) continue;
-    let sc = 0.86; if(t.pop) sc *= 1 + t.pop*0.5; if(PG.sel && PG.sel[0] === r && PG.sel[1] === c) sc *= 1.08 + Math.sin(nowT/90)*0.04;
-    const isHint = PG.hint && PG.hint.some(([hr, hc]) => hr === r && hc === c);
-    if(isHint || (PG.sel && PG.sel[0] === r && PG.sel[1] === c)){ x.fillStyle = isHint ? `rgba(255,240,120,${0.35 + Math.sin(nowT/120)*0.2})` : 'rgba(255,255,255,.35)'; rrOn(x, G.bx + c*G.cell + 2, G.by + r*G.cell + 2, G.cell - 4, G.cell - 4, G.cell*0.18); x.fill(); }
-    x.globalAlpha = t.pop ? 1 - t.pop : 1;
-    const im = pangImgs[t.t], sz = G.cell*sc;
-    if(im && im.complete && im.naturalWidth) x.drawImage(im, cx - sz/2, cy - sz/2, sz, sz);
-    else { x.fillStyle = FRUIT_COL[t.t]; x.beginPath(); x.arc(cx, cy, sz*0.4, 0, 6.29); x.fill(); }
-    // 귀여운 얼굴
-    x.fillStyle = '#2b1b10'; x.beginPath(); x.arc(cx - sz*0.1, cy + sz*0.02, sz*0.035, 0, 6.29); x.arc(cx + sz*0.1, cy + sz*0.02, sz*0.035, 0, 6.29); x.fill();
-    x.strokeStyle = '#2b1b10'; x.lineWidth = Math.max(1, sz*0.025); x.beginPath(); x.arc(cx, cy + sz*0.07, sz*0.05, 0.2, Math.PI - 0.2); x.stroke();
-    x.fillStyle = 'rgba(255,120,150,.45)'; x.beginPath(); x.arc(cx - sz*0.17, cy + sz*0.09, sz*0.04, 0, 6.29); x.arc(cx + sz*0.17, cy + sz*0.09, sz*0.04, 0, 6.29); x.fill();
-    x.globalAlpha = 1;
+    const isHint = PG.hint && PG.hint.some(([hr, hc]) => hr === r && hc === c), sel = PG.sel && PG.sel[0] === r && PG.sel[1] === c;
+    if(isHint || sel){ x.fillStyle = isHint ? `rgba(255,240,120,${(PG.autoHint ? 0.2 : 0.35) + Math.sin(nowT/150)*0.15})` : 'rgba(255,255,255,.35)'; rrOn(x, G.bx + c*G.cell + 2, G.by + r*G.cell + 2, G.cell - 4, G.cell - 4, G.cell*0.18); x.fill(); }
+    let sc = 0.92; if(t.pop) sc *= 1 + t.pop*0.5; if(sel) sc *= 1.08 + Math.sin(nowT/90)*0.04;
+    const sx = sc*(1 + t.land*0.12), sy2 = sc*(1 - t.land*0.16), sz = G.cell;
+    x.save(); x.globalAlpha = t.pop ? 1 - t.pop : 1; x.translate(cx, cy + G.cell*0.5*(1 - sy2)*0.3); x.scale(sx, sy2);
+    pangDrawTile(x, t, 0, 0, sz, r, c, nowT); x.restore();
     if(PG.bombArm){ x.strokeStyle = 'rgba(255,138,61,.5)'; x.lineWidth = 1; rrOn(x, G.bx + c*G.cell + 3, G.by + r*G.cell + 3, G.cell - 6, G.cell - 6, 6); x.stroke(); }
   }
+  // 줄 광선 · 번개
+  for(const b of PG.beams){ b.t += dt; const a = 1 - b.t/0.35; if(a <= 0) continue; x.globalAlpha = a; x.fillStyle = '#ffffff';
+    if(b.dir === 'h'){ const y = G.by + (b.r + 0.5)*G.cell; x.fillRect(G.bx, y - G.cell*0.18*a, G.bw, G.cell*0.36*a); x.fillStyle = b.col; x.globalAlpha = a*0.5; x.fillRect(G.bx, y - G.cell*0.4, G.bw, G.cell*0.8); }
+    else { const xx = G.bx + (b.c + 0.5)*G.cell; x.fillRect(xx - G.cell*0.18*a, G.by, G.cell*0.36*a, G.bh); x.fillStyle = b.col; x.globalAlpha = a*0.5; x.fillRect(xx - G.cell*0.4, G.by, G.cell*0.8, G.bh); } }
+  x.globalAlpha = 1; PG.beams = PG.beams.filter(b => b.t < 0.35);
+  for(const b of PG.bolts){ b.t += dt; const a = 1 - b.t/0.4; if(a <= 0) continue; x.globalAlpha = a; x.strokeStyle = '#fffde7'; x.lineWidth = 3; x.beginPath(); x.moveTo(b.x1, b.y1); const mx = (b.x1 + b.x2)/2 + rand(-10, 10), my = (b.y1 + b.y2)/2 + rand(-10, 10); x.lineTo(mx, my); x.lineTo(b.x2, b.y2); x.stroke(); }
+  x.globalAlpha = 1; PG.bolts = PG.bolts.filter(b => b.t < 0.4);
   x.restore();
-  // 불꽃·글자
-  for(const p of PG.fx){ p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.life -= dt*1.8; x.globalAlpha = Math.max(0, p.life); x.fillStyle = p.col; x.beginPath(); x.arc(p.x, p.y, 3, 0, 6.29); x.fill(); }
+  // 불꽃·고리·글자
+  for(const p of PG.fx){ if(p.ring){ p.r += dt*6; p.life -= dt*2.5; x.globalAlpha = Math.max(0, p.life); x.strokeStyle = '#ffb74d'; x.lineWidth = 6; x.beginPath(); x.arc(p.x, p.y, p.r*G.cell*p.max/2, 0, 6.29); x.stroke(); continue; }
+    p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.life -= dt*1.8; x.globalAlpha = Math.max(0, p.life); x.fillStyle = p.col;
+    if(p.star){ x.save(); x.translate(p.x, p.y); x.rotate(p.life*5); x.beginPath(); for(let i=0;i<5;i++){ const a = i*1.2566 - 1.57; x.lineTo(Math.cos(a)*6, Math.sin(a)*6); x.lineTo(Math.cos(a + 0.628)*2.6, Math.sin(a + 0.628)*2.6); } x.closePath(); x.fillStyle = '#fff59d'; x.fill(); x.restore(); }
+    else { x.beginPath(); x.arc(p.x, p.y, 3, 0, 6.29); x.fill(); } }
   x.globalAlpha = 1; PG.fx = PG.fx.filter(p => p.life > 0);
-  for(const tx of PG.texts){ tx.t += dt; const a = 1 - tx.t/0.9; if(a <= 0) continue; x.save(); x.globalAlpha = a; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `900 ${Math.max(18, G.cell*0.5)}px ${FONT}`;
-    x.lineWidth = 5; x.strokeStyle = '#3a1a00'; x.strokeText(tx.text, tx.x, tx.y - tx.t*30); x.fillStyle = tx.col; x.fillText(tx.text, tx.x, tx.y - tx.t*30); x.restore(); }
-  PG.texts = PG.texts.filter(tx => tx.t < 0.9);
-  // 왼쪽 위: 레벨 · 점수
-  const pw = Math.min(170, G.bx - 20), ps = clamp(pw/170, 0.6, 1);
+  for(const tx of PG.texts){ tx.t += dt; const a = 1 - tx.t/(tx.big ? 1.2 : 0.9); if(a <= 0) continue; const sc = tx.big ? 1 + Math.max(0, 0.2 - tx.t)*2 : 1;
+    x.save(); x.globalAlpha = a; x.textAlign = 'center'; x.textBaseline = 'middle'; x.translate(tx.x, tx.y - tx.t*30); x.scale(sc, sc); x.font = `900 ${tx.big ? Math.max(24, G.cell*0.7) : Math.max(16, G.cell*0.42)}px ${FONT}`;
+    x.lineWidth = 6; x.strokeStyle = '#3a1a00'; x.strokeText(tx.text, 0, 0); x.fillStyle = tx.col; x.fillText(tx.text, 0, 0); x.restore(); }
+  PG.texts = PG.texts.filter(tx => tx.t < (tx.big ? 1.2 : 0.9));
+  // ---- 왼쪽: 레벨 · 점수 · 목표 · 파트너 ----
+  const pw = Math.min(180, G.bx - 20), ps = clamp(pw/170, 0.6, 1);
   if(pw > 90){
-    x.fillStyle = 'rgba(30,60,110,.78)'; rrOn(x, 12, G.by - 6, pw, 110*ps, 16); x.fill();
-    x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.font = `900 ${18*ps}px ${FONT}`; x.fillText(`LEVEL ${townLevel().lv}`, 24, G.by + 16*ps);
-    x.font = `${15*ps}px ${FONT}`; x.fillText('점수:', 24, G.by + 42*ps);
-    x.font = `900 ${24*ps}px ${FONT}`; x.fillStyle = '#ffd23f'; x.fillText(PG.score.toLocaleString(), 24, G.by + 72*ps);
-    x.font = `${12*ps}px ${FONT}`; x.fillStyle = '#cfe8ff'; x.fillText(`최고 ${(DEX.pangBest || 0).toLocaleString()}`, 24, G.by + 94*ps);
+    x.fillStyle = 'rgba(30,60,110,.8)'; rrOn(x, 12, G.by - 6, pw, 96*ps, 16); x.fill();
+    x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.font = `900 ${16*ps}px ${FONT}`;
+    x.fillText(PG.stage ? `${PANG_AREAS[PG.stage.area].icon} ${PG.stage.n}단계` : PG.mode === 'daily' ? '📅 오늘의 과일팡' : PG.mode === 'relax' ? '🌿 느긋한 모드' : `LEVEL ${townLevel().lv}`, 22, G.by + 12*ps);
+    x.font = `${13*ps}px ${FONT}`; x.fillText('점수:', 22, G.by + 36*ps);
+    x.font = `900 ${24*ps}px ${FONT}`; x.fillStyle = '#ffd23f'; x.fillText(Math.round(PG.shown).toLocaleString(), 22, G.by + 62*ps);
+    let yy = G.by + 100*ps;
+    const goalRows = [];
+    if(PG.stage) for(const gl of PG.stage.goals) goalRows.push([gl.type === 'fruit' ? gl.t : gl.type, pangGoalProgress(gl), gl.n]);
+    if(PG.order) goalRows.push([PG.order.t, Math.min(PG.order.n, PG.cleared[PG.order.t] || 0), PG.order.n, PG.order.g]);
+    if(goalRows.length){
+      x.fillStyle = 'rgba(255,255,255,.85)'; rrOn(x, 12, yy, pw, (14 + goalRows.length*30)*ps, 14); x.fill();
+      goalRows.forEach(([k, v, n, who], i) => { const gy = yy + (22 + i*30)*ps;
+        if(PANG_TYPES.includes(k)){ const im = pangImg(k); x.drawImage(im, 20, gy - 13*ps, 26*ps, 26*ps); }
+        else { x.font = `${20*ps}px sans-serif`; x.fillText({ice:'🧊', stone:'🪨', seed:'🌱'}[k] || '⭐', 20, gy); }
+        x.font = `bold ${15*ps}px ${FONT}`; x.fillStyle = v >= n ? '#2e7d32' : '#37474f'; x.fillText(`${who ? who + ' ' : ''}${v}/${n}${v >= n ? ' ✔' : ''}`, 52*ps, gy); x.fillStyle = '#fff'; });
+      yy += (20 + goalRows.length*30)*ps;
+    }
+    // 파트너 (스킬)
+    const sk = PANG_SKILL[PG.pet] || PANG_SKILL.none, py = Math.max(yy + 62*ps, G.by + G.bh - 40*ps), pcx = 12 + 34*ps;
+    const ready = PG.skill >= 100;
+    x.fillStyle = ready ? `rgba(255,215,64,${0.6 + Math.sin(nowT/150)*0.3})` : 'rgba(30,60,110,.8)'; x.beginPath(); x.arc(pcx, py, 28*ps, 0, 6.29); x.fill();
+    x.strokeStyle = '#ffd23f'; x.lineWidth = 5*ps; x.beginPath(); x.arc(pcx, py, 30*ps, -Math.PI/2, -Math.PI/2 + 6.28*PG.skill/100); x.stroke();
+    x.font = `${30*ps}px sans-serif`; x.textAlign = 'center'; x.fillText(sk.icon, pcx, py + Math.sin(nowT/250)*2);
+    x.textAlign = 'left'; x.font = `bold ${12*ps}px ${FONT}`; x.fillStyle = '#fff'; x.strokeStyle = '#1a2a50'; x.lineWidth = 3; const lab = ready ? '눌러서 스킬!' : `${sk.name} 스킬 ${Math.round(PG.skill)}%`; x.strokeText(lab, pcx + 34*ps, py); x.fillText(lab, pcx + 34*ps, py);
+    PG.skillBtn = {x:pcx, y:py, r:32*ps};
+    if(PG.petSay){ x.font = `bold ${13*ps}px ${FONT}`; x.textAlign = 'left'; const tw = Math.min(x.measureText(PG.petSay.text).width + 16, G.bx - pcx - 36*ps); const bx2 = pcx + 30*ps, by3 = py - 44*ps; x.fillStyle = 'rgba(255,255,255,.95)'; rrOn(x, bx2, by3, tw, 24*ps, 10); x.fill(); x.beginPath(); x.moveTo(bx2 + 8, by3 + 24*ps); x.lineTo(bx2 + 2, by3 + 32*ps); x.lineTo(bx2 + 18, by3 + 24*ps); x.fill(); x.fillStyle = '#4a2a10'; x.fillText(PG.petSay.text, bx2 + 8, by3 + 12*ps); }
   }
-  // 오른쪽: 남은 시간 · 피버
+  // ---- 오른쪽: 시간(또는 남은 횟수) · 피버 ----
   const rx0 = G.bx + G.bw + 20, rw = Math.min(150, w - rx0 - 12);
   if(rw > 70){
-    const tl = Math.max(0, PG.time), mm = Math.floor(tl/60), ss = Math.floor(tl % 60);
-    x.fillStyle = 'rgba(30,60,110,.78)'; rrOn(x, rx0, G.by - 6, rw, 74*ps, 16); x.fill();
-    x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = `${14*ps}px ${FONT}`; x.fillText('남은 시간:', rx0 + rw/2, G.by + 12*ps);
-    x.font = `900 ${32*ps}px ${FONT}`; x.fillStyle = tl < 10 ? '#ff6b6b' : '#ffd23f'; x.fillText(`${mm}:${String(ss).padStart(2, '0')}`, rx0 + rw/2, G.by + 44*ps);
+    x.fillStyle = 'rgba(30,60,110,.8)'; rrOn(x, rx0, G.by - 6, rw, 74*ps, 16); x.fill();
+    x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = `${14*ps}px ${FONT}`;
+    if(PG.stage){ x.fillText('남은 횟수:', rx0 + rw/2, G.by + 12*ps); x.font = `900 ${32*ps}px ${FONT}`; x.fillStyle = PG.moves <= 5 ? '#ff6b6b' : '#ffd23f'; x.fillText(String(Math.max(0, PG.moves)), rx0 + rw/2, G.by + 44*ps); }
+    else if(PG.mode === 'relax'){ x.fillText('느긋하게', rx0 + rw/2, G.by + 12*ps); x.font = `900 ${28*ps}px ${FONT}`; x.fillStyle = '#b8ff7a'; x.fillText('∞', rx0 + rw/2, G.by + 44*ps); }
+    else { const tl = Math.max(0, PG.time), mm = Math.floor(tl/60), ss = Math.floor(tl % 60); x.fillText('남은 시간:', rx0 + rw/2, G.by + 12*ps); x.font = `900 ${32*ps}px ${FONT}`; x.fillStyle = tl < 10 ? '#ff6b6b' : '#ffd23f'; const sp = tl < 10 ? 1 + Math.abs(Math.sin(nowT/160))*0.12 : 1; x.save(); x.translate(rx0 + rw/2, G.by + 44*ps); x.scale(sp, sp); x.fillText(`${mm}:${String(ss).padStart(2, '0')}`, 0, 0); x.restore(); }
     const fx0 = rx0 + rw/2 - 16*ps, fy0 = G.by + 110*ps, fh = Math.max(60, G.by + G.bh - fy0 - 70*ps), fv = PG.feverT > 0 ? PG.feverT/8 : PG.fever/100;
     x.font = `900 ${16*ps}px ${FONT}`; x.fillStyle = PG.feverT > 0 ? '#ff6bd6' : '#ff9d2e'; x.lineWidth = 4; x.strokeStyle = '#3a1a00'; x.strokeText(PG.feverT > 0 ? 'FEVER!' : 'Fever', rx0 + rw/2, fy0 - 14*ps); x.fillText(PG.feverT > 0 ? 'FEVER!' : 'Fever', rx0 + rw/2, fy0 - 14*ps);
     x.fillStyle = '#18323f'; x.strokeStyle = '#c7d7e0'; x.lineWidth = 4; rrOn(x, fx0, fy0, 32*ps, fh, 16*ps); x.fill(); x.stroke();
-    const fg = x.createLinearGradient(0, fy0 + fh, 0, fy0); fg.addColorStop(0, '#ff3b30'); fg.addColorStop(1, '#ffd23f'); x.fillStyle = fg; rrOn(x, fx0 + 5*ps, fy0 + fh - 5*ps - (fh - 10*ps)*fv, 22*ps, Math.max(2, (fh - 10*ps)*fv), 11*ps); x.fill();
+    const fg = x.createLinearGradient(0, fy0 + fh, 0, fy0); fg.addColorStop(0, '#ff3b30'); fg.addColorStop(1, '#ffd23f'); x.fillStyle = PG.feverT > 0 ? `hsl(${nowT/4 % 360},90%,60%)` : fg; rrOn(x, fx0 + 5*ps, fy0 + fh - 5*ps - (fh - 10*ps)*fv, 22*ps, Math.max(2, (fh - 10*ps)*fv), 11*ps); x.fill();
   }
-  // 아래: 콤보 · 아이템
+  // ---- 아래: 콤보 · 아이템 ----
   const byy = G.by + G.bh + Math.max(14, (h - G.by - G.bh)/2), bs = Math.min(56, h - G.by - G.bh - 10, G.cell*1.2);
-  if(PG.combo >= 2){ x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `900 ${bs*0.62}px ${FONT}`; x.lineWidth = 6; x.strokeStyle = '#6b3a00'; x.strokeText(`COMBO ${PG.combo}`, G.bx + G.bw*0.3, byy); const cg = x.createLinearGradient(0, byy - 20, 0, byy + 20); cg.addColorStop(0, '#fff3a0'); cg.addColorStop(1, '#ffb300'); x.fillStyle = cg; x.fillText(`COMBO ${PG.combo}`, G.bx + G.bw*0.3, byy); }
+  if(PG.combo >= 2){ const pop = 1 + Math.max(0, PG.comboT - 1.7)*0.8; x.save(); x.translate(G.bx + G.bw*0.3, byy); x.scale(pop, pop); x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `900 ${bs*0.62}px ${FONT}`; x.lineWidth = 6; x.strokeStyle = '#6b3a00'; x.strokeText(`COMBO ${PG.combo}`, 0, 0); const cg = x.createLinearGradient(0, -20, 0, 20); cg.addColorStop(0, '#fff3a0'); cg.addColorStop(1, '#ffb300'); x.fillStyle = cg; x.fillText(`COMBO ${PG.combo}`, 0, 0); x.restore(); }
   PG.btns = [];
-  const items = [['bomb', '💣', PG.bombs, '#ffb300'], ['hint', '💡', PG.hints, '#3fa9ff'], ['quit', '✖', null, '#e53935']];
+  const items = [['bomb', '💣', PG.bombs, '#ffb300'], ['hint', '💡', PG.hints, '#3fa9ff'], ['quit', PG.mode === 'relax' ? '✔' : '✖', null, PG.mode === 'relax' ? '#43a047' : '#e53935']];
   items.forEach(([k, ic, n, col], i) => { const bx = G.bx + G.bw - (3 - i)*(bs + 10) + 10, by2 = byy - bs/2;
     x.globalAlpha = n === 0 ? 0.45 : 1; x.fillStyle = col; rrOn(x, bx, by2, bs, bs, bs*0.22); x.fill(); x.strokeStyle = k === 'bomb' && PG.bombArm ? '#ffffff' : 'rgba(0,0,0,.35)'; x.lineWidth = k === 'bomb' && PG.bombArm ? 4 : 2; x.stroke();
     x.font = `${bs*0.5}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.fillText(ic, bx + bs/2, by2 + bs/2);
     if(n !== null){ x.font = `bold ${bs*0.26}px ${FONT}`; x.fillText(`x${n}`, bx + bs*0.78, by2 + bs*0.82); }
     x.globalAlpha = 1; PG.btns.push({k, x:bx, y:by2, s:bs}); });
   if(PG.bombArm){ x.textAlign = 'center'; x.font = `bold 16px ${FONT}`; x.fillStyle = '#fff'; x.strokeStyle = '#3a1a00'; x.lineWidth = 4; x.strokeText('터뜨릴 과일을 눌러요', w/2, G.by + G.bh + 12); x.fillText('터뜨릴 과일을 눌러요', w/2, G.by + G.bh + 12); }
-  // 시작 · 끝
-  if(PG.readyT > 0){ x.fillStyle = 'rgba(0,30,60,.35)'; x.fillRect(0, 0, w, h); x.textAlign = 'center'; x.font = `900 ${h*0.12}px ${FONT}`; x.lineWidth = 8; x.strokeStyle = '#2b3a67'; const t = PG.readyT > 0.6 ? '준비!' : '시작!'; x.strokeText(t, w/2, h/2); x.fillStyle = '#ffd23f'; x.fillText(t, w/2, h/2); }
-  if(PG.over){ x.fillStyle = 'rgba(0,30,60,.4)'; x.fillRect(0, 0, w, h); x.textAlign = 'center'; x.font = `900 ${h*0.11}px ${FONT}`; x.lineWidth = 8; x.strokeStyle = '#2b3a67'; x.strokeText('시간 끝!', w/2, h/2); x.fillStyle = '#ff8ad8'; x.fillText('시간 끝!', w/2, h/2); }
+  if(PG.readyT > 0){ x.fillStyle = 'rgba(0,30,60,.35)'; x.fillRect(0, 0, w, h); x.textAlign = 'center'; x.font = `900 ${h*0.12}px ${FONT}`; x.lineWidth = 8; x.strokeStyle = '#2b3a67'; const t = PG.readyT > 0.6 ? (PG.stage ? `${PG.stage.n}단계` : '준비!') : '시작!'; x.strokeText(t, w/2, h/2); x.fillStyle = '#ffd23f'; x.fillText(t, w/2, h/2); }
+  if(PG.over){ x.fillStyle = 'rgba(0,30,60,.35)'; x.fillRect(0, 0, w, h); x.textAlign = 'center'; x.font = `900 ${h*0.11}px ${FONT}`; x.lineWidth = 8; x.strokeStyle = '#2b3a67'; const t = PG.stage ? (PG.win ? '클리어!' : '아쉬워요!') : PG.mode === 'relax' ? '잘했어요!' : '시간 끝!'; x.strokeText(t, w/2, h/2); x.fillStyle = PG.win ? '#ffd23f' : '#ff8ad8'; x.fillText(t, w/2, h/2); }
+  x.restore();
   PG.raf = requestAnimationFrame(pangLoop);
 }
 function pangFinish(){
   pangStop();
-  const coins = Math.min(40, Math.floor(PG.score/3000) + 5), gained = {}; let gTot = 0;
-  for(const [t, n] of Object.entries(PG.fruits)){ const k = Math.min(Math.floor(n/2), 30 - gTot); if(k > 0){ gTot += k; gained[t] = k; DEX.pantry[t] = (DEX.pantry[t] || 0) + k; } }   // 맞춘 과일 2번마다 1개 (한 판 최대 30개)
+  const cap = PG.stage ? 15 : PG.mode === 'relax' ? 20 : 30, gained = {}; let gTot = 0;
+  for(const [t, n] of Object.entries(PG.fruits)){ const k = Math.min(Math.floor(n/2), cap - gTot); if(k > 0){ gTot += k; gained[t] = k; DEX.pantry[t] = (DEX.pantry[t] || 0) + k; } }
+  let coins = PG.mode === 'relax' ? Math.min(15, Math.floor(PG.score/4000) + 2) : Math.min(40, Math.floor(PG.score/3000) + 5);
+  if(PG.stage){
+    DEX.pangStage = Object.assign({cleared:0, stars:{}}, DEX.pangStage);
+    if(PG.win){
+      const left = Math.max(0, PG.moves), ratio = left/PG.stage.moves; PG.stars = ratio >= 0.3 ? 3 : ratio >= 0.1 ? 2 : 1;
+      PG.score += left*300;
+      const prev = DEX.pangStage.stars[PG.stage.n] || 0; if(PG.stars > prev) DEX.pangStage.stars[PG.stage.n] = PG.stars;
+      DEX.pangStage.cleared = Math.max(DEX.pangStage.cleared, PG.stage.n);
+      coins = prev ? 5 : 10 + PG.stars*5;
+    } else coins = 2;
+  }
+  if(PG.orderDone && PG.order){ const ing = ['egg','honey','coconut','wheat']; PG.orderReward = {}; for(let i=0;i<3;i++){ const t = pick(ing); PG.orderReward[t] = (PG.orderReward[t] || 0) + 1; DEX.pantry[t] = (DEX.pantry[t] || 0) + 1; } coins += 10; DEX.pangOrder = null; }
   PG.coins = coins; PG.gained = gained; DEX.coins += coins;
-  PG.newBest = PG.score > (DEX.pangBest || 0); if(PG.newBest) DEX.pangBest = PG.score;
+  if(PG.mode === 'time'){ PG.newBest = PG.score > (DEX.pangBest || 0); if(PG.newBest) DEX.pangBest = PG.score; const wk = weekKey(); if(!DEX.pangWeek || DEX.pangWeek.w !== wk) DEX.pangWeek = {w:wk, s:0}; DEX.pangWeek.s = Math.max(DEX.pangWeek.s, PG.score); }
+  if(PG.mode === 'daily'){ const d = todayKey(); if(!DEX.pangDaily || DEX.pangDaily.d !== d) DEX.pangDaily = {d, s:0}; PG.newBest = PG.score > DEX.pangDaily.s; DEX.pangDaily.s = Math.max(DEX.pangDaily.s, PG.score); }
   DEX.pangPlays = (DEX.pangPlays || 0) + 1; if(PG.score >= 10000) unlock('pang10k'); saveDex();
   showScreen('pangResult');
 }
-/* 과일팡 조작 */
+/* ---- 조작 ---- */
 pstage.addEventListener('pointerdown', e => {
   e.preventDefault(); if(!PG || PG.over) return;
   const px = e.clientX, py = e.clientY;
+  if(PG.skillBtn && Math.hypot(px - PG.skillBtn.x, py - PG.skillBtn.y) < PG.skillBtn.r){ pangUseSkill(); return; }
   for(const b of PG.btns || []){ if(px >= b.x && px <= b.x + b.s && py >= b.y && py <= b.y + b.s){
-    if(b.k === 'quit'){ if(confirm('과일팡을 그만할까요?')){ PG.time = 0; PG.phase = PG.phase === 'idle' ? 'idle' : PG.phase; } return; }
+    if(b.k === 'quit'){ if(PG.mode === 'relax' || confirm('과일팡을 그만할까요?')) pangEnd(PG.mode === 'relax'); return; }
     if(b.k === 'bomb' && PG.bombs > 0){ PG.bombArm = !PG.bombArm; tone(440, .06, 'triangle', .04); return; }
-    if(b.k === 'hint' && PG.hints > 0 && PG.phase === 'idle'){ const m = pangFindMove(PG.g); if(m){ PG.hint = m; PG.hintT = 3; PG.hints--; tone(880, .1, 'triangle', .05); } return; }
+    if(b.k === 'hint' && PG.hints > 0 && PG.phase === 'idle'){ const m = pangFindMove(); if(m){ PG.hint = m; PG.hintT = 3; PG.autoHint = false; PG.hints--; tone(880, .1, 'triangle', .05); } return; }
     return; } }
   const G = pangGeom(pstage.clientWidth, pstage.clientHeight), c = Math.floor((px - G.bx)/G.cell), r = Math.floor((py - G.by)/G.cell);
-  if(r < 0 || c < 0 || r >= PANG_ROWS || c >= PANG_COLS) return;
+  if(r < 0 || c < 0 || r >= PG.rows || c >= PG.cols) return;
   if(PG.bombArm){ if(PG.phase === 'idle' && PG.readyT <= 0) pangBomb(r, c); return; }
   PG.drag = {r, c, x:px, y:py, id:e.pointerId, moved:false};
 });
@@ -5926,35 +6294,68 @@ pstage.addEventListener('pointermove', e => {
   if(Math.hypot(dx, dy) < G.cell*0.35) return;
   d.moved = true;
   const b = Math.abs(dx) > Math.abs(dy) ? [d.r, d.c + Math.sign(dx)] : [d.r + Math.sign(dy), d.c];
-  if(b[0] >= 0 && b[1] >= 0 && b[0] < PANG_ROWS && b[1] < PANG_COLS) pangTrySwap([d.r, d.c], b);
+  if(b[0] >= 0 && b[1] >= 0 && b[0] < PG.rows && b[1] < PG.cols) pangTrySwap([d.r, d.c], b);
 });
 pstage.addEventListener('pointerup', e => {
   const d = PG && PG.drag; if(!d || d.id !== e.pointerId) return; PG.drag = null;
   if(d.moved) return;
-  if(PG.sel && Math.abs(PG.sel[0] - d.r) + Math.abs(PG.sel[1] - d.c) === 1){ pangTrySwap(PG.sel, [d.r, d.c]); }
+  if(PG.sel && Math.abs(PG.sel[0] - d.r) + Math.abs(PG.sel[1] - d.c) === 1) pangTrySwap(PG.sel, [d.r, d.c]);
   else { PG.sel = PG.sel && PG.sel[0] === d.r && PG.sel[1] === d.c ? null : [d.r, d.c]; tone(700, .04, 'triangle', .03); }
 });
 document.addEventListener('visibilitychange', () => { if(document.hidden && PG && screen === 'pang') PG.last = performance.now(); });
+/* ---- 화면 ---- */
+const PANG_LOGO = `<h2 class="pangtitle"><span style="color:#ff5fa2">과</span><span style="color:#ffb347">일</span><span style="color:#3fa9ff">팡</span></h2>`;
 function esportsHTML(){
-  return `<h2 class="pangtitle"><span style="color:#ff5fa2">과</span><span style="color:#ffb347">일</span><span style="color:#3fa9ff">팡</span></h2>
-    <p>🎮 e스포츠체험실에 온 걸 환영해요!</p>
-    <div class="pangrule"><p>🍎🍎🍎 <b>같은 과일 3개 이상</b>을 가로나 세로로 나란히 맞추면 팡! 사라져요.</p>
-      <p>👆 과일을 옆 칸으로 <b>밀거나</b>, 두 과일을 차례로 <b>눌러서</b> 자리를 바꿔요.</p>
-      <p>⏱️ 60초 동안 최고 점수에 도전! 연속으로 맞추면 <b>콤보</b>, 게이지가 차면 <b>FEVER</b>(점수 2배)!</p>
-      <p>4개를 맞추면 시간 +1초, 5개를 맞추면 💣 폭탄 +1 · 💡 힌트로 맞출 곳을 알려줘요.</p></div>
-    <p class="coins">🏆 최고 점수 ${(DEX.pangBest || 0).toLocaleString()} · 플레이 ${DEX.pangPlays || 0}번</p>
-    <p class="keys">맞춘 과일은 창고에 들어가서 바리스타체험실·요리체험실에서 쓸 수 있어요.</p>
-    <div class="btnrow"><button class="go big" id="pangGo">▶ 과일팡 시작!</button></div>
+  const opt = pangOpt(), st = Object.assign({cleared:0, stars:{}}, DEX.pangStage), wk = weekKey();
+  const rank = PROF.list.map(p => { const d = p.id === PROF.cur ? DEX : profData(p.id); return {p, s:d.pangWeek && d.pangWeek.w === wk ? d.pangWeek.s : 0}; }).filter(r => r.s > 0).sort((a, b) => b.s - a.s).slice(0, 5);
+  const daily = DEX.pangDaily && DEX.pangDaily.d === todayKey() ? DEX.pangDaily.s : 0, pet = PANG_SKILL[equipped('pet')] || PANG_SKILL.none;
+  return `${PANG_LOGO}<p>🎮 e스포츠체험실에 온 걸 환영해요!</p>
+    <div class="pmodes">
+      <button class="pmode" data-pm="time" style="--c:#ff5fa2"><span>⏱️</span><b>60초 도전</b><small>최고 ${(DEX.pangBest || 0).toLocaleString()}점</small></button>
+      <button class="pmode" data-pm="stage" style="--c:#3fa9ff"><span>🗺️</span><b>스테이지</b><small>${st.cleared}/${PANG_STAGES}단계 · ⭐${Object.values(st.stars).reduce((a, b) => a + b, 0)}</small></button>
+      <button class="pmode" data-pm="daily" style="--c:#ffb347"><span>📅</span><b>오늘의 과일팡</b><small>${daily ? `오늘 ${daily.toLocaleString()}점` : '모두 같은 판!'}</small></button>
+      <button class="pmode" data-pm="relax" style="--c:#43a047"><span>🌿</span><b>느긋한 모드</b><small>시간 제한 없이</small></button>
+    </div>
+    ${DEX.pangOrder ? `<p class="porder">${DEX.pangOrder.g} 요리체험실 주문: <b>${FRUIT_INFO[DEX.pangOrder.t].ko} ${DEX.pangOrder.n}개</b> 터뜨려 주세요! (어느 모드든 OK)</p>` : ''}
+    <div class="pguide"><b>특수 과일 만들기</b>
+      <span>4개 한 줄 → 🚀 줄무늬 (한 줄 싹!)</span><span>ㄱ·ㅗ 모양 → 💥 폭탄 (주변 펑!)</span><span>5개 한 줄 → 🌈 무지개 (같은 과일 모두!)</span><span>특수끼리 바꾸면 더 큰 폭발!</span><span>🌱 씨앗은 아래로 밀면 한 칸 내려가요</span></div>
+    <p class="keys">파트너 ${pet.icon} ${pet.name} 스킬: ${pet.desc} (옷장에서 파트너를 바꿀 수 있어요)</p>
+    <div class="setrow"><span>🔍 큰 판 (6×6, 과일 크게)</span><input type="checkbox" id="pgBig" ${opt.big ? 'checked' : ''}></div>
+    <div class="setrow"><span>🔷 모양으로 구분 (과일마다 다른 테두리)</span><input type="checkbox" id="pgShape" ${opt.shapes ? 'checked' : ''}></div>
+    ${rank.length ? `<h3 class="wtitle">🏆 이번 주 우리 반 순위 (60초 도전)</h3><table class="rank">${rank.map((r, i) => `<tr><td>${['🥇','🥈','🥉','4','5'][i]}</td><td>${r.p.icon} ${escapeHTML(r.p.name)}</td><td>${r.s.toLocaleString()}</td></tr>`).join('')}</table>` : ''}
     <button class="go alt" id="goBtn">나가기</button>`;
 }
+function pangMapHTML(){
+  const st = Object.assign({cleared:0, stars:{}}, DEX.pangStage);
+  return `${PANG_LOGO}<p class="keys">강릉 명소를 따라 한 단계씩! 별이 많을수록 좋아요.</p>
+    ${PANG_AREAS.map((a, ai) => `<div class="parea" style="--c:${a.col}"><h3>${a.icon} ${a.name}</h3><div class="pstages">${[1,2,3,4,5].map(k => { const n = ai*5 + k, open = n <= st.cleared + 1, s = st.stars[n] || 0, d = pangStageDef(n);
+      const goal = d.goals.map(gl => gl.type === 'fruit' ? FRUIT_INFO[gl.t].ko : {ice:'🧊', stone:'🪨', seed:'🌱'}[gl.type]).join(' ');
+      return `<button class="pst${open ? '' : ' lock'}${s ? ' done' : ''}" data-ps="${n}" ${open ? '' : 'disabled'}><b>${open ? n : '🔒'}</b><small>${'★'.repeat(s)}${'☆'.repeat(3 - s)}</small><i>${open ? goal : ''}</i></button>`; }).join('')}</div></div>`).join('')}
+    <button class="go alt" id="goBtn">돌아가기</button>`;
+}
 function pangResultHTML(){
-  const gained = Object.entries(PG.gained || {});
-  return `<h2 class="pangtitle"><span style="color:#ff5fa2">과</span><span style="color:#ffb347">일</span><span style="color:#3fa9ff">팡</span></h2>
-    <p class="stars">${PG.score.toLocaleString()}점</p>${PG.newBest ? '<p class="rec">🏆 새 최고 기록!</p>' : ''}
+  const gained = Object.entries(PG.gained || {}), stageTxt = PG.stage ? (PG.win ? `<p class="stars">${'★'.repeat(PG.stars)}${'☆'.repeat(3 - PG.stars)}</p><p>${PG.stage.n}단계 클리어! 남은 횟수 보너스 +${Math.max(0, PG.moves)*300}</p>` : `<p class="big">아쉬워요! 다시 해 볼까요?</p><p class="keys">${PG.stage.goals.map(gl => `${gl.type === 'fruit' ? FRUIT_INFO[gl.t].ko : {ice:'얼음', stone:'돌', seed:'씨앗'}[gl.type]} ${pangGoalProgress(gl)}/${gl.n}`).join(' · ')}</p>`) : '';
+  const next = PG.stage && PG.win && PG.stage.n < PANG_STAGES ? `<button class="go" id="pgNext">다음 단계 ▶</button>` : '';
+  return `${PANG_LOGO}${stageTxt}<p class="stars" style="font-size:clamp(28px,6vw,44px)">${PG.score.toLocaleString()}점</p>${PG.newBest ? '<p class="rec">🏆 새 최고 기록!</p>' : ''}
     <p>최대 콤보 ${PG.maxCombo} · 팡 ${PG.pangs}번</p>
     <p class="coins">🪙 코인 +${PG.coins}</p>
     ${gained.length ? `<p>창고에 들어간 과일: ${gained.map(([t, n]) => `<img src="${fruitPic(t)}" style="width:26px;height:26px;vertical-align:middle">×${n}`).join(' ')}</p>` : ''}
-    <div class="btnrow"><button class="go" id="pangAgain">다시 하기</button><button class="go alt" id="goBtn">나가기</button></div>`;
+    ${PG.orderReward ? `<p class="rec">요리체험실 주문 완료! 재료 ${Object.entries(PG.orderReward).map(([t, n]) => `${ING_INFO[t].icon}×${n}`).join(' ')} · 🪙+10</p>` : ''}
+    <div class="btnrow">${next}<button class="go${next ? ' alt' : ''}" id="pangAgain">다시 하기</button>${PG.stage ? '<button class="go alt" id="pgMap">🗺️ 지도</button>' : ''}<button class="go alt" id="goBtn">나가기</button></div>`;
+}
+function wirePang(type){
+  const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  if(type === 'esports'){
+    card.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const m = b.dataset.pm; if(m === 'stage') showScreen('pangMap'); else pangStart(m); });
+    const gb = document.getElementById('pgBig'); if(gb) gb.onchange = e => { pangOpt().big = e.target.checked; saveDex(); };
+    const gs = document.getElementById('pgShape'); if(gs) gs.onchange = e => { pangOpt().shapes = e.target.checked; saveDex(); };
+  }
+  if(type === 'pangMap') card.querySelectorAll('[data-ps]').forEach(b => b.onclick = () => pangStart('stage', +b.dataset.ps));
+  if(type === 'pangResult'){
+    on('pangAgain', () => pangStart(PG.mode, PG.stage ? PG.stage.n : 0));
+    on('pgNext', () => pangStart('stage', PG.stage.n + 1));
+    on('pgMap', () => showScreen('pangMap'));
+  }
 }
 function wireSettings(){
   const g = id => document.getElementById(id);
@@ -6065,6 +6466,8 @@ function wireWardrobe(){
 function hideScreen(){ overlay.classList.remove('show'); document.body.classList.remove('menuopen'); screen = ''; if(typeof doorBtnUpdate === 'function') doorBtnUpdate(); }
 function startGame(opts = {}){
   if(overLimit()){ restFrom = null; showScreen('limit'); return; }
+  if(typeof PG !== 'undefined' && PG && !PG.stopped) pangStop();
+  if(typeof RH !== 'undefined' && RH && !RH.stopped) rhyStop();
   if(isTouch && SET.autoFull !== false) goFull();
   bgmStop(); screen = '';
   stopRainSound();
