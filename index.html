@@ -1924,10 +1924,10 @@ function renderBoss(){
 const TOWN = {w:1024, y0:300, y1:990};   // 강릉분원 디오라마 (assets/town.jpg, 원래 그림 좌표)
 const DOORS = [   // x, y = 들어가는 곳 (길 위) · lx, ly = 간판 위치
   {id:'safety',   name:'안전체험관', icon:'🦺', col:'#1e88e5', x:340, y:618, lx:300, ly:462, sub:'강릉분원'},
-  {id:'club',     name:'음악실',     icon:'🎵', col:'#6a3fb5', x:548, y:478, lx:505, ly:352, sub:'정자'},
+  {id:'club',     name:'동아리실',     icon:'🎵', col:'#6a3fb5', x:548, y:478, lx:505, ly:352, sub:'정자'},
   {id:'jungle',   name:'정글 모험',  icon:'🌴', col:'#2e7d32', x:640, y:492, lx:668, ly:452, sub:'선착장'},
-  {id:'barista',  name:'카페',       icon:'☕', col:'#8d5524', x:500, y:782, lx:480, ly:722},
-  {id:'cook',     name:'식당',       icon:'🍳', col:'#c0392b', x:566, y:762, lx:540, ly:690},
+  {id:'barista',  name:'바리스타체험실',       icon:'☕', col:'#8d5524', x:500, y:782, lx:480, ly:722},
+  {id:'cook',     name:'요리체험실',       icon:'🍳', col:'#c0392b', x:566, y:762, lx:540, ly:690},
   {id:'wardrobe', name:'옷 가게',    icon:'👕', col:'#ec407a', x:652, y:730, lx:632, ly:652, screen:'wardrobe'},
   {id:'dex',      name:'도서관',     icon:'📚', col:'#1565c0', x:736, y:700, lx:718, ly:612, screen:'dex'},
   {id:'treasure', name:'보물 창고',  icon:'💎', col:'#f9a825', x:824, y:666, lx:810, ly:578, screen:'treasure'}
@@ -2010,10 +2010,10 @@ const CHAR_SCALE = 0.5;   // 디오라마 크기에 맞춰 주인공을 작게
 const townZoom = () => (S && S.lobby && S.lobby.far) ? H/(TOWN.y1 - TOWN.y0 + 20) : H/400;
 function townNpcs(){
   return [
-    {e:'🐰', x:420, y:688, t:0, tip:'정글에서 과일을 모아 카페에 가 봐!'},
-    {e:'🐻', x:600, y:748, t:40, tip:'식당에서 요리하면 모험에 쓸 아이템이 생겨!'},
+    {e:'🐰', x:420, y:688, t:0, tip:'정글에서 과일을 모아 바리스타체험실에 가 봐!'},
+    {e:'🐻', x:600, y:748, t:40, tip:'요리체험실에서 요리하면 모험에 쓸 아이템이 생겨!'},
     {e:'🐸', x:446, y:600, t:80, tip:'강릉분원 안전체험관에서 별 3개면 생명 보너스!'},
-    {e:'🦜', x:700, y:496, t:20, tip:'정자 음악실에서 동요를 연주해 봐!'},
+    {e:'🦜', x:700, y:496, t:20, tip:'정자 동아리실에서 동요를 연주해 봐!'},
     {e:'🦀', x:900, y:640, t:60, tip:'선착장에서 배를 타면 정글 모험이 시작돼!'}
   ];
 }
