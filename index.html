@@ -6538,6 +6538,21 @@ function gaDrawBadge(x, e, u){
   x.save(); x.globalAlpha = al; x.translate(e.x, e.y - u*20); x.drawImage(a.img, -s/2, -s/2, s, s*a.img.height/a.img.width); x.restore();
 }
 function gaSummary(q){ const n = q.perfect + q.good + q.ok + q.retry; return n ? `✨완벽 ${q.perfect} · 잘했어요 ${q.good} · 괜찮아요 ${q.ok} · 다시 ${q.retry}` : ''; }
+/* ---- 🍳 요리실 3D 그림 (재료 · 요리 · 도구) ---- */
+const KT_ART = {};
+const ktArt = k => KT_ART[k] || (KT_ART[k] = artImg(`assets/kitchen/${k}.png`));
+const KT_ING = {milk:'ing_milk', ice:'ing_ice', honey:'ing_honey', yogurt:'ing_yogurt', egg:'ing_egg', wheat:'ing_flour', coconut:'ing_coconut', vanilla:'ing_vanilla', choco:'ing_choco'};
+const KT_DISH = {'사과 샐러드':'salad_mix', '바나나 샐러드':'salad_mix', '딸기 샐러드':'salad_mix', '과일 샐러드':'salad_mix', '딸기 사과 샐러드':'salad_mix', '수박 조각':'watermelon', '수박 화채':'watermelon',
+  '달걀 프라이':'egg', '팬케이크':'pancake', '꿀 팬케이크':'pancake_honey', '코코넛 수프':'soup_coconut', '망고 코코넛 수프':'soup_mango', '꿀 바나나 구이':'banana_grill', '바나나 오믈렛':'omelette', '우유 푸딩':'pudding'};
+const KT_KDISH = {salad:'salad_mix', grill:'banana_grill', soup:'soup_coconut', cake:'pancake'};
+function ktDishArt(m){ if(!m) return null; const k = m.dishArt || KT_DISH[m.name]; if(!k) return null; const a = ktArt('dish_' + k); return a.ok ? a.img : null; }
+function ktDish(x, m, cx, cy, size){   // 요리 그림 (없으면 이모지)
+  const im = ktDishArt(m);
+  if(im){ const w = size*1.3, h = w*im.height/im.width; x.drawImage(im, cx - w/2, cy - h/2, w, h); return true; }
+  x.font = `${size}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(m && m.icon || '🍽️', cx, cy); return false;
+}
+function ktTool(x, k, cx, cy, w, rot){ const a = ktArt('tool_' + k); if(!a.ok) return false; const im = a.img, h = w*im.height/im.width; x.save(); x.translate(cx, cy); if(rot) x.rotate(rot); x.drawImage(im, -w/2, -h/2, w, h); x.restore(); return true; }
+function ktPreload(){ Object.values(KT_ING).forEach(ktArt); [...new Set([...Object.values(KT_DISH), ...Object.values(KT_KDISH)])].forEach(k => ktArt('dish_' + k)); ['board', 'knife', 'pan', 'pot'].forEach(k => ktArt('tool_' + k)); }
 let TY = null, tyRoomKind = 'cafe', tyRecipeDraft = null;
 const tstage = document.createElement('canvas');
 tstage.id = 'tyStage';
@@ -6547,11 +6562,12 @@ const tctx = tstage.getContext('2d');
 const tyIcons = {}, tyIconURL = {};
 function tyImg(t){
   if(FRUIT_INFO[t]) return pangImg(t);
+  if(KT_ING[t]){ const a = ktArt(KT_ING[t]); if(a.ok) return a.img; }
   if(CF_CUPS.includes(t) || t === 'steam_milk'){ const a = cfArt(t === 'steam_milk' ? 'pitcher' : t); if(a.ok) return a.img; const c = document.createElement('canvas'); c.width = c.height = 8; return c; }
   if(!tyIcons[t]){ const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d'); if(x){ x.translate(80, 80); drawTyIng(x, t); } tyIcons[t] = c; }
   return tyIcons[t];
 }
-function tyPic(t){ if(!tyIconURL[t]){ try{ tyIconURL[t] = tyImg(t).toDataURL(); }catch(e){ tyIconURL[t] = ''; } } return tyIconURL[t]; }   // 화면(HTML)에 쓰는 재료 그림
+function tyPic(t){ if(KT_ING[t]) return `assets/kitchen/${KT_ING[t]}.png`; if(!tyIconURL[t]){ try{ tyIconURL[t] = tyImg(t).toDataURL(); }catch(e){ tyIconURL[t] = ''; } } return tyIconURL[t]; }   // 화면(HTML)에 쓰는 재료 그림
 function drawTyIng(x, t){   // 과일이 아닌 재료 아이콘 (코드로 그림)
   const lg = (y0, y1, a, b) => { const g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
   const shine = (cx, cy, rx, ry) => { x.fillStyle = 'rgba(255,255,255,.7)'; x.beginPath(); x.ellipse(cx, cy, rx, ry, -0.5, 0, 6.29); x.fill(); };
@@ -6650,7 +6666,7 @@ function tyStart(kind, lv){
   if(typeof doorBtnUpdate === 'function') doorBtnUpdate(); if(typeof xClose !== 'undefined') xClose.style.display = 'none';
   bgmStop();
   if(soundOn && SET.bgm > 0){ const mu = tyDecoItem(kind, 'music').id; startSongBgm(mu === 'auto' ? pick(kind !== 'kitchen' ? ['minuet', 'canon', 'green'] : ['mac', 'row', 'susanna']) : mu); }
-  for(const t of TY_PAL[kind][lv]) tyImg(t);
+  ktPreload(); for(const t of TY_PAL[kind][lv]) tyImg(t);
   if(kind === 'coffee') ['ui/gauge_extract', 'ui/gauge_thermo', 'ui/arrow_down', 'ui/arrow_left', 'ui/badge_perfect', 'ui/badge_good', 'ui/badge_ok', 'ui/badge_retry', 'baby', 'pitcher', 'tamper', 'portafilter', 'bean_roasted', 'bean_gold', ...CF_CUPS].forEach(cfArt);
   tstage.style.display = 'block'; tyResize();
   if(TY.duo) TY.banner = {text:'👫 두 명이 함께: 🙋 손님 친구 · 👩‍🍳 점원 친구', t:0, dur:3};
@@ -6817,7 +6833,7 @@ function tyAddIng(t){
 function tyServe(c){
   const T = TY, W = T.work, G = TY_GEO[T.kind]; if(!W || W.cust !== c) return;
   const [sx, sy] = T.kind === 'kitchen' ? G.plate : G.cup;
-  T.fx.push({type:'fly', emoji:T.kind === 'cafe' ? '🥤' : T.kind === 'coffee' ? '☕' : W.m.icon, col:W.m.col, x0:sx, y0:sy - 60, x1:c.x, y1:G.occ - 90, t:0, dur:0.45, size:90});
+  T.fx.push({type:'fly', dish:T.kind === 'kitchen' ? W.m : null, emoji:T.kind === 'cafe' ? '🥤' : T.kind === 'coffee' ? '☕' : W.m.icon, col:W.m.col, x0:sx, y0:sy - 60, x1:c.x, y1:G.occ - 90, t:0, dur:0.45, size:90});
   c.qm = W.qm; T.work = null; T.sel = null; T.idle = 0; c.served = true;
   if(T.pay){ c.state = 'pay'; setTimeout(() => { if(TY === T) tyPayOpen(c); }, 500); tone(700, .08, 'triangle', .05); return; }
   tyServeEnd(c);
@@ -7047,7 +7063,7 @@ function tyDrawBubble(x, c, front, slot){
   } else {
     let ix = bx + 18;
     if(dishW && T.kind === 'coffee'){ const im = tyImg(c.menu.cup), ih = dishW - 14, iw2 = ih*(im.width || 1)/(im.height || 1); if(im.width > 8) x.drawImage(im, ix + dishW/2 - 6 - iw2/2, by + 46 - ih/2, iw2, ih); ix += dishW; }
-    else if(dishW){ x.font = `${two ? 52 : 64}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(c.menu.icon || '🍽️', ix + dishW/2 - 6, by + 46); ix += dishW; }
+    else if(dishW){ ktDish(x, c.menu, ix + dishW/2 - 6, by + 46, two ? 50 : 60); ix += dishW; }
     const count = {};
     for(const [t] of items){
       count[t] = (count[t] || 0) + 1; const done = W && (t === 'steam_milk' ? W.steamed : (W.added[t] || 0) >= count[t]);
@@ -7130,7 +7146,10 @@ function tyDrawKitchen(x, W){
   const cooking = W && W.at === 'stove' && (st === 'cook' || W.cooked);
   if(cooking && W.heat > 0){ for(let i=0;i<5;i++){ const fx = sx - 44 + i*22, fh = 16 + Math.sin(T.t*20 + i*2)*6; x.fillStyle = 'rgba(80,160,255,.85)'; x.beginPath(); x.ellipse(fx, sy - 10, 7, fh*0.6, 0, 0, 6.29); x.fill(); x.fillStyle = 'rgba(255,170,60,.9)'; x.beginPath(); x.ellipse(fx, sy - 14, 4, fh*0.4, 0, 0, 6.29); x.fill(); } }
   x.save(); x.translate(sx, sy - 14);
-  if(pan){
+  const panArt = ktArt('tool_pan').ok, potArt = ktArt('tool_pot').ok;
+  if(pan && panArt){ x.save(); x.scale(1, 0.42); ktTool(x, 'pan', 34, -8, 250); x.restore(); }
+  else if(!pan && potArt){ ktTool(x, 'pot', 0, -44, 200); x.scale(0.85, 0.85); }
+  else if(pan){
     x.fillStyle = '#343a40'; rrOn(x, 70, -14, 90, 16, 8); x.fill();
     x.fillStyle = '#495057'; x.beginPath(); x.ellipse(0, 0, 92, 30, 0, 0, 6.29); x.fill(); x.fillStyle = '#212529'; x.beginPath(); x.ellipse(0, -4, 80, 22, 0, 0, 6.29); x.fill();
   } else {
@@ -7143,7 +7162,7 @@ function tyDrawKitchen(x, W){
     const items = []; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++) items.push(t);
     const yb = pan ? -12 : -86, fl = W.flipT > 0 ? Math.sin((0.35 - W.flipT)/0.35*Math.PI) : 0;
     x.save(); x.translate(0, -fl*90); if(fl) x.rotate(fl*Math.PI);
-    if(W.cooked){ x.font = '66px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(W.m.icon, 0, yb - 12); }
+    if(W.cooked){ if(pan || !ktDishArt(W.m)) ktDish(x, W.m, 0, yb - 12, 66); else { x.fillStyle = W.m.name.includes('망고') ? '#ffc078' : W.m.name.includes('푸딩') ? '#ffe8a3' : '#fff4dc'; x.beginPath(); x.ellipse(0, -78, 66, 20, 0, 0, 6.29); x.fill(); x.fillStyle = 'rgba(255,255,255,.5)'; x.beginPath(); x.ellipse(-20, -82, 20, 5, 0, 0, 6.29); x.fill(); } }
     else items.forEach((t, i) => { const px = (i - (items.length - 1)/2)*44, py = yb - 10 + Math.sin(T.t*6 + i)*(W.heat > 0 ? 3 : 0); x.save(); x.translate(px, py); if(W.chopped) x.scale(0.8, 0.8); x.globalAlpha = mv; x.drawImage(tyImg(t), -26, -26, 52, 52); x.restore(); });
     x.restore();
     if(W.heat > 0 || W.cooked){ x.fillStyle = 'rgba(255,255,255,.6)'; for(let i=0;i<4;i++){ const u = (T.t*0.6 + i/4) % 1; x.globalAlpha = (1 - u)*0.7; x.beginPath(); x.arc(-30 + i*20 + Math.sin(T.t*2 + i)*8, yb - 30 - u*90, 10 + u*14, 0, 6.29); x.fill(); } x.globalAlpha = 1; }
@@ -7154,15 +7173,20 @@ function tyDrawKitchen(x, W){
   }
   x.restore();
   const [bx, by] = G.board;
+  { const a = ktArt('tool_board'); if(a.ok){ x.save(); x.translate(bx, by - 18); x.scale(1, 0.5); x.rotate(0.72); const w = 190, h = w*a.img.height/a.img.width; x.drawImage(a.img, -w/2, -h/2, w, h); x.restore(); } }
   if(W && W.at === 'board'){
     const items = []; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++) items.push(t);
     items.forEach((t, i) => { const px = bx + (i - (items.length - 1)/2)*58, py = by - 26;
       if(W.chopped){ for(let k=0;k<3;k++){ x.save(); x.translate(px + (k - 1)*16, py + 8 + (k % 2)*6); x.rotate((k - 1)*0.4); x.drawImage(tyImg(t), -16, -16, 32, 32); x.restore(); } }
       else { const hop = W.chopT > 0 ? -Math.abs(Math.sin(T.t*30))*6 : 0; x.drawImage(tyImg(t), px - 28, py - 28 + hop, 56, 56); } });
-    if(W.chopT > 0 || st === 'chop'){ const k = W.chopT > 0 ? Math.sin((0.25 - W.chopT)/0.25*Math.PI) : 0; x.save(); x.translate(bx + 64, by - 118 + k*54); x.rotate(0.35 - k*0.25); x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('🔪', 0, 0); x.restore(); }
+    if(W.chopT > 0 || st === 'chop'){ const k = W.chopT > 0 ? Math.sin((0.25 - W.chopT)/0.25*Math.PI) : 0; if(!ktTool(x, 'knife', bx + 70, by - 96 + k*54, 104, -0.2 - k*0.35)){ x.save(); x.translate(bx + 64, by - 118 + k*54); x.rotate(0.35 - k*0.25); x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('🔪', 0, 0); x.restore(); } }
   }
   const [px, py] = G.plate, rim = tyDecoItem('kitchen', 'cup').col;
+  const dimg = W && W.plated && ktDishArt(W.m);
   x.fillStyle = 'rgba(0,0,0,.15)'; x.beginPath(); x.ellipse(px, py + 2, 92, 22, 0, 0, 6.29); x.fill();
+  if(dimg){ x.save(); x.globalAlpha = mv; const w = 175, h = w*dimg.height/dimg.width; x.drawImage(dimg, px - w/2, py + 12 - h - (1 - mv)*40, w, h); x.restore();
+    x.fillStyle = `rgba(255,240,150,${0.4 + Math.sin(T.t*6)*0.2})`; for(let i=0;i<5;i++){ const a = T.t*2 + i*1.25; x.beginPath(); x.arc(px + Math.cos(a)*90, py - 60 + Math.sin(a)*34, 4, 0, 6.29); x.fill(); }
+    return; }
   x.fillStyle = '#ffffff'; x.beginPath(); x.ellipse(px, py - 4, 88, 22, 0, 0, 6.29); x.fill(); x.strokeStyle = rim; x.lineWidth = 5; x.beginPath(); x.ellipse(px, py - 4, 80, 19, 0, 0, 6.29); x.stroke();
   x.strokeStyle = '#dee2e6'; x.lineWidth = 3; x.beginPath(); x.ellipse(px, py - 4, 60, 13, 0, 0, 6.29); x.stroke();
   if(W && W.plated){ x.save(); x.globalAlpha = mv; x.font = '92px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(W.m.icon, px, py - 50 - (1 - mv)*40); x.restore();
@@ -7292,7 +7316,7 @@ function tyDrawPick(x){   // 계산하기 · 주문 고르기 창
       x.fillStyle = '#fff'; rrOn(x, bx, by, bw, bh, 22); x.fill(); x.strokeStyle = m.custom ? '#7048e8' : '#e9b949'; x.lineWidth = 4; x.stroke();
       if(T.kind === 'coffee'){ const im = tyImg(m.cup); if(im.width > 8){ const h = 96, w = h*im.width/im.height; x.drawImage(im, bx + bw/2 - w/2, by + 22, w, h); } }
       else if(T.kind === 'cafe'){ x.fillStyle = m.col || '#ffb3c7'; x.beginPath(); x.moveTo(bx + bw/2 - 30, by + 116); x.lineTo(bx + bw/2 + 30, by + 116); x.lineTo(bx + bw/2 + 40, by + 30); x.lineTo(bx + bw/2 - 40, by + 30); x.closePath(); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 3; x.stroke(); }
-      else { x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(m.icon || '🍽️', bx + bw/2, by + 74); }
+      else ktDish(x, m, bx + bw/2, by + 70, 96);
       const ks = Object.entries(m.need), iw = Math.min(46, (bw - 20)/Math.max(1, ks.length));
       ks.forEach(([t, n], k) => { const ix = bx + bw/2 - ks.length*iw/2 + k*iw; x.drawImage(tyImg(t), ix + 2, by + 128, iw - 4, iw - 4); if(n > 1){ x.font = `bold 16px ${FONT}`; x.fillStyle = '#e8590c'; x.textAlign = 'center'; x.fillText('×' + n, ix + iw - 8, by + 130 + iw); } });
       x.font = `bold 21px ${FONT}`; x.fillStyle = '#3a2412'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(m.name, bx + bw/2, by + 212, bw - 14);
@@ -7344,7 +7368,7 @@ function tyDraw(){
   for(const e of T.fx){
     const u = clamp(e.t/e.dur, 0, 1); if(e.t < 0) continue;
     if(e.type === 'fly'){ const px = e.x0 + (e.x1 - e.x0)*u, py = e.y0 + (e.y1 - e.y0)*u - Math.sin(u*Math.PI)*80, s = e.size*(1 - u*0.35);
-      if(e.ing) x.drawImage(tyImg(e.ing), px - s/2, py - s/2, s, s); else { x.font = `${s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(e.emoji, px, py); } }
+      if(e.ing) x.drawImage(tyImg(e.ing), px - s/2, py - s/2, s, s); else if(e.dish && ktDishArt(e.dish)) ktDish(x, e.dish, px, py, s); else { x.font = `${s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(e.emoji, px, py); } }
     else if(e.type === 'heart'){ x.globalAlpha = 1 - u; x.font = '34px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText('💖', e.x, e.y); x.globalAlpha = 1; }
     else if(e.type === 'note'){ x.globalAlpha = 1 - u; x.font = '40px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText(e.e, e.x + Math.sin(e.t*8)*10, e.y); x.globalAlpha = 1; }
     else if(e.type === 'drop'){ x.globalAlpha = 1 - u*0.6; x.fillStyle = '#74c0fc'; x.beginPath(); x.ellipse(e.x, e.y, 6, 9, 0, 0, 6.29); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.arc(e.x - 2, e.y - 3, 2, 0, 6.29); x.fill(); x.globalAlpha = 1; }
@@ -7440,7 +7464,7 @@ document.addEventListener('visibilitychange', () => { if(TY && !TY.stopped){ TY.
 /* ---- 체험실 화면 · 결과 · 꾸미기 · 도감 · 레시피 · 기록 ---- */
 function tyPanelHTML(kind0){
   const kind = kind0 === 'cafe' && DEX.tyTab === 'coffee' ? 'coffee' : kind0, CD = cfData();
-  tyArt(kind);
+  tyArt(kind); ktPreload();
   const D = tyData(kind), O = tyOpt(), open = tyOpenLv(kind), fruits = [...new Set(Object.values(TY_PAL[kind]).flat())].filter(t => FRUIT_INFO[t]), jn = kind === 'coffee' ? CD.beans : fruits.reduce((a, t) => a + (DEX.pantry[t] || 0), 0);
   const tabs = kind0 === 'cafe' ? `<div class="tytabs"><button data-tytab="cafe" class="${kind === 'cafe' ? 'on' : ''}">🍹 과일 음료</button><button data-tytab="coffee" class="${kind === 'coffee' ? 'on' : ''}">☕ 커피</button></div>` : '';
   const regN = TY_LOOKS.filter(L => L.id && (D.reg[L.id] || 0) >= 3).length, sp = D.spDay !== todayKey();
@@ -7510,10 +7534,10 @@ function tyRecipeHTML(kind){
   const pal = TY_PAL[kind][3], n = Object.values(R.need).reduce((a, b) => a + b, 0), auto = tyRecipeName(R);
   return `<h2>🧪 나만의 ${kind === 'cafe' ? '음료' : '요리'} 레시피</h2><p class="keys">재료를 눌러 넣어요 (한 번 더 누르면 2개, 또 누르면 빼기 · 최대 4개). 만든 메뉴는 손님이 ⭐ 주문해요!</p>
     <div class="tyrec">${pal.map(t => `<button class="tyri${R.need[t] ? ' on' : ''}" data-tyri="${t}"><img src="${tyPic(t)}" alt=""><b>${tyName(t)}</b>${R.need[t] ? `<i>${R.need[t]}</i>` : ''}</button>`).join('')}</div>
-    ${kind === 'kitchen' ? `<div class="setrow"><span>요리 종류</span><span class="seg">${Object.entries(TY_KDISH).map(([k, v]) => `<button data-tyk="${k}" class="${R.dish === k ? 'on' : ''}">${v.icon} ${v.name}</button>`).join('')}</span></div>` : ''}
+    ${kind === 'kitchen' ? `<div class="setrow"><span>요리 종류</span><span class="seg">${Object.entries(TY_KDISH).map(([k, v]) => `<button data-tyk="${k}" class="${R.dish === k ? 'on' : ''}"><img src="assets/kitchen/dish_${KT_KDISH[k]}.png" style="height:1.5em;vertical-align:middle" alt=""> ${v.name}</button>`).join('')}</span></div>` : ''}
     <p>이름: <input class="namein" id="tyrName" maxlength="12" placeholder="${escapeHTML(auto || '재료를 골라요')}" value="${escapeHTML(R.name)}"> ${n ? `<span class="keys">(${tyRecipeLv(R.need)}단계 메뉴)</span>` : ''}</p>
     <div class="btnrow"><button class="go" id="tyrSave" ${n && D.custom.length < 6 ? '' : 'disabled'}>⭐ 메뉴판에 올리기</button></div>
-    ${D.custom.length ? `<h4>내 메뉴판 (${D.custom.length}/6)</h4><div class="tydrow">${D.custom.map((m, i) => `<div class="tyd on"><i>${kind === 'cafe' ? `<span class="dot" style="background:${m.col}"></span>` : m.icon}</i><b>${escapeHTML(m.name)}</b><small>${Object.entries(m.need).map(([t, k]) => tyName(t) + (k > 1 ? '×' + k : '')).join(' ')}</small><button class="sm" data-tyrdel="${i}">지우기</button></div>`).join('')}</div>` : ''}
+    ${D.custom.length ? `<h4>내 메뉴판 (${D.custom.length}/6)</h4><div class="tydrow">${D.custom.map((m, i) => `<div class="tyd on"><i>${kind === 'cafe' ? `<span class="dot" style="background:${m.col}"></span>` : `<img src="assets/kitchen/dish_${m.dishArt || KT_KDISH.salad}.png" style="height:1.6em" alt="">`}</i><b>${escapeHTML(m.name)}</b><small>${Object.entries(m.need).map(([t, k]) => tyName(t) + (k > 1 ? '×' + k : '')).join(' ')}</small><button class="sm" data-tyrdel="${i}">지우기</button></div>`).join('')}</div>` : ''}
     <p id="msg"></p><button class="go alt" id="goBtn">체험실로</button>`;
 }
 function tyRecipeName(R){
@@ -7556,7 +7580,7 @@ function wireTyScreen(type){
     const sv = document.getElementById('tyrSave'); if(sv) sv.onclick = () => {
       const name = (R.name || '').trim() || tyRecipeName(R); if(!name || !Object.keys(R.need).length || D.custom.length >= 6) return;
       const m = {name:name.slice(0, 12), need:Object.assign({}, R.need), lv:tyRecipeLv(R.need), custom:true};
-      if(kind === 'cafe') m.col = tyMixCol(R.need); else { const K = TY_KDISH[R.dish]; m.icon = K.icon; m.steps = K.steps.slice(); if(K.pan) m.pan = true; }
+      if(kind === 'cafe') m.col = tyMixCol(R.need); else { const K = TY_KDISH[R.dish]; m.icon = K.icon; m.dishArt = KT_KDISH[R.dish]; m.steps = K.steps.slice(); if(K.pan) m.pan = true; }
       D.custom.push(m); saveDex(); tyRecipeDraft = null; seq([784, 988, 1175, 1568], 70, 'triangle', .06); tySay(`${m.name}${eul(m.name)} 메뉴판에 올렸어요`); re(); setMsg(`⭐ ${m.name} — ${m.lv}단계부터 손님이 주문해요`);
     };
     card.querySelectorAll('[data-tyrdel]').forEach(b => b.onclick = () => { D.custom.splice(+b.dataset.tyrdel, 1); saveDex(); re(); });
