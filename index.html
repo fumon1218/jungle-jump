@@ -177,6 +177,14 @@
   .cfstock{display:flex;flex-wrap:wrap;gap:.4em;align-items:center;justify-content:center;margin:.3em 0} .cfstock span{background:rgba(255,255,255,.12);border-radius:12px;padding:.2em .6em;font-weight:bold} .cfstock button{font:inherit;border-radius:12px;border:2px solid #ffe8cc;background:#6d4c41;color:#fff;padding:.3em .8em;cursor:pointer}
   .cfgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6em;margin:.5em 0} .cfbox{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);border-radius:16px;padding:.5em;text-align:center} .cfbox h4{margin:.1em 0 .3em}
   .cfpan{position:relative;height:130px;display:flex;align-items:center;justify-content:center} .cfpan img{max-height:120px;max-width:90%;transition:transform .2s} .cfpan i{position:absolute;left:50%;top:52%;width:70px;height:40px;margin:-20px 0 0 -52px;border-radius:50%;opacity:.8;mix-blend-mode:multiply}
+  @keyframes cfpop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  .cfbox.wide{grid-column:1/-1}
+  .cfgtitle{margin:.2em 0 .6em} .cfg{position:relative;width:100%;max-width:640px;margin:2.4em auto .2em;aspect-ratio:6.447} .cfg>img:first-child{position:absolute;inset:0;width:100%;height:100%}
+  .cfgt{position:absolute;left:11.03%;width:78.21%;top:29.58%;height:53.52%;border-radius:999px;overflow:hidden;background:linear-gradient(90deg,rgb(190,214,120) 0%,rgb(230,200,90) 25%,rgb(196,140,80) 50%,rgb(140,90,50) 75%,rgb(40,25,15) 100%)}
+  .cfz{position:absolute;top:0;bottom:0} .cfz.g{border:4px solid #69db7c;border-radius:10px;background:rgba(105,219,124,.18);box-sizing:border-box} .cfz.p{background:rgba(255,212,59,.55);border-left:2px solid #fff;border-right:2px solid #fff} .cfz.b{background:repeating-linear-gradient(45deg,rgba(224,49,49,.55) 0 8px,rgba(0,0,0,.25) 8px 16px)}
+  .cfga{position:absolute;bottom:62%;width:9%;max-width:56px;transform:translateX(-50%);filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+  .cfglab{position:relative;height:1.4em;max-width:640px;margin:0 auto;font-size:.8em;opacity:.9} .cfglab span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  .cfres{position:relative;height:130px;display:flex;align-items:center;justify-content:center} .cfres img{max-height:120px} .cfres .cfbadge{position:absolute;right:50%;margin-right:-150px;top:0;height:74px;animation:cfpop .5s}
   .cfbar{height:16px;border-radius:8px;background:rgba(255,255,255,.2);overflow:hidden;margin:.3em 0} .cfbar b{display:block;height:100%}
   .cftree{height:160px;display:flex;align-items:flex-end;justify-content:center} .cfsack{height:110px;display:block;margin:.2em auto}
   details.tyset{margin:.4em 0;text-align:left} details.tyset summary{cursor:pointer;padding:.3em .6em;border-radius:12px;background:rgba(255,255,255,.1);display:inline-block}
@@ -6236,14 +6244,14 @@ function cfArtHit(W, ix, iy){   // 하트 선을 따라 그리기
   CF_HEART.forEach(([hx, hy], i) => { if(!W.trace[i] && Math.hypot(ix - (zx + hx*zr*0.62), iy - (zy + hy*zr*0.62 + 6)) < 30){ W.trace[i] = true; n++; } });
   if(n){ const p = W.trace.filter(Boolean).length/CF_HEART.length; W.prog = Math.max(W.prog, Math.min(1, p/0.8)); if(W.prog >= 1) tyStepDone('art'); }
 }
-function cfStartExtract(){
+function cfStartExtract(gauge){
   const T = TY, W = T.work, c = W.cust, G = TY_GEO.coffee;
-  if(W.extractT > 0) return;
-  W.extractT = 0.001; tone(220, .3, 'sine', .04, 330); T.idle = 0;
+  if(W.extractT > 0 || W.beanDone) return; W.beanDone = true;
+  if(!gauge){ W.extractT = 0.001; tone(220, .3, 'sine', .04, 330); } T.idle = 0;
   const D = cfData();
   if(c.special && D.gold > 0){ D.gold--; c.gold = true; tyText(G.machine[0], G.machine[1] - 260, '✨ 황금 원두 커피!', '#ffe066', true); }
   else if(T.jungle && D.beans > 0){ D.beans--; c.bonus = true; T.jungleUsed++; tyText(G.machine[0], G.machine[1] - 260, '🫘 내가 볶은 원두! 팁 2배', '#b8ff7a'); }
-  tySay('커피가 나올 때까지 기다려요');
+  if(!gauge) tySay('커피가 나올 때까지 기다려요');
 }
 function cfBabyOpen(c){ TY.pick = {type:'baby', c, choices:['coffee', 'milk'], btns:[], wrong:0}; tySay('아기 손님이 커피를 달래요. 어떻게 할까요?'); }
 function cfBabyChoose(i){
@@ -6316,13 +6324,20 @@ function cfBeanHTML(){
   const beanCol = p => { const s = [[190, 214, 120], [230, 200, 90], [196, 140, 80], [140, 90, 50], [80, 50, 30]], f = p*(s.length - 1), i = Math.min(s.length - 2, Math.floor(f)), u = f - i; return `rgb(${s[i].map((v, k) => Math.round(v + (s[i + 1][k] - v)*u)).join(',')})`; };
   let roast;
   if(R.phase === 'peel') roast = `<div class="cfpan"><img src="assets/coffee/cherry.png" style="transform:scale(${1 - R.peel*0.2})"></div><p>🍒 체리 껍질을 벗겨요 (${R.peel}/3)</p><button class="go sm" id="cfPeel">👆 껍질 벗기기</button>`;
+  else if(R.phase === 'roast' && cfGaugeOn()){ const z = cfRoastZones(), L = v => (11.03 + v*78.21).toFixed(2);
+    roast = `<p class="cfgtitle">🔥 원하는 색에서 <b>✋ 멈추기</b>! 초록 칸 = 딱 좋아요 · 가운데 금색 = ✨ 특급</p>
+      <div class="cfg"><img src="assets/coffee/ui/gauge_roast.png" alt=""><div class="cfgt"><i class="cfz g" style="left:${(z.g0*100).toFixed(1)}%;width:${((z.g1 - z.g0)*100).toFixed(1)}%"></i><i class="cfz p" style="left:${(z.p0*100).toFixed(1)}%;width:${((z.p1 - z.p0)*100).toFixed(1)}%"></i><i class="cfz b" style="left:${(z.burn*100).toFixed(1)}%;width:${((1 - z.burn)*100).toFixed(1)}%"></i></div><img class="cfga" id="cfArrow" src="assets/coffee/ui/arrow_down.png" style="left:${L(R.p)}%" alt=""></div>
+      <div class="cfglab">${[[z.early/2, '🟢 생두'], [(z.early + z.g0)/2, '🟡 연하게'], [(z.g0 + z.g1)/2, '🟤 딱 좋아요'], [(z.g1 + z.burn)/2, '🟫 진하게'], [(z.burn + 1)/2, '🔥 탐']].map(([v, t]) => `<span style="left:${L(v)}%">${t}</span>`).join('')}</div>
+      <p id="cfStage">${cfRoastName(R.p)}</p><button class="go" id="cfStop">✋ 멈추기</button>`; }
+  else if(R.phase === 'burnt') roast = `<div class="cfres"><img src="assets/coffee/ui/bean_burnt.png" alt=""><img class="cfbadge" src="assets/coffee/ui/badge_retry.png" alt=""></div><p class="rec">앗, 탔어요! 괜찮아요, 체리는 그대로예요</p><button class="go sm" id="cfRetry">🔄 다시 볶기</button>`;
+  else if(R.phase === 'done' && R.grade) roast = `<div class="cfres"><img src="assets/coffee/${R.grade === 'perfect' ? 'ui/bean_perfect' : 'bean_roasted'}.png" style="${R.grade === 'perfect' ? '' : `filter:brightness(${1.35 - R.p*0.7})`}" alt=""><img class="cfbadge" src="assets/coffee/ui/${GA_BADGE[R.grade]}.png" alt=""></div><p class="rec">${R.grade === 'perfect' ? '✨ 완벽해요! 특급 원두 3개가 생겼어요!' : `🎉 ${R.name} 원두 2개가 생겼어요!`}</p><button class="go sm" id="cfAgain" ${D.cherry ? '' : 'disabled'}>🍒 한 번 더 볶기</button>`;
   else if(R.phase === 'roast') roast = `<div class="cfpan"><img src="assets/coffee/roaster.png"><i id="cfBeanDot" style="background:${beanCol(R.p)}"></i></div><div class="cfbar"><b id="cfBar" style="width:${R.p*100}%;background:${beanCol(R.p)}"></b></div><p id="cfStage">${cfRoastName(R.p)}</p><button class="go sm" id="cfStop">✋ 멈추기</button><p class="keys">원하는 색이 되면 멈춰요. 연하게 = 과일 향 · 중간 = 고소한 향 · 진하게 = 초코 향</p>`;
   else if(R.phase === 'done') roast = `<div class="cfpan"><img src="assets/coffee/bean_roasted.png" style="filter:brightness(${1.35 - R.p*0.7})"></div><p class="rec">🎉 ${R.name} 원두 2개가 생겼어요!</p><button class="go sm" id="cfAgain" ${D.cherry ? '' : 'disabled'}>🍒 한 번 더 볶기</button>`;
   else roast = `<div class="cfpan"><img src="assets/coffee/roaster.png"></div><button class="go sm" id="cfStart" ${D.cherry ? '' : 'disabled'}>🍒 체리 1개 넣기</button>${D.cherry ? '' : '<p class="keys">정글 점프에서 🍒 커피 체리를 모아 와요</p>'}`;
-  return `<h2>🫘 원두 공방</h2><p class="coins">🍒 커피 체리 ${D.cherry} · 🫘 볶은 원두 ${D.beans} · ✨ 황금 원두 ${D.gold} · 🪙 ${DEX.coins}</p>
+  return `<h2>🫘 원두 공방</h2><p class="coins">🍒 커피 체리 ${D.cherry} · 🫘 볶은 원두 ${D.beans}${D.premium ? ` (✨특급 ${D.premium}번)` : ''} · ✨ 황금 원두 ${D.gold} · 🪙 ${DEX.coins}</p>
     <p class="keys">커피는 원래 빨간 열매(커피 체리)의 씨앗이에요! 체리 → 껍질 벗기기 → 초록 생두 → 볶기 → 갈색 원두</p>
     <div class="cfgrid">
-      <div class="cfbox"><h4>🔥 원두 볶기</h4>${roast}</div>
+      <div class="cfbox${['roast', 'done', 'burnt'].includes(R.phase) && cfGaugeOn() ? ' wide' : ''}"><h4>🔥 원두 볶기</h4>${roast}</div>
       <div class="cfbox"><h4>🌱 커피나무</h4><div class="cftree"><img src="assets/coffee/tree_${stage}.png" style="height:${[0, 70, 118, 150][stage]}px"></div>
         <p>${stage === 3 ? '🍒 빨간 체리가 열렸어요!' : `물을 주면 자라요 (${Math.min(D.tree, 4)}/4)`}</p>
         <div class="btnrow">${stage === 3 ? '<button class="go sm" id="cfHarvest">🍒 수확하기 (+5)</button>' : `<button class="go sm" id="cfWater" ${watered ? 'disabled' : ''}>${watered ? '💧 오늘은 물을 줬어요' : '💧 물 주기'}</button>`}</div></div>
@@ -6330,14 +6345,30 @@ function cfBeanHTML(){
       <div class="cfbox"><h4>🛍️ 원두 자루</h4><img class="cfsack" src="assets/coffee/bean_sack.png"><div class="btnrow"><button class="go alt sm" id="cfBuy" ${DEX.coins >= 30 ? '' : 'disabled'}>🪙 30 → 체리 +5</button></div></div>
     </div><p id="msg"></p><button class="go" id="goBtn">체험실로</button>`;
 }
-let cfRoast = {phase:'idle', p:0, peel:0}, cfTimer = null;
-const cfRoastName = p => p < 0.3 ? '🟢 아직 초록색이에요' : p < 0.55 ? '🟡 연하게 볶았어요 (과일 향)' : p < 0.8 ? '🟤 중간으로 볶았어요 (고소한 향)' : '🟫 진하게 볶았어요 (초코 향)';
+let cfRoast = {phase:'idle', p:0, peel:0}, cfTimer = null, cfRoastHelp = 0, cfBurnRun = 0;
+const cfGaugeOn = () => tyOpt().gauge !== 'off';
+function cfRoastZones(){ const h = cfRoastHelp*0.04; return {early:0.2, g0:0.42 - h, g1:0.72 + h, p0:0.54 - h/2, p1:0.60 + h/2, burn:Math.min(0.95, 0.88 + h)}; }
+function cfRoastStop(auto){   // 로스팅 게이지 멈추기
+  const R = cfRoast, z = cfRoastZones(), D = cfData(), p = R.p, re = () => { const sc = card.scrollTop; showScreen('tyBean'); card.scrollTop = sc; };
+  if(!auto && p < z.early){ setMsg('🟢 아직 초록색이에요. 조금 더 볶아요! 🔥'); say('조금 더 볶아요', 'ko-KR'); return; }
+  clearInterval(cfTimer);
+  if(auto || p >= z.burn){ R.phase = 'burnt'; cfBurnRun++; if(cfBurnRun >= 2 && cfRoastHelp < 3){ cfRoastHelp++; cfBurnRun = 0; } tone(220, .3, 'sawtooth', .04, 110); say('앗, 탔어요! 다시 볶아요', 'ko-KR'); re(); if(cfRoastHelp && !cfBurnRun) setMsg('🐢 조금 느리고 넓게 바꿨어요'); return; }
+  R.grade = p >= z.p0 && p <= z.p1 ? 'perfect' : p >= z.g0 && p <= z.g1 ? 'good' : 'ok';
+  cfBurnRun = 0; if(cfRoastHelp && R.grade !== 'ok') cfRoastHelp--;
+  R.phase = 'done'; R.name = cfRoastName(p).replace(/^\S+ /, '').replace(/ \(.*/, '').replace('볶았어요', '볶은');
+  const n = R.grade === 'perfect' ? 3 : 2; D.beans += n; D.roasts++; if(R.grade === 'perfect') D.premium = (D.premium || 0) + 1; saveDex();
+  seq(R.grade === 'perfect' ? [784, 988, 1319, 1568] : [523, 659, 784, 1047], 90, 'triangle', .06);
+  say(R.grade === 'perfect' ? '완벽해요! 특급 원두!' : R.grade === 'good' ? '잘했어요! 원두 완성!' : '괜찮아요! 원두 완성!', 'ko-KR'); re();
+}
+const cfRoastName = p => cfGaugeOn() ? (p < 0.2 ? '🟢 아직 초록색이에요' : p < 0.42 ? '🟡 연하게 볶았어요 (과일 향)' : p < 0.72 ? '🟤 중간으로 볶았어요 (고소한 향)' : p < 0.88 ? '🟫 진하게 볶았어요 (초코 향)' : '🔥 앗, 타고 있어요!') : p < 0.3 ? '🟢 아직 초록색이에요' : p < 0.55 ? '🟡 연하게 볶았어요 (과일 향)' : p < 0.8 ? '🟤 중간으로 볶았어요 (고소한 향)' : '🟫 진하게 볶았어요 (초코 향)';
 function wireCfBean(){
   const D = cfData(), re = () => { const sc = card.scrollTop; showScreen('tyBean'); card.scrollTop = sc; }, on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
   const start = () => { if(!D.cherry) return; D.cherry--; saveDex(); cfRoast = {phase:'peel', p:0, peel:0}; tone(700, .06, 'triangle', .05); re(); };
   on('cfStart', start); on('cfAgain', start);
   on('cfPeel', () => { cfRoast.peel++; tone(500 + cfRoast.peel*120, .08, 'triangle', .05); vibe(10); if(cfRoast.peel >= 3){ cfRoast.phase = 'roast'; say('초록 생두가 나왔어요. 이제 볶아요!', 'ko-KR'); } re(); });
-  on('cfStop', () => { if(cfRoast.p < 0.3){ setMsg('아직 초록색이에요. 조금 더 볶아요! 🔥'); say('조금 더 볶아요', 'ko-KR'); return; } cfFinishRoast(); re(); });
+  on('cfRetry', () => { cfRoast = {phase:'roast', p:0, peel:3}; tone(700, .06, 'triangle', .05); re(); });
+  if(cfRoast.phase === 'roast' && cfGaugeOn()){ on('cfStop', () => cfRoastStop(false)); const b = document.getElementById('cfStop'); if(b) setTimeout(() => b.focus(), 50); }
+  else on('cfStop', () => { if(cfRoast.p < 0.3){ setMsg('아직 초록색이에요. 조금 더 볶아요! 🔥'); say('조금 더 볶아요', 'ko-KR'); return; } cfFinishRoast(); re(); });
   on('cfWater', () => { D.tree++; D.treeDay = todayKey(); saveDex(); seq([523, 659, 784], 80, 'triangle', .05); re(); setMsg('💧 쑥쑥 자라라!'); });
   on('cfHarvest', () => { D.cherry += 5; D.tree = 2; saveDex(); seq([784, 988, 1175, 1568], 70, 'triangle', .06); say('커피 체리를 다섯 개 땄어요!', 'ko-KR'); re(); });
   on('cfParrot', () => { D.cherry += 3; D.parrotDay = todayKey(); saveDex(); seq([988, 1175, 988, 1319], 80, 'triangle', .06); say('앵무새가 커피 체리를 가져왔어요!', 'ko-KR'); re(); });
@@ -6345,13 +6376,21 @@ function wireCfBean(){
   clearInterval(cfTimer);
   if(cfRoast.phase === 'roast') cfTimer = setInterval(() => {
     if(screen !== 'tyBean' || cfRoast.phase !== 'roast'){ clearInterval(cfTimer); return; }
-    cfRoast.p = Math.min(1, cfRoast.p + 0.1/7);
+    if(cfGaugeOn()){
+      const z = cfRoastZones(), prev = cfRoast.p; cfRoast.p = Math.min(1, cfRoast.p + 0.05/(7*(GA_SPEED[tyOpt().gauge] || 1)*(1 + 0.3*cfRoastHelp)));
+      const a = document.getElementById('cfArrow'), s = document.getElementById('cfStage'); if(a) a.style.left = (11.03 + cfRoast.p*78.21) + '%'; if(s) s.textContent = cfRoastName(cfRoast.p);
+      if(prev < z.g0 && cfRoast.p >= z.g0){ tone(1319, .12, 'sine', .06); vibe(20); }
+      if(Math.random() < 0.15) tone(900 + Math.random()*500, .03, 'square', .015);
+      if(cfRoast.p >= 1) cfRoastStop(true);
+      return;
+    }
+    cfRoast.p = Math.min(1, cfRoast.p + 0.05/7);
     const b = document.getElementById('cfBar'), s = document.getElementById('cfStage'), d = document.getElementById('cfBeanDot');
     const col = (() => { const st = [[190, 214, 120], [230, 200, 90], [196, 140, 80], [140, 90, 50], [80, 50, 30]], f = cfRoast.p*(st.length - 1), i = Math.min(st.length - 2, Math.floor(f)), u = f - i; return `rgb(${st[i].map((v, k) => Math.round(v + (st[i + 1][k] - v)*u)).join(',')})`; })();
     if(b){ b.style.width = cfRoast.p*100 + '%'; b.style.background = col; } if(d) d.style.background = col; if(s) s.textContent = cfRoastName(cfRoast.p);
-    if(Math.random() < 0.3) tone(900 + Math.random()*500, .03, 'square', .015);
+    if(Math.random() < 0.15) tone(900 + Math.random()*500, .03, 'square', .015);
     if(cfRoast.p >= 1){ cfFinishRoast(); const sc = card.scrollTop; showScreen('tyBean'); card.scrollTop = sc; }
-  }, 100);
+  }, 50);
 }
 function cfFinishRoast(){ const D = cfData(); clearInterval(cfTimer); cfRoast.phase = 'done'; cfRoast.name = cfRoastName(cfRoast.p).replace(/^\S+ /, '').replace(/ \(.*/, '').replace('볶았어요', '볶은'); D.beans += 2; D.roasts++; saveDex(); seq([523, 659, 784, 1047], 90, 'triangle', .06); say('원두 완성!', 'ko-KR'); }
 /* 정글에서 줍는 커피 체리 */
@@ -6370,6 +6409,135 @@ function cfDrawPickup(h){
   ctx.drawImage(a.img, x - s/2, hy - s/2 + bob, s, s*a.img.height/a.img.width);
   if(h.gold) S.lights.push({x, y:hy, r:50, s:0.6});
 }
+/* ---- 🎯 타이밍 게이지 (추출 · 우유 온도 · 로스팅) — 실패 대신 등급, 재료는 잃지 않아요 ---- */
+const GA = {extract:{img:'gauge_extract', x0:.106, x1:.8602, y0:.3273, y1:.8212}, thermo:{img:'gauge_thermo', x0:.2222, x1:.7756, y0:.1288, y1:.9406}, roast:{img:'gauge_roast', x0:.1103, x1:.8924, y0:.2958, y1:.831}};
+const GA_MASK = {}, GA_TMP = {};
+const gaArt = k => cfArt('ui/' + k);
+const GA_SPEED = {slow:1.5, normal:1, fast:0.75};
+const GA_BADGE = {perfect:'badge_perfect', good:'badge_good', ok:'badge_ok', retry:'badge_retry'};
+const GA_MULT = {perfect:1.5, good:1, ok:0.8};
+function tyGaugeOn(st){ const T = TY; return !!(T && T.kind === 'coffee' && T.gaugeOn && (st === 'extract' || st === 'steam')); }
+function gaMask(k){   // 게이지 안쪽 빈 칸 모양 (둥근 끝까지 딱 맞게)
+  if(GA_MASK[k] !== undefined) return GA_MASK[k];
+  const a = gaArt(GA[k].img); if(!a.ok) return null;
+  const im = a.img, c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'), G = GA[k];
+  try{
+    x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+    for(let i=0;i<p.length;i+=4){ const r = p[i], g = p[i + 1], b = p[i + 2], al = p[i + 3]; const on = al > 200 && Math.abs(r - g) < 18 && Math.abs(g - b) < 18 && r > 175 && r < 240; p[i] = p[i + 1] = p[i + 2] = 255; p[i + 3] = on ? 255 : 0; }
+    x.putImageData(d, 0, 0); x.globalCompositeOperation = 'destination-in'; x.fillRect(G.x0*c.width - 2, G.y0*c.height - 2, (G.x1 - G.x0)*c.width + 4, (G.y1 - G.y0)*c.height + 4);
+    GA_MASK[k] = c;
+  }catch(e){ GA_MASK[k] = false; }   // 파일로 열었을 때 등: 둥근 네모로 대신해요
+  return GA_MASK[k];
+}
+function gaPaint(x, k, gx, gy, gw, gh, paint){   // 틀 + 안쪽 색칠
+  const a = gaArt(GA[k].img); if(!a.ok) return false;
+  const im = a.img, G = GA[k], W = im.naturalWidth, H = im.naturalHeight, mk = gaMask(k);
+  let t = GA_TMP[k]; if(!t){ t = GA_TMP[k] = document.createElement('canvas'); t.width = W; t.height = H; }
+  const tx = t.getContext('2d'); tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, W, H);
+  const X = G.x0*W, Y = G.y0*H, TW = (G.x1 - G.x0)*W, TH = (G.y1 - G.y0)*H;
+  tx.save(); if(!mk){ rrOn(tx, X, Y, TW, TH, Math.min(TW, TH)/2); tx.clip(); }
+  paint(tx, X, Y, TW, TH); tx.restore();
+  if(mk){ tx.globalCompositeOperation = 'destination-in'; tx.drawImage(mk, 0, 0); tx.globalCompositeOperation = 'source-over'; }
+  x.drawImage(im, gx, gy, gw, gh); x.drawImage(t, gx, gy, gw, gh);
+  return true;
+}
+function gaZones(lv, help, center){   // 단계 · 도움에 따라 구간 넓이
+  const L = clamp(lv, 1, 3) - 1, w = [0.30, 0.22, 0.16][L] + 0.07*help, ym = [0.12, 0.09, 0.07][L], pw = lv >= 3 ? 0.05 + 0.02*help : 0;
+  return {g0:center - w/2, g1:center + w/2, y0:center - w/2 - ym, y1:center + w/2 + ym, p0:center - pw/2, p1:center + pw/2, pw};
+}
+function gaGrade(z, p){ return z.pw && p >= z.p0 && p <= z.p1 ? 'perfect' : p >= z.g0 && p <= z.g1 ? 'good' : p >= z.y0 && p <= z.y1 ? 'ok' : 'retry'; }
+function gaNew(st, run){
+  const T = TY, lv = Math.min(T.lv, 3);
+  return Object.assign({k:st === 'extract' ? 'extract' : 'thermo', st, p:0, run, dur:[4.2, 3.4, 2.8][lv - 1]*T.gSpeed*(1 + 0.3*T.gHelp), inG:false, flash:0}, gaZones(lv, T.gHelp, 0.7));
+}
+function gaTap(){
+  const T = TY, W = T.work, st = W.steps[W.si];
+  if(W.g && W.g.run){ gaStop(false); return; }
+  if(W.g && W.g.lock > 0) return;
+  if(st === 'extract') cfStartExtract(true);
+  W.g = gaNew(st, true); T.idle = 0;
+  tone(st === 'extract' ? 330 : 440, .12, 'triangle', .05);
+  if(!T.gTold){ T.gTold = true; tySay('초록색에서 멈춰요!'); }
+}
+function gaUpdate(dt){
+  const T = TY, W = T.work; if(!W) return; const g = W.g; if(!g) return;
+  if(g.lock > 0) g.lock -= dt; if(g.flash > 0) g.flash -= dt;
+  if(!g.run) return;
+  const prev = g.p; g.p = Math.min(1, g.p + dt/g.dur); T.idle = 0;
+  if(prev < g.g0 && g.p >= g.g0){ tone(1319, .12, 'sine', .06); vibe(20); g.flash = 0.5; }   // 초록에 들어왔어요 (띵!)
+  if(g.st === 'extract') W.extractT = 0.001 + g.p*0.98;
+  if(g.st === 'steam') W.prog = g.p;
+  if(g.p >= 1) gaStop(true);
+}
+function gaStop(late){
+  const T = TY, W = T.work, g = W.g, st = g.st; g.run = false;
+  const r = late ? 'retry' : gaGrade(g, g.p), temp = Math.round(20 + g.p*60), early = g.p < g.y0;
+  const [bx, by] = st === 'extract' ? [800, 330] : [1190, 150];
+  T.fx.push({type:'badge', k:GA_BADGE[r], x:bx, y:by, t:0, dur:1.4});
+  T.gq[r]++;
+  const msg = st === 'extract'
+    ? {perfect:'완벽한 커피! ✨', good:'잘했어요! ☕', ok:g.p < g.g0 ? '괜찮아요, 조금 연해요 🙂' : '괜찮아요, 조금 진해요 🙂', retry:early ? '앗, 너무 빨라요! 다시 해 볼까요?' : '앗, 너무 늦었어요! 다시 해 볼까요?'}[r]
+    : {perfect:`딱 좋은 온도! ✨ ${temp}℃`, good:`잘했어요! 🥛 ${temp}℃`, ok:g.p < g.g0 ? `괜찮아요, 조금 미지근해요 ${temp}℃` : `괜찮아요, 조금 뜨거워요 ${temp}℃`, retry:early ? '앗, 아직 차가워요! 다시 해요' : '앗 뜨거워! 너무 뜨거워요. 다시 해요'}[r];
+  tyActText(msg);
+  tySay(msg.replace(/[✨☕🙂🥛]/g, '').replace(/(\d+)℃/, '$1도'));
+  if(r === 'retry'){
+    T.gRetry++; g.lock = 0.6; g.res = 'retry'; if(st === 'extract') W.extractT = 0; else W.prog = 0;
+    tone(260, .15, 'sine', .04); T.hintT = 2;
+    if(T.gRetry >= 2 && T.gHelp < 3){ T.gHelp++; T.gRetry = 0; setTimeout(() => { if(TY === T) tyActText('🐢 조금 느리고 넓게 바꿨어요'); }, 1500); }
+    return;
+  }
+  seq(r === 'perfect' ? [784, 988, 1319, 1568] : r === 'good' ? [659, 880, 1047] : [587, 740], 70, 'triangle', .06);
+  if(r === 'perfect') for(let i=0;i<12;i++) T.fx.push({type:'spark', x:bx + rand(-110, 110), y:by + rand(-60, 60), t:-i*0.04, dur:1, col:'#ffd43b'});
+  T.gRetry = 0; if(T.gHelp > 0 && r !== 'ok') T.gHelp--;
+  (W.qm = W.qm || []).push(GA_MULT[r]);
+  W.g = null;
+  if(st === 'extract'){ W.extractT = 1; tySay('커피가 나왔어요!'); }
+  tyStepDone(st);
+}
+function gaDrawTy(x){
+  const T = TY, W = T.work, st = W && W.steps[W.si]; if(!tyGaugeOn(st)) return;
+  const g = W.g || (W.gPrev && W.gPrev.st === st && W.gPrev.help === T.gHelp ? W.gPrev : (W.gPrev = Object.assign(gaNew(st, false), {help:T.gHelp})));
+  const p = g.p, pulse = g.flash > 0 ? 0.5 + Math.sin(T.t*30)*0.5 : 0, inG = p >= g.g0 && p <= g.g1 && g.run;
+  const zones = (tx, v2c, horiz) => {   // 색 구간 칠하기
+    const seg = (a, b, col) => { tx.fillStyle = col; v2c(tx, Math.max(0, a), Math.min(1, b)); };
+    seg(0, 1, '#ff9b9b'); seg(g.y0, g.y1, '#ffe38a'); seg(g.g0, g.g1, inG ? `rgb(${120 + pulse*80},${230},${140 + pulse*60})` : '#69db7c');
+    if(g.pw){ seg(g.p0, g.p1, '#f59f00'); }
+  };
+  x.save();
+  if(st === 'extract'){
+    const gw = 520, gh = gw/5.46, gx = 800 - gw/2, gy = 446, G = GA.extract;
+    x.fillStyle = 'rgba(30,20,10,.55)'; rrOn(x, gx - 16, gy - 70, gw + 32, gh + 84, 26); x.fill();
+    tyOutline(x, g.run ? '✋ 초록에서 멈춰요!' : g.res === 'retry' ? '🔄 다시 눌러 시작해요' : '☕ 눌러서 추출 시작!', gx + 14, gy - 42, 26, '#fff6dc', 'rgba(0,0,0,.5)', 'left');
+    tyOutline(x, `⏱️ ${Math.round(p*36)}초`, gx + gw - 10, gy - 42, 24, '#ffe066', 'rgba(0,0,0,.5)', 'right');
+    gaPaint(x, 'extract', gx, gy, gw, gh, (tx, X, Y, TW, TH) => zones(tx, (c, a, b) => c.fillRect(X + a*TW, Y, (b - a)*TW, TH)));
+    const ax = gx + gw*(G.x0 + p*(G.x1 - G.x0)), ay = gy + gh*G.y0 + 8, aa = gaArt('arrow_down');
+    if(aa.ok){ const h = 58, w = h*aa.img.width/aa.img.height, bob = g.run ? 0 : Math.abs(Math.sin(T.t*4))*6; x.drawImage(aa.img, ax - w/2, ay - h - bob, w, h); }
+  } else {
+    const gh = 300, gw = gh*0.2549, gx = 1200 - gw/2, gy = 190, G = GA.thermo, tube = 0.80;
+    x.fillStyle = 'rgba(30,20,10,.55)'; rrOn(x, gx - 90, gy - 64, gw + 190, gh + 76, 26); x.fill();
+    tyOutline(x, g.run ? '✋ 초록에서 멈춰요!' : '🥛 눌러서 데우기!', gx + gw/2 + 6, gy - 36, 24, '#fff6dc', 'rgba(0,0,0,.5)');
+    gaPaint(x, 'thermo', gx, gy, gw, gh, (tx, X, Y, TW, TH) => {
+      const yv = v => Y + TH*tube*(1 - v);
+      tx.globalAlpha = 0.75; zones(tx, (c, a, b) => c.fillRect(X, yv(b), TW, yv(a) - yv(b))); tx.globalAlpha = 1;
+      tx.fillStyle = '#ffffff'; tx.globalAlpha = 0.35; tx.fillRect(X + TW*0.3, Y, TW*0.4, TH*tube); tx.globalAlpha = 1;
+      const lg = tx.createLinearGradient(0, Y + TH, 0, Y); lg.addColorStop(0, '#e03131'); lg.addColorStop(1, '#ff6b6b');
+      tx.fillStyle = lg; tx.fillRect(X + TW*0.3, yv(p), TW*0.4, Y + TH - yv(p)); tx.fillRect(X, Y + TH*tube, TW, TH*(1 - tube));
+    });
+    const ly = gy + gh*(G.y0 + (G.y1 - G.y0)*tube*(1 - p)), aa = gaArt('arrow_left'), ax = gx + gw*G.x1 + 6;
+    if(aa.ok){ const h = 44, w = h*aa.img.width/aa.img.height, bob = g.run ? 0 : Math.abs(Math.sin(T.t*4))*6; x.drawImage(aa.img, ax + bob, ly - h/2, w, h); }
+    tyOutline(x, `${Math.round(20 + p*60)}℃`, ax + 62, ly + 34, 24, p > g.y1 ? '#ff8787' : '#fff', 'rgba(0,0,0,.6)');
+    const t0 = Math.round(20 + g.g0*60), t1 = Math.round(20 + g.g1*60);
+    x.font = `bold 17px ${FONT}`; x.fillStyle = '#b8ff7a'; x.textAlign = 'right'; x.textBaseline = 'middle';
+    const gy0 = gy + gh*(G.y0 + (G.y1 - G.y0)*tube*(1 - (g.g0 + g.g1)/2)); x.fillText(`${t0}~${t1}℃`, gx - 8, gy0);
+  }
+  x.restore();
+}
+function gaDrawBadge(x, e, u){
+  const a = gaArt(e.k); if(!a.ok) return;
+  const s = (u < 0.15 ? u/0.15*1.25 : u < 0.3 ? 1.25 - (u - 0.15)/0.15*0.25 : 1)*130, al = u > 0.8 ? (1 - u)/0.2 : 1;
+  x.save(); x.globalAlpha = al; x.translate(e.x, e.y - u*20); x.drawImage(a.img, -s/2, -s/2, s, s*a.img.height/a.img.width); x.restore();
+}
+function gaSummary(q){ const n = q.perfect + q.good + q.ok + q.retry; return n ? `✨완벽 ${q.perfect} · 잘했어요 ${q.good} · 괜찮아요 ${q.ok} · 다시 ${q.retry}` : ''; }
 let TY = null, tyRoomKind = 'cafe', tyRecipeDraft = null;
 const tstage = document.createElement('canvas');
 tstage.id = 'tyStage';
@@ -6455,7 +6623,7 @@ function tyData(kind){
   D.deco = Object.assign({owned:[], eq:{}}, D.deco); D.deco.eq = Object.assign({cup:'base', plant:'none', sign:'none', light:'none', music:'auto'}, D.deco.eq);
   return D;
 }
-function tyOpt(){ DEX.tyOpt = Object.assign({relax:!!DEX.tyRelax, jungle:!!DEX.tyJungle, tapOnly:false, pay:false, duo:false, view:'pic'}, DEX.tyOpt); return DEX.tyOpt; }
+function tyOpt(){ DEX.tyOpt = Object.assign({relax:!!DEX.tyRelax, jungle:!!DEX.tyJungle, tapOnly:false, pay:false, duo:false, view:'pic', gauge:'normal'}, DEX.tyOpt); return DEX.tyOpt; }
 function tyOpenLv(kind){ return TEACH.allOpen ? 4 : clamp(tyData(kind).open, 1, 4); }
 function tyDecoItem(kind, cat){ const D = tyData(tyDK(kind)), id = D.deco.eq[cat]; return TY_DECO[cat].items.find(i => i.id === id) || TY_DECO[cat].items[0]; }
 const tyOwned = (D, cat, id) => TY_DECO[cat].items.find(i => i.id === id).price === 0 || D.deco.owned.includes(cat + ':' + id);
@@ -6474,7 +6642,7 @@ function tyMenus(kind, lv){
 function tySteps(m, kind){ if(kind === 'coffee') return cfSteps(m); return kind === 'cafe' ? (TY && TY.motion ? ['greet', 'add', 'blend', 'pour', 'serve'] : ['greet', 'add', 'blend', 'serve']) : ['greet', 'add', ...m.steps, 'serve']; }
 function tyStart(kind, lv){
   const O = tyOpt(), D = tyData(kind);
-  TY = {kind, lv, relax:O.relax, jungle:O.jungle, motion:!O.tapOnly && lv >= 2, pay:O.pay, view:O.view, duo:O.duo, front:lv === 4 ? 2 : 1, total:lv === 4 ? 6 : 5,
+  TY = {gaugeOn:kind === 'coffee' && O.gauge !== 'off', gSpeed:GA_SPEED[O.gauge] || 1, gHelp:0, gRetry:0, gq:{perfect:0, good:0, ok:0, retry:0}, kind, lv, relax:O.relax, jungle:O.jungle, motion:!O.tapOnly && lv >= 2, pay:O.pay, view:O.view, duo:O.duo, front:lv === 4 ? 2 : 1, total:lv === 4 ? 6 : 5,
     t:0, last:performance.now(), lastF:0, custs:[], leavers:[], spawned:0, served:0, next:0.4, work:null, sel:null,
     mistakes:0, hints:0, hintOn:false, payMiss:0, payN:0, payOK:0, tips:0, patSum:0, fx:[], texts:[], idle:0, hintT:0, done:false, endT:0, closing:null,
     lastLook:-1, press:{}, jungleUsed:0, special:D.spDay !== todayKey(), specialSpawned:false, specialDone:false, newRegs:[], pick:null, hold:null, gest:null, t0:Date.now(), banner:null};
@@ -6483,7 +6651,7 @@ function tyStart(kind, lv){
   bgmStop();
   if(soundOn && SET.bgm > 0){ const mu = tyDecoItem(kind, 'music').id; startSongBgm(mu === 'auto' ? pick(kind !== 'kitchen' ? ['minuet', 'canon', 'green'] : ['mac', 'row', 'susanna']) : mu); }
   for(const t of TY_PAL[kind][lv]) tyImg(t);
-  if(kind === 'coffee') ['baby', 'pitcher', 'tamper', 'portafilter', 'bean_roasted', 'bean_gold', ...CF_CUPS].forEach(cfArt);
+  if(kind === 'coffee') ['ui/gauge_extract', 'ui/gauge_thermo', 'ui/arrow_down', 'ui/arrow_left', 'ui/badge_perfect', 'ui/badge_good', 'ui/badge_ok', 'ui/badge_retry', 'baby', 'pitcher', 'tamper', 'portafilter', 'bean_roasted', 'bean_gold', ...CF_CUPS].forEach(cfArt);
   tstage.style.display = 'block'; tyResize();
   if(TY.duo) TY.banner = {text:'👫 두 명이 함께: 🙋 손님 친구 · 👩‍🍳 점원 친구', t:0, dur:3};
   TY.raf = requestAnimationFrame(tyLoop);
@@ -6536,7 +6704,7 @@ function tyNewCust(){
 const tyFront = () => TY.custs.slice(0, TY.front).filter(c => !c.walking && (c.state === 'wait' || c.state === 'pay'));
 function tyTarget(){ const T = TY; if(T.work) return T.work.cust; const F = tyFront().filter(c => c.state === 'wait' && c.ordered); return T.sel && F.includes(T.sel) ? T.sel : F[0] || null; }
 function tyStep(){ const T = TY; if(!T || T.pick || T.done) return null; if(T.work) return T.work.steps[T.work.si]; return tyTarget() ? 'greet' : null; }
-function tyMotion(st){ const T = TY; if(!T.motion || !T.work) return null; if(T.kind === 'coffee') return st === 'grind' ? 'stir' : st === 'tamp' || st === 'steam' ? 'hold' : st === 'art' ? 'trace' : null; if(st === 'blend' || st === 'pour') return 'hold'; if(st === 'cook') return T.work.m.pan ? 'flip' : 'stir'; return null; }
+function tyMotion(st){ const T = TY; if(!T.motion || !T.work) return null; if(tyGaugeOn(st)) return null; if(T.kind === 'coffee') return st === 'grind' ? 'stir' : st === 'tamp' || st === 'steam' ? 'hold' : st === 'art' ? 'trace' : null; if(st === 'blend' || st === 'pour') return 'hold'; if(st === 'cook') return T.work.m.pan ? 'flip' : 'stir'; return null; }
 const tyAllAdded = W => Object.entries(W.m.need).every(([t, n]) => (W.added[t] || 0) >= n);
 function tySay(t){ say(t, 'ko-KR'); }
 function tyText(x, y, text, col, big){ TY.texts = TY.texts.filter(o => Math.abs(o.x - x) > 60 || Math.abs(o.y - y) > 40); TY.texts.push({x, y, text, col:col || '#fff', t:0, dur:big ? 1.6 : 1.3, big}); }
@@ -6554,6 +6722,7 @@ function tyAction(fromKey){
   if(!st){ tyActText('손님을 기다려요 ⏳'); return; }
   T.press.act = 0.15;
   if(st === 'greet'){ tyGreet(tyTarget()); return; }
+  if(tyGaugeOn(st)){ gaTap(); return; }
   const W = T.work, c = W.cust;
   if(st === 'cup'){ tyActText('알맞은 잔을 눌러요 👇'); T.hintT = 3; tone(330, .08, 'sine', .03); return; }
   if(st === 'extract'){ cfStartExtract(); return; }
@@ -6649,7 +6818,7 @@ function tyServe(c){
   const T = TY, W = T.work, G = TY_GEO[T.kind]; if(!W || W.cust !== c) return;
   const [sx, sy] = T.kind === 'kitchen' ? G.plate : G.cup;
   T.fx.push({type:'fly', emoji:T.kind === 'cafe' ? '🥤' : T.kind === 'coffee' ? '☕' : W.m.icon, col:W.m.col, x0:sx, y0:sy - 60, x1:c.x, y1:G.occ - 90, t:0, dur:0.45, size:90});
-  T.work = null; T.sel = null; T.idle = 0; c.served = true;
+  c.qm = W.qm; T.work = null; T.sel = null; T.idle = 0; c.served = true;
   if(T.pay){ c.state = 'pay'; setTimeout(() => { if(TY === T) tyPayOpen(c); }, 500); tone(700, .08, 'triangle', .05); return; }
   tyServeEnd(c);
 }
@@ -6659,13 +6828,14 @@ function tyServeEnd(c){
   if(c.special){ tip += 20; T.specialDone = true; D.spDay = todayKey(); D.badges = (D.badges || 0) + 1; }
   if(c.custom) tip += 3;
   if(c.gold) tip += 30;
+  const q = c.qm && c.qm.length ? c.qm.reduce((a, b) => a + b, 0)/c.qm.length : 1; tip = Math.round(tip*q);
   T.tips += tip; T.patSum += T.relax ? 1 : c.pat; T.served++;
   if(L.id && !c.special){ const n0 = D.reg[L.id] || 0; D.reg[L.id] = n0 + 1; if(n0 + 1 === 3) T.newRegs.push(L); }
   if(c.fav && L.id) D.favSeen[L.id] = true;
   for(let i=0;i<8;i++) T.fx.push({type:'heart', x:c.x + rand(-60, 60), y:G.occ - rand(120, 220), vx:rand(-40, 40), vy:rand(-120, -60), t:0, dur:1.2});
   const f = tyFit();
   for(let i=0;i<Math.min(8, 2 + Math.floor(tip/4));i++) T.fx.push({type:'coin', x0:c.x + rand(-40, 40), y0:G.occ - 150, x1:(f.w - 150 - f.ox)/f.k, y1:(34 - f.oy)/f.k, t:-i*0.06, dur:0.7});
-  tyText(c.x, G.occ - 40, `${c.special ? '👑 ' : ''}고마워요! 💖 🪙+${tip}`, '#fff3a0', true);
+  tyText(c.x, G.occ - 40, `${c.special ? '👑 ' : ''}${q >= 1.4 ? '완벽해요! 💖💖' : q < 0.9 ? '조금 아쉽지만 고마워요 🙂' : '고마워요! 💖'} 🪙+${tip}`, '#fff3a0', true);
   tySay(L.thanks || '감사합니다!');
   tyReactFx(c);
   vibe(25);
@@ -6762,7 +6932,8 @@ function tyUpdate(dt){
     if(W.autoT > 0){ W.autoT -= dt; if(W.autoT <= 0) tyAdvance(); }
     if(!T.motion && W.pourT > 0 && W.pourT < 1) W.pourT = Math.min(1, W.pourT + dt/0.9);
     if(W.moveT > 0 && W.moveT < 1) W.moveT = Math.min(1, W.moveT + dt/0.45);
-    if(W.extractT > 0 && W.extractT < 1){ W.extractT = Math.min(1, W.extractT + dt/2.6); T.idle = 0; if(W.extractT >= 1){ tySay('커피가 나왔어요!'); tyStepDone('extract'); } }
+    gaUpdate(dt);
+    if(W.extractT > 0 && W.extractT < 1 && !T.gaugeOn){ W.extractT = Math.min(1, W.extractT + dt/2.6); T.idle = 0; if(W.extractT >= 1){ tySay('커피가 나왔어요!'); tyStepDone('extract'); } }
     const st = W.steps[W.si];
     if(T.hold && tyMotion(st) === 'hold'){ tyProg(dt/(st === 'blend' ? 1.3 : 1.0)); T.holdSnd = (T.holdSnd || 0) + dt; if(T.holdSnd > 0.22){ T.holdSnd = 0; tone(st === 'blend' ? 160 + W.prog*300 : 500 + W.prog*500, .12, st === 'blend' ? 'sawtooth' : 'sine', .03); } }
     if(W.cust && W.cust.hidden && !W.cust.revealed && st === 'add' && T.idle > 8) W.cust.revealed = true;   // 오래 고민하면 그림을 보여 줘요
@@ -6789,7 +6960,7 @@ function tyFinish(){
   else if(T.kind === 'cafe'){ const before = vit(); DEX.vit = Math.min(20, (DEX.vit || 0) + (stars === 3 ? 2 : 1)); R.vit = vit() - before; if(!R.vit){ R.vitMax = true; R.coins += 10; } }
   else { for(let i=0;i<(stars === 3 ? 2 : 1);i++){ const k = pick(['giant', 'magnet', 'heart', 'power', 'fairy', 'float', 'glow']); DEX.items[k] = (DEX.items[k] || 0) + 1; R.gifts.push(k); } }
   DEX.coins += R.coins;
-  D.log.push({d:Date.now(), lv:T.lv, stars, served:T.served, miss:T.mistakes, hints:T.hints, pay:T.pay ? `${T.payOK}/${T.payN}` : '', sec:Math.round((Date.now() - T.t0)/1000), relax:T.relax, view:T.view, motion:T.motion, duo:T.duo, sp:T.specialDone});
+  D.log.push({d:Date.now(), lv:T.lv, stars, served:T.served, miss:T.mistakes, hints:T.hints, pay:T.pay ? `${T.payOK}/${T.payN}` : '', sec:Math.round((Date.now() - T.t0)/1000), relax:T.relax, view:T.view, motion:T.motion, duo:T.duo, sp:T.specialDone, tm:T.gaugeOn ? gaSummary(T.gq) : ''});
   if(D.log.length > 60) D.log.splice(0, D.log.length - 60);
   gainXP(50 + stars*20); saveDex();
   const nd = tyNextDeco(tyDK(T.kind)); R.nextDeco = nd ? {name:TY_DECO[nd.cat].title.split(' ')[0] + ' ' + nd.name, need:Math.max(0, nd.price - DEX.coins)} : null;
@@ -7008,7 +7179,9 @@ function tyActInfo(){   // 큰 버튼 글자 · 색
   if(st === 'cup') lab = '🥤 잔을 골라요';
   if(st === 'extract'){ if(W.extractT > 0){ lab = '⏳ 기다려요…'; col = '#a1887f'; } else lab = '☕ 추출 버튼'; }
   if(mo === 'flip') lab = '🍳 위로 밀어 뒤집기';
-  const active = st && st !== 'add' && st !== 'cup' && !(st === 'extract' && W.extractT > 0) && !(st === 'serve' && T.kind === 'cafe' && !T.motion && W.pourT < 1) && !(st === 'serve' && T.lv === 4);
+  const gOn = tyGaugeOn(st), gRun = gOn && W.g && W.g.run;
+  if(gOn){ lab = gRun ? '✋ 멈춰요!' : st === 'extract' ? '☕ 추출 시작' : '🥛 데우기 시작'; col = gRun ? (W.g.p >= W.g.g0 && W.g.p <= W.g.g1 ? '#2f9e44' : '#e8590c') : TY_STEP[st].col; }
+  const active = st && st !== 'add' && st !== 'cup' && !(st === 'extract' && W.extractT > 0 && !gOn) && !(st === 'serve' && T.kind === 'cafe' && !T.motion && W.pourT < 1) && !(st === 'serve' && T.lv === 4);
   return {st, lab, col, active, mo};
 }
 function tyDrawUI(x){
@@ -7175,11 +7348,13 @@ function tyDraw(){
     else if(e.type === 'heart'){ x.globalAlpha = 1 - u; x.font = '34px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText('💖', e.x, e.y); x.globalAlpha = 1; }
     else if(e.type === 'note'){ x.globalAlpha = 1 - u; x.font = '40px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText(e.e, e.x + Math.sin(e.t*8)*10, e.y); x.globalAlpha = 1; }
     else if(e.type === 'drop'){ x.globalAlpha = 1 - u*0.6; x.fillStyle = '#74c0fc'; x.beginPath(); x.ellipse(e.x, e.y, 6, 9, 0, 0, 6.29); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.arc(e.x - 2, e.y - 3, 2, 0, 6.29); x.fill(); x.globalAlpha = 1; }
+    else if(e.type === 'badge') gaDrawBadge(x, e, u);
     else if(e.type === 'spark'){ const a = Math.sin(u*Math.PI), s = 14*a; x.fillStyle = e.col; x.globalAlpha = a; x.beginPath(); x.moveTo(e.x, e.y - s); x.lineTo(e.x + s*0.3, e.y); x.lineTo(e.x, e.y + s); x.lineTo(e.x - s*0.3, e.y); x.fill(); x.globalAlpha = 1; }
     else if(e.type === 'coin'){ const px = e.x0 + (e.x1 - e.x0)*u, py = e.y0 + (e.y1 - e.y0)*u - Math.sin(u*Math.PI)*120; x.fillStyle = '#ffd43b'; x.beginPath(); x.arc(px, py, 16, 0, 6.29); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 3; x.stroke(); x.fillStyle = '#fff3bf'; x.beginPath(); x.arc(px - 5, py - 5, 5, 0, 6.29); x.fill(); }
   }
   for(const e of T.texts){ const u = e.t/e.dur, a = Math.min(1, (1 - u)*3); x.globalAlpha = a; tyOutline(x, e.text, e.x, e.y - u*50, e.big ? 36 : 28, e.col, 'rgba(40,24,8,.85)'); x.globalAlpha = 1; }
   cfDrawZoom(x);
+  gaDrawTy(x);
   tyDrawPick(x);
   if(T.banner){ const b = T.banner, a = Math.min(1, b.t*4, (b.dur - b.t)*3); x.globalAlpha = a; x.fillStyle = 'rgba(30,20,10,.75)'; x.font = `bold 34px ${FONT}`; const bw = x.measureText(b.text).width + 60; rrOn(x, TY_W/2 - bw/2, 408, bw, 64, 32); x.fill(); tyOutline(x, b.text, TY_W/2, 441, 34, '#fff6dc', 'rgba(0,0,0,.4)'); x.globalAlpha = 1; }
   if(T.closing) tyDrawClosing(x, f);
@@ -7224,6 +7399,7 @@ tstage.addEventListener('pointerdown', e => {
     if(A.mo && !(T.idle > 12)){ tyGestStart(e, A.mo, ax + aw/2, ay + ah/2, p); if(A.mo !== 'hold') tyActText(A.mo === 'stir' ? '동그랗게 돌려요 🔄' : '위로 쓱 밀어요 ⬆️'); return; }
     tyAction(); return;
   }
+  if(tyGaugeOn(st) && ((st === 'extract' && ix > 520 && ix < 1080 && iy > 370 && iy < 545) || (st === 'steam' && ix > 1100 && ix < 1340 && iy > 120 && iy < 510))){ tyAction(); return; }
   if(st === 'art' && Math.hypot(ix - CF_ZOOM[0], iy - CF_ZOOM[1]) < CF_ZOOM[2] + 40){ if(A.mo === 'trace'){ tyGestStart(e, 'trace', 0, 0, p); cfArtHit(T.work, ix, iy); } else tyAction(); return; }
   for(const t of tyPal()){ const [bx, by, br] = tyBtnXY(t); if(Math.hypot(ix - bx, iy - by) < br + 12){ tyAddIng(t); return; } }
   for(const c of T.custs.slice(0, T.front)){   // 손님 · 말풍선 누르기
@@ -7277,6 +7453,7 @@ function tyPanelHTML(kind0){
     <div class="tybtns"><button data-tygo="tyDeco">🛍️ 가게 꾸미기</button><button data-tygo="tyBook">📖 단골 도감 <small>${regN}/7</small></button>${kind === 'coffee' ? '<button data-tygo="tyBean">🫘 원두 공방</button>' : `<button data-tygo="tyRecipe">🧪 나만의 레시피 <small>${D.custom.length}/6</small></button>`}</div>
     <details class="tyset" id="tySet" ${tySetOpen ? 'open' : ''}><summary>⚙️ 영업 방법 고르기</summary>
       <div class="setrow"><span>주문 보기</span>${seg('view', [['pic', '🖼️ 그림'], ['sound', '🔊 소리만'], ['text', '🔤 글자만']])}</div>
+      ${kind === 'coffee' ? `<div class="setrow"><span>🎯 타이밍 게이지</span>${seg('gauge', [['off', '끄기'], ['slow', '🐢 느리게'], ['normal', '보통'], ['fast', '🐇 빠르게']])}</div>` : ''}
       <label class="tyopt"><input type="checkbox" data-tyo="relax" ${O.relax ? 'checked' : ''}> ⏳ 느긋하게 하기 (기다림 시간 표시 없음)</label>
       <label class="tyopt"><input type="checkbox" data-tyo="pay" ${O.pay ? 'checked' : ''}> 🪙 계산하기 (1단계 돈 세기 · 2~3단계 거스름돈)</label>
       <label class="tyopt"><input type="checkbox" data-tyo="tapOnly" ${O.tapOnly ? 'checked' : ''}> 👆 누르기만 하기 (2단계부터 나오는 꾹 누르기·돌리기·밀기 끄기)</label>
@@ -7305,6 +7482,7 @@ function tyResultHTML(){
     ${R.baby ? '<p class="rec">👶 아기 손님에게 커피 대신 우유를 드렸어요! 멋져요</p>' : ''}
     ${R.special ? '<p class="rec">👑 특별 손님 고릴라 대장을 대접했어요! 배지 +1</p>' : ''}
     ${R.newRegs.length ? `<p class="rec">💖 새 단골: ${R.newRegs.join(', ')}</p>` : ''}
+    ${T.gaugeOn && gaSummary(T.gq) ? `<p>🎯 타이밍: ${gaSummary(T.gq)}</p>` : ''}
     ${R.payN ? `<p>🪙 계산 ${R.payN}번 중 ${R.payOK}번 한 번에 맞혔어요</p>` : ''}
     ${R.nextDeco ? `<p class="keys">🛍️ ${R.nextDeco.need ? `다음 꾸미기(${R.nextDeco.name})까지 🪙 ${R.nextDeco.need}` : `새 꾸미기(${R.nextDeco.name})를 살 수 있어요!`}</p>` : ''}
     ${R.unlocked ? `<p class="rec">🔓 ${R.unlocked}단계가 열렸어요!</p>` : ''}
@@ -7355,10 +7533,10 @@ function tyLogHTML(){
     const d = p.id === PROF.cur ? DEX : profData(p.id), T = d.ty || {};
     return ['cafe', 'coffee', 'kitchen'].map(k => { const L = (T[k] && T[k].log) || []; if(!L.length) return '';
       const last = L.slice(-6).reverse();
-      return last.map((r, i) => `<tr><td>${i ? '' : faceHTML(p) + ' ' + escapeHTML(p.name)}</td><td>${i ? '' : nm[k]}</td><td>${new Date(r.d).toLocaleDateString('ko-KR')}</td><td>${r.lv}단계${r.duo ? ' 👫' : ''}</td><td>${'★'.repeat(r.stars)}</td><td>${r.miss}</td><td>${r.hints}</td><td>${r.pay || '-'}</td><td>${Math.floor(r.sec/60)}분 ${r.sec % 60}초</td><td>${{pic:'그림', sound:'소리', text:'글자'}[r.view] || '그림'}${r.motion ? '·동작' : ''}${r.relax ? '·느긋' : ''}</td></tr>`).join(''); }).join('');
+      return last.map((r, i) => `<tr><td>${i ? '' : faceHTML(p) + ' ' + escapeHTML(p.name)}</td><td>${i ? '' : nm[k]}</td><td>${new Date(r.d).toLocaleDateString('ko-KR')}</td><td>${r.lv}단계${r.duo ? ' 👫' : ''}</td><td>${'★'.repeat(r.stars)}</td><td>${r.miss}</td><td>${r.hints}</td><td>${r.pay || '-'}</td><td class="tm">${r.tm || '-'}</td><td>${Math.floor(r.sec/60)}분 ${r.sec % 60}초</td><td>${{pic:'그림', sound:'소리', text:'글자'}[r.view] || '그림'}${r.motion ? '·동작' : ''}${r.relax ? '·느긋' : ''}</td></tr>`).join(''); }).join('');
   }).join('');
-  return `<h2>☕🍳 체험실 영업 기록</h2><p class="keys">학생마다 최근 영업 6번 · 다시 본 = 틀린 재료·손님을 고른 횟수 · 도움 = 👇 도움 손가락이 나온 횟수 · 계산 = 한 번에 맞힌 수/전체</p>
-    <div class="tscroll"><table class="rank tt"><tr><th>학생</th><th>체험실</th><th>날짜</th><th>단계</th><th>별</th><th>다시 본</th><th>도움</th><th>계산</th><th>걸린 시간</th><th>방법</th></tr>${rows || '<tr><td colspan="10">아직 기록이 없어요</td></tr>'}</table></div>
+  return `<h2>☕🍳 체험실 영업 기록</h2><p class="keys">학생마다 최근 영업 6번 · 다시 본 = 틀린 재료·손님을 고른 횟수 · 도움 = 👇 도움 손가락이 나온 횟수 · 계산 = 한 번에 맞힌 수/전체 · 타이밍 = ☕ 커피 게이지에서 멈춘 결과 (완벽·잘했어요·괜찮아요·다시)</p>
+    <div class="tscroll"><table class="rank tt"><tr><th>학생</th><th>체험실</th><th>날짜</th><th>단계</th><th>별</th><th>다시 본</th><th>도움</th><th>계산</th><th>타이밍</th><th>걸린 시간</th><th>방법</th></tr>${rows || '<tr><td colspan="11">아직 기록이 없어요</td></tr>'}</table></div>
     <button class="go" id="goBtn">선생님 화면으로</button>`;
 }
 function wireTyScreen(type){
