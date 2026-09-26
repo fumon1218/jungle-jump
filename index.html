@@ -143,6 +143,10 @@
   .grade{font-size:clamp(60px,12vw,90px)!important;margin:.05em 0} .grade.gS{color:#ffe07a} .grade.gA{color:#8ff7ff} .grade.gB{color:#b8ff7a} .grade.gC{color:#cfcfcf}
   #xClose{position:absolute;top:10px;right:10px;z-index:3;width:48px;height:48px;border-radius:50%;border:3px solid #fff6dc;background:#c0392b;color:#fff;font-size:24px;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.35)}
   #xClose:hover{background:#e04b3a}
+  img.face{width:1.25em;height:1.25em;border-radius:50%;object-fit:cover;vertical-align:-0.25em;border:2px solid rgba(255,224,122,.8)}
+  .prof span img.face{width:1.6em;height:1.6em}
+  .avnow{width:110px;height:110px;margin:.3em auto;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff8d6,#f5c860);border:5px solid #e9b949;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:64px}
+  .avnow img{width:100%;height:100%;object-fit:cover}
   .iconpick.big .ip{font-size:40px;width:68px;height:68px}
   .vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(130px,22vw,190px),1fr));gap:12px;margin:.6em 0}
   .vcard{font-family:var(--font);border:0;border-radius:20px;padding:12px 8px;cursor:pointer;background:var(--c);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.3)}
@@ -2406,289 +2410,6 @@ function iconCoin(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); co
 function iconBag(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -12, 7, Math.PI, 0); ctx.stroke();
   const g = ctx.createLinearGradient(0, -14, 0, 20); g.addColorStop(0, '#ff6b6b'); g.addColorStop(1, '#c62828'); ctx.fillStyle = g; rr(-16, -14, 32, 34, 9); ctx.fill();
   ctx.fillStyle = '#e53935'; rr(-16, -14, 32, 13, 7); ctx.fill(); ctx.fillStyle = '#ffcdd2'; rr(-9, 4, 18, 11, 4); ctx.fill(); ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(0, -1, 2.5, 0, 6.29); ctx.fill(); ctx.restore(); }
-function lbLiveInfo(){   // 그림 위 정보판을 실제 상태로 다시 그리기
-  const L = S.lobby, pr = curProf(), lv = townLevel(), m = dm(), found = DEX.counts.filter(c => c > 0).length;
-  ctx.save(); ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  // ── 탐험가 판 (얼굴을 누르면 바꿀 수 있어요)
-  goldPanel(58, 22, 416, 102, 51);
-  ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'left'; ctx.fillText(pr.name, 146, 50, 300);
-  ctx.fillStyle = '#140b04'; rr(144, 70, 302, 24, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,220,140,.35)'; ctx.lineWidth = 2; ctx.stroke();
-  if(lv.f > 0.02){ const xg = ctx.createLinearGradient(146, 0, 444, 0); xg.addColorStop(0, '#9bf05a'); xg.addColorStop(1, '#f2ea3c'); ctx.fillStyle = xg; rr(146, 72, Math.max(20, 298*clamp(lv.f, 0, 1)), 20, 10); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; rr(150, 74, Math.max(12, 290*clamp(lv.f, 0, 1)), 6, 3); ctx.fill(); }
-  ctx.font = `bold 20px ${FONT}`; ctx.fillStyle = '#ffe07a'; ctx.textAlign = 'right'; ctx.fillText(`${lv.xp.toLocaleString()} / ${lv.need.toLocaleString()} XP`, 444, 108);
-  const ah = L.ui.avHover ? 1.05 : 1;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(77, 76, 60, 0, 6.29); ctx.fill();
-  const ag = ctx.createRadialGradient(64, 52, 6, 75, 72, 58); ag.addColorStop(0, '#fff8d6'); ag.addColorStop(1, '#f5c860'); ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(75, 72, 57*ah, 0, 6.29); ctx.fill();
-  const rg = ctx.createLinearGradient(0, 14, 0, 130); rg.addColorStop(0, '#ffe8a0'); rg.addColorStop(1, '#b8801f'); ctx.strokeStyle = rg; ctx.lineWidth = 7; ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.font = `${62*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 75, 66);
-  goldPanel(36, 98, 80, 30, 15); ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(`Lv.${lv.lv}`, 76, 114);
-  ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(124, 32, 14, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#8a5a14'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = '#6b3a0a'; ctx.fillText('✎', 124, 33);
-  // ── 오른쪽 위: 지금 내 상태 (바뀌면 톡 튀어요)
-  const st = {vit:vit(), life:START_LIVES + (DEX.bonusLives || 0), bonus:DEX.bonusLives || 0, coin:DEX.coins, bag:bagCount()};
-  L.pop = L.pop || {}; L.prev = L.prev || st;
-  for(const k in st){ if(st[k] !== L.prev[k]){ L.pop[k] = 1; if(st[k] > L.prev[k]) for(let i=0;i<6;i++) L.sparks.push({x:{vit:1170, life:1300, bonus:1300, coin:1440, bag:1590}[k], y:54, vx:rand(-3,3), vy:rand(-4,-1), life:1}); } L.pop[k] = Math.max(0, (L.pop[k] || 0) - 0.06); }
-  L.prev = st;
-  const pp = k => 1 + Math.sin((L.pop[k] || 0)*Math.PI)*0.18;
-  // 활력 (아래 작은 칸에 막대)
-  goldPanel(1140, 58, 106, 46, 14); ctx.fillStyle = '#140b04'; rr(1152, 82, 82, 12, 6); ctx.fill();
-  if(st.vit){ const vg = ctx.createLinearGradient(1152, 0, 1234, 0); vg.addColorStop(0, '#ffe066'); vg.addColorStop(1, '#ff9f1c'); ctx.fillStyle = vg; rr(1152, 82, Math.max(12, 82*st.vit/20), 12, 6); ctx.fill(); }
-  goldPanel(1098, 22, 148, 62, 31); iconBolt(1132, 53, 1.05*pp('vit'));
-  ctx.font = `bold ${27*pp('vit')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'center'; ctx.fillText(`${st.vit}/20`, 1196, 54);
-  // 생명 (다음 판 시작 생명)
-  goldPanel(1252, 24, 114, 60, 30); iconHeart(1284, 54, 1.05*pp('life'));
-  ctx.font = `bold ${28*pp('life')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.life), st.bonus ? 1324 : 1330, 55);
-  if(st.bonus){ ctx.font = `bold 16px ${FONT}`; ctx.fillStyle = '#9bf05a'; ctx.fillText(`+${st.bonus}`, 1350, 40); }
-  // 코인
-  goldPanel(1372, 24, 148, 60, 30); iconCoin(1404, 54, 1.05*pp('coin'));
-  ctx.font = `bold ${(st.coin >= 10000 ? 23 : 27)*pp('coin')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(st.coin.toLocaleString(), 1467, 55);
-  // 가방 아이템
-  goldPanel(1526, 24, 128, 60, 30); iconBag(1560, 54, 1.05*pp('bag'));
-  ctx.font = `bold ${27*pp('bag')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.bag), 1612, 55);
-  for(const sp of L.sparks){ sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.2; sp.life -= 0.03; ctx.globalAlpha = Math.max(0, sp.life); ctx.fillStyle = '#fff59d'; ctx.beginPath(); ctx.arc(sp.x, sp.y, 3, 0, 6.29); ctx.fill(); }
-  ctx.globalAlpha = 1; L.sparks = L.sparks.filter(sp => sp.life > 0);
-  // 강릉분원 완성 n / 11
-  lbCover(822, 30, 100, 40, '#1c4470', 8); ctx.font = `bold 30px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'right'; ctx.fillText(`${found} / ${GOAL}`, 915, 50);
-  lbCover(655, 72, 265, 26, '#1c4470', 12); ctx.fillStyle = '#0f2a44'; rr(660, 75, 255, 20, 10); ctx.fill();
-  if(found){ const qg = ctx.createLinearGradient(660, 0, 915, 0); qg.addColorStop(0, '#fff17a'); qg.addColorStop(1, '#ffc107'); ctx.fillStyle = qg; rr(660, 75, Math.max(20, 255*found/GOAL), 20, 10); ctx.fill(); }
-  // 마스코트 말풍선
-  const tips = mascotTips(), tip = tips[L.tipI % tips.length];
-  lbCover(138, 634, 176, 58, '#fcf9ee', 12);
-  ctx.font = `bold 19px ${FONT}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center';
-  const words = tip.split(' '); let l1 = '', l2 = ''; for(const w2 of words){ if(!l2 && ctx.measureText(l1 + ' ' + w2).width < 168) l1 = (l1 ? l1 + ' ' : '') + w2; else l2 = (l2 ? l2 + ' ' : '') + w2; }
-  if(ctx.measureText(l2).width > 170){ ctx.font = `bold 16px ${FONT}`; }
-  ctx.fillText(l1, 226, l2 ? 650 : 663); if(l2) ctx.fillText(l2, 226, 676, 172);
-  if(L.hop){ ctx.fillStyle = `rgba(255,240,150,${L.hop*0.6})`; ctx.beginPath(); ctx.arc(115, 740, 70*(1.2 - L.hop*0.2), 0, 6.29); ctx.fill(); }
-  // 오늘의 탐험 (체크 · 진행 · 보상)
-  DAILY_MISSIONS.forEach((ms, i) => {
-    const ry = [742, 781, 820, 858][i], v = Math.min(ms.n, Math.floor(m[ms.k] || 0)), ok = !!m.got[ms.k];
-    lbCover(1236, ry - 14, 30, 28, '#fcfaf1', 4);
-    ctx.strokeStyle = '#6d7c5b'; ctx.lineWidth = 2.5; ctx.fillStyle = ok ? '#43a047' : '#eef3e6'; rr(1240, ry - 11, 22, 22, 4); ctx.fill(); ctx.stroke();
-    if(ok){ ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1245, ry); ctx.lineTo(1250, ry + 6); ctx.lineTo(1258, ry - 6); ctx.stroke(); }
-    lbCover(1452, ry - 15, 96, 30, '#fcfaf1', 14); ctx.fillStyle = ok ? '#c8e6c9' : '#ebe8dd'; rr(1455, ry - 13, 90, 26, 13); ctx.fill();
-    ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = ok ? '#2e7d32' : '#4a4a4a'; ctx.textAlign = 'center'; ctx.fillText(`${v}/${ms.n}`, 1500, ry + 1);
-    lbCover(1550, ry - 17, 92, 34, '#fcfaf1', 8); ctx.font = '24px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText('🪙', 1568, ry + 1); ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = ok ? '#9e9e9e' : '#3a2412'; ctx.textAlign = 'left'; ctx.fillText(`+${DM_REWARD}`, 1584, ry + 1);
-  });
-  const allDone = DAILY_MISSIONS.every(ms => m.got[ms.k]);
-  L.ui.gift = [1570, 650, 1648, 728];
-  if(allDone && !m.gift){ const pul = 0.5 + Math.sin(S.time*0.15)*0.5; ctx.strokeStyle = `rgba(255,230,90,${0.5 + pul*0.5})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(1608, 689, 40 + pul*6, 0, 6.29); ctx.stroke(); }
-  if(m.gift){ ctx.fillStyle = 'rgba(46,125,50,.85)'; ctx.beginPath(); ctx.arc(1628, 710, 16, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1620, 710); ctx.lineTo(1626, 716); ctx.lineTo(1636, 704); ctx.stroke(); }
-  ctx.restore();
-}
-function iconHeart(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); const g = ctx.createRadialGradient(-6, -8, 2, 0, 0, 22); g.addColorStop(0, '#ff8a9a'); g.addColorStop(1, '#d81b3c'); ctx.fillStyle = g;
-  ctx.beginPath(); ctx.moveTo(0, 18); ctx.bezierCurveTo(-26, 2, -20, -22, 0, -10); ctx.bezierCurveTo(20, -22, 26, 2, 0, 18); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(-8, -8, 5, 3, -0.6, 0, 6.29); ctx.fill(); ctx.restore(); }
-function iconCoin(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); const g = ctx.createRadialGradient(-5, -6, 2, 0, 0, 20); g.addColorStop(0, '#fff3b0'); g.addColorStop(0.6, '#ffc107'); g.addColorStop(1, '#c88400'); ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(0, 0, 18, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#a86a00'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#e8a200'; ctx.beginPath(); for(let i=0;i<5;i++){ const a = i*1.2566 - 1.57; ctx.lineTo(Math.cos(a)*9, Math.sin(a)*9); ctx.lineTo(Math.cos(a + 0.628)*4, Math.sin(a + 0.628)*4); } ctx.closePath(); ctx.fill(); ctx.restore(); }
-function iconBag(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -12, 7, Math.PI, 0); ctx.stroke();
-  const g = ctx.createLinearGradient(0, -14, 0, 20); g.addColorStop(0, '#ff6b6b'); g.addColorStop(1, '#c62828'); ctx.fillStyle = g; rr(-16, -14, 32, 34, 9); ctx.fill();
-  ctx.fillStyle = '#e53935'; rr(-16, -14, 32, 13, 7); ctx.fill(); ctx.fillStyle = '#ffcdd2'; rr(-9, 4, 18, 11, 4); ctx.fill(); ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(0, -1, 2.5, 0, 6.29); ctx.fill(); ctx.restore(); }
-function lbLiveInfo(){   // 그림 위 정보판을 실제 상태로 다시 그리기
-  const L = S.lobby, pr = curProf(), lv = townLevel(), m = dm(), found = DEX.counts.filter(c => c > 0).length;
-  ctx.save(); ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  // ── 탐험가 판 (얼굴을 누르면 바꿀 수 있어요)
-  goldPanel(58, 22, 416, 102, 51);
-  ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'left'; ctx.fillText(pr.name, 146, 50, 300);
-  ctx.fillStyle = '#140b04'; rr(144, 70, 302, 24, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,220,140,.35)'; ctx.lineWidth = 2; ctx.stroke();
-  if(lv.f > 0.02){ const xg = ctx.createLinearGradient(146, 0, 444, 0); xg.addColorStop(0, '#9bf05a'); xg.addColorStop(1, '#f2ea3c'); ctx.fillStyle = xg; rr(146, 72, Math.max(20, 298*clamp(lv.f, 0, 1)), 20, 10); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; rr(150, 74, Math.max(12, 290*clamp(lv.f, 0, 1)), 6, 3); ctx.fill(); }
-  ctx.font = `bold 20px ${FONT}`; ctx.fillStyle = '#ffe07a'; ctx.textAlign = 'right'; ctx.fillText(`${lv.xp.toLocaleString()} / ${lv.need.toLocaleString()} XP`, 444, 108);
-  const ah = L.ui.avHover ? 1.05 : 1;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(77, 76, 60, 0, 6.29); ctx.fill();
-  const ag = ctx.createRadialGradient(64, 52, 6, 75, 72, 58); ag.addColorStop(0, '#fff8d6'); ag.addColorStop(1, '#f5c860'); ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(75, 72, 57*ah, 0, 6.29); ctx.fill();
-  const rg = ctx.createLinearGradient(0, 14, 0, 130); rg.addColorStop(0, '#ffe8a0'); rg.addColorStop(1, '#b8801f'); ctx.strokeStyle = rg; ctx.lineWidth = 7; ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.font = `${62*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 75, 66);
-  goldPanel(36, 98, 80, 30, 15); ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(`Lv.${lv.lv}`, 76, 114);
-  ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(124, 32, 14, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#8a5a14'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = '#6b3a0a'; ctx.fillText('✎', 124, 33);
-  // ── 오른쪽 위: 지금 내 상태 (바뀌면 톡 튀어요)
-  const st = {vit:vit(), life:START_LIVES + (DEX.bonusLives || 0), bonus:DEX.bonusLives || 0, coin:DEX.coins, bag:bagCount()};
-  L.pop = L.pop || {}; L.prev = L.prev || st;
-  for(const k in st){ if(st[k] !== L.prev[k]){ L.pop[k] = 1; if(st[k] > L.prev[k]) for(let i=0;i<6;i++) L.sparks.push({x:{vit:1170, life:1300, bonus:1300, coin:1440, bag:1590}[k], y:54, vx:rand(-3,3), vy:rand(-4,-1), life:1}); } L.pop[k] = Math.max(0, (L.pop[k] || 0) - 0.06); }
-  L.prev = st;
-  const pp = k => 1 + Math.sin((L.pop[k] || 0)*Math.PI)*0.18;
-  // 활력 (아래 작은 칸에 막대)
-  goldPanel(1140, 58, 106, 46, 14); ctx.fillStyle = '#140b04'; rr(1152, 82, 82, 12, 6); ctx.fill();
-  if(st.vit){ const vg = ctx.createLinearGradient(1152, 0, 1234, 0); vg.addColorStop(0, '#ffe066'); vg.addColorStop(1, '#ff9f1c'); ctx.fillStyle = vg; rr(1152, 82, Math.max(12, 82*st.vit/20), 12, 6); ctx.fill(); }
-  goldPanel(1098, 22, 148, 62, 31); iconBolt(1132, 53, 1.05*pp('vit'));
-  ctx.font = `bold ${27*pp('vit')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'center'; ctx.fillText(`${st.vit}/20`, 1196, 54);
-  // 생명 (다음 판 시작 생명)
-  goldPanel(1252, 24, 114, 60, 30); iconHeart(1284, 54, 1.05*pp('life'));
-  ctx.font = `bold ${28*pp('life')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.life), st.bonus ? 1324 : 1330, 55);
-  if(st.bonus){ ctx.font = `bold 16px ${FONT}`; ctx.fillStyle = '#9bf05a'; ctx.fillText(`+${st.bonus}`, 1350, 40); }
-  // 코인
-  goldPanel(1372, 24, 148, 60, 30); iconCoin(1404, 54, 1.05*pp('coin'));
-  ctx.font = `bold ${(st.coin >= 10000 ? 23 : 27)*pp('coin')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(st.coin.toLocaleString(), 1467, 55);
-  // 가방 아이템
-  goldPanel(1526, 24, 128, 60, 30); iconBag(1560, 54, 1.05*pp('bag'));
-  ctx.font = `bold ${27*pp('bag')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.bag), 1612, 55);
-  for(const sp of L.sparks){ sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.2; sp.life -= 0.03; ctx.globalAlpha = Math.max(0, sp.life); ctx.fillStyle = '#fff59d'; ctx.beginPath(); ctx.arc(sp.x, sp.y, 3, 0, 6.29); ctx.fill(); }
-  ctx.globalAlpha = 1; L.sparks = L.sparks.filter(sp => sp.life > 0);
-  // 강릉분원 완성 n / 11
-  lbCover(822, 30, 100, 40, '#1c4470', 8); ctx.font = `bold 30px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'right'; ctx.fillText(`${found} / ${GOAL}`, 915, 50);
-  lbCover(655, 72, 265, 26, '#1c4470', 12); ctx.fillStyle = '#0f2a44'; rr(660, 75, 255, 20, 10); ctx.fill();
-  if(found){ const qg = ctx.createLinearGradient(660, 0, 915, 0); qg.addColorStop(0, '#fff17a'); qg.addColorStop(1, '#ffc107'); ctx.fillStyle = qg; rr(660, 75, Math.max(20, 255*found/GOAL), 20, 10); ctx.fill(); }
-  // 마스코트 말풍선
-  const tips = mascotTips(), tip = tips[L.tipI % tips.length];
-  lbCover(138, 634, 176, 58, '#fcf9ee', 12);
-  ctx.font = `bold 19px ${FONT}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center';
-  const words = tip.split(' '); let l1 = '', l2 = ''; for(const w2 of words){ if(!l2 && ctx.measureText(l1 + ' ' + w2).width < 168) l1 = (l1 ? l1 + ' ' : '') + w2; else l2 = (l2 ? l2 + ' ' : '') + w2; }
-  if(ctx.measureText(l2).width > 170){ ctx.font = `bold 16px ${FONT}`; }
-  ctx.fillText(l1, 226, l2 ? 650 : 663); if(l2) ctx.fillText(l2, 226, 676, 172);
-  if(L.hop){ ctx.fillStyle = `rgba(255,240,150,${L.hop*0.6})`; ctx.beginPath(); ctx.arc(115, 740, 70*(1.2 - L.hop*0.2), 0, 6.29); ctx.fill(); }
-  // 오늘의 탐험 (체크 · 진행 · 보상)
-  DAILY_MISSIONS.forEach((ms, i) => {
-    const ry = [742, 781, 820, 858][i], v = Math.min(ms.n, Math.floor(m[ms.k] || 0)), ok = !!m.got[ms.k];
-    lbCover(1236, ry - 14, 30, 28, '#fcfaf1', 4);
-    ctx.strokeStyle = '#6d7c5b'; ctx.lineWidth = 2.5; ctx.fillStyle = ok ? '#43a047' : '#eef3e6'; rr(1240, ry - 11, 22, 22, 4); ctx.fill(); ctx.stroke();
-    if(ok){ ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1245, ry); ctx.lineTo(1250, ry + 6); ctx.lineTo(1258, ry - 6); ctx.stroke(); }
-    lbCover(1452, ry - 15, 96, 30, '#fcfaf1', 14); ctx.fillStyle = ok ? '#c8e6c9' : '#ebe8dd'; rr(1455, ry - 13, 90, 26, 13); ctx.fill();
-    ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = ok ? '#2e7d32' : '#4a4a4a'; ctx.textAlign = 'center'; ctx.fillText(`${v}/${ms.n}`, 1500, ry + 1);
-    lbCover(1550, ry - 17, 92, 34, '#fcfaf1', 8); ctx.font = '24px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText('🪙', 1568, ry + 1); ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = ok ? '#9e9e9e' : '#3a2412'; ctx.textAlign = 'left'; ctx.fillText(`+${DM_REWARD}`, 1584, ry + 1);
-  });
-  const allDone = DAILY_MISSIONS.every(ms => m.got[ms.k]);
-  L.ui.gift = [1570, 650, 1648, 728];
-  if(allDone && !m.gift){ const pul = 0.5 + Math.sin(S.time*0.15)*0.5; ctx.strokeStyle = `rgba(255,230,90,${0.5 + pul*0.5})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(1608, 689, 40 + pul*6, 0, 6.29); ctx.stroke(); }
-  if(m.gift){ ctx.fillStyle = 'rgba(46,125,50,.85)'; ctx.beginPath(); ctx.arc(1628, 710, 16, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1620, 710); ctx.lineTo(1626, 716); ctx.lineTo(1636, 704); ctx.stroke(); }
-  ctx.restore();
-}
-function iconCoin(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); const g = ctx.createRadialGradient(-5, -6, 2, 0, 0, 20); g.addColorStop(0, '#fff3b0'); g.addColorStop(0.6, '#ffc107'); g.addColorStop(1, '#c88400'); ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(0, 0, 18, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#a86a00'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#e8a200'; ctx.beginPath(); for(let i=0;i<5;i++){ const a = i*1.2566 - 1.57; ctx.lineTo(Math.cos(a)*9, Math.sin(a)*9); ctx.lineTo(Math.cos(a + 0.628)*4, Math.sin(a + 0.628)*4); } ctx.closePath(); ctx.fill(); ctx.restore(); }
-function iconBag(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -12, 7, Math.PI, 0); ctx.stroke();
-  const g = ctx.createLinearGradient(0, -14, 0, 20); g.addColorStop(0, '#ff6b6b'); g.addColorStop(1, '#c62828'); ctx.fillStyle = g; rr(-16, -14, 32, 34, 9); ctx.fill();
-  ctx.fillStyle = '#e53935'; rr(-16, -14, 32, 13, 7); ctx.fill(); ctx.fillStyle = '#ffcdd2'; rr(-9, 4, 18, 11, 4); ctx.fill(); ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(0, -1, 2.5, 0, 6.29); ctx.fill(); ctx.restore(); }
-function lbLiveInfo(){   // 그림 위 정보판을 실제 상태로 다시 그리기
-  const L = S.lobby, pr = curProf(), lv = townLevel(), m = dm(), found = DEX.counts.filter(c => c > 0).length;
-  ctx.save(); ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  // ── 탐험가 판 (얼굴을 누르면 바꿀 수 있어요)
-  goldPanel(58, 22, 416, 102, 51);
-  ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'left'; ctx.fillText(pr.name, 146, 50, 300);
-  ctx.fillStyle = '#140b04'; rr(144, 70, 302, 24, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,220,140,.35)'; ctx.lineWidth = 2; ctx.stroke();
-  if(lv.f > 0.02){ const xg = ctx.createLinearGradient(146, 0, 444, 0); xg.addColorStop(0, '#9bf05a'); xg.addColorStop(1, '#f2ea3c'); ctx.fillStyle = xg; rr(146, 72, Math.max(20, 298*clamp(lv.f, 0, 1)), 20, 10); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; rr(150, 74, Math.max(12, 290*clamp(lv.f, 0, 1)), 6, 3); ctx.fill(); }
-  ctx.font = `bold 20px ${FONT}`; ctx.fillStyle = '#ffe07a'; ctx.textAlign = 'right'; ctx.fillText(`${lv.xp.toLocaleString()} / ${lv.need.toLocaleString()} XP`, 444, 108);
-  const ah = L.ui.avHover ? 1.05 : 1;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(77, 76, 60, 0, 6.29); ctx.fill();
-  const ag = ctx.createRadialGradient(64, 52, 6, 75, 72, 58); ag.addColorStop(0, '#fff8d6'); ag.addColorStop(1, '#f5c860'); ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(75, 72, 57*ah, 0, 6.29); ctx.fill();
-  const rg = ctx.createLinearGradient(0, 14, 0, 130); rg.addColorStop(0, '#ffe8a0'); rg.addColorStop(1, '#b8801f'); ctx.strokeStyle = rg; ctx.lineWidth = 7; ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.font = `${62*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 75, 66);
-  goldPanel(36, 98, 80, 30, 15); ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(`Lv.${lv.lv}`, 76, 114);
-  ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(124, 32, 14, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#8a5a14'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = '#6b3a0a'; ctx.fillText('✎', 124, 33);
-  // ── 오른쪽 위: 지금 내 상태 (바뀌면 톡 튀어요)
-  const st = {vit:vit(), life:START_LIVES + (DEX.bonusLives || 0), bonus:DEX.bonusLives || 0, coin:DEX.coins, bag:bagCount()};
-  L.pop = L.pop || {}; L.prev = L.prev || st;
-  for(const k in st){ if(st[k] !== L.prev[k]){ L.pop[k] = 1; if(st[k] > L.prev[k]) for(let i=0;i<6;i++) L.sparks.push({x:{vit:1170, life:1300, bonus:1300, coin:1440, bag:1590}[k], y:54, vx:rand(-3,3), vy:rand(-4,-1), life:1}); } L.pop[k] = Math.max(0, (L.pop[k] || 0) - 0.06); }
-  L.prev = st;
-  const pp = k => 1 + Math.sin((L.pop[k] || 0)*Math.PI)*0.18;
-  // 활력 (아래 작은 칸에 막대)
-  goldPanel(1140, 58, 106, 46, 14); ctx.fillStyle = '#140b04'; rr(1152, 82, 82, 12, 6); ctx.fill();
-  if(st.vit){ const vg = ctx.createLinearGradient(1152, 0, 1234, 0); vg.addColorStop(0, '#ffe066'); vg.addColorStop(1, '#ff9f1c'); ctx.fillStyle = vg; rr(1152, 82, Math.max(12, 82*st.vit/20), 12, 6); ctx.fill(); }
-  goldPanel(1098, 22, 148, 62, 31); iconBolt(1132, 53, 1.05*pp('vit'));
-  ctx.font = `bold ${27*pp('vit')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'center'; ctx.fillText(`${st.vit}/20`, 1196, 54);
-  // 생명 (다음 판 시작 생명)
-  goldPanel(1252, 24, 114, 60, 30); iconHeart(1284, 54, 1.05*pp('life'));
-  ctx.font = `bold ${28*pp('life')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.life), st.bonus ? 1324 : 1330, 55);
-  if(st.bonus){ ctx.font = `bold 16px ${FONT}`; ctx.fillStyle = '#9bf05a'; ctx.fillText(`+${st.bonus}`, 1350, 40); }
-  // 코인
-  goldPanel(1372, 24, 148, 60, 30); iconCoin(1404, 54, 1.05*pp('coin'));
-  ctx.font = `bold ${(st.coin >= 10000 ? 23 : 27)*pp('coin')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(st.coin.toLocaleString(), 1467, 55);
-  // 가방 아이템
-  goldPanel(1526, 24, 128, 60, 30); iconBag(1560, 54, 1.05*pp('bag'));
-  ctx.font = `bold ${27*pp('bag')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.bag), 1612, 55);
-  for(const sp of L.sparks){ sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.2; sp.life -= 0.03; ctx.globalAlpha = Math.max(0, sp.life); ctx.fillStyle = '#fff59d'; ctx.beginPath(); ctx.arc(sp.x, sp.y, 3, 0, 6.29); ctx.fill(); }
-  ctx.globalAlpha = 1; L.sparks = L.sparks.filter(sp => sp.life > 0);
-  // 강릉분원 완성 n / 11
-  lbCover(822, 30, 100, 40, '#1c4470', 8); ctx.font = `bold 30px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'right'; ctx.fillText(`${found} / ${GOAL}`, 915, 50);
-  lbCover(655, 72, 265, 26, '#1c4470', 12); ctx.fillStyle = '#0f2a44'; rr(660, 75, 255, 20, 10); ctx.fill();
-  if(found){ const qg = ctx.createLinearGradient(660, 0, 915, 0); qg.addColorStop(0, '#fff17a'); qg.addColorStop(1, '#ffc107'); ctx.fillStyle = qg; rr(660, 75, Math.max(20, 255*found/GOAL), 20, 10); ctx.fill(); }
-  // 마스코트 말풍선
-  const tips = mascotTips(), tip = tips[L.tipI % tips.length];
-  lbCover(138, 634, 176, 58, '#fcf9ee', 12);
-  ctx.font = `bold 19px ${FONT}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center';
-  const words = tip.split(' '); let l1 = '', l2 = ''; for(const w2 of words){ if(!l2 && ctx.measureText(l1 + ' ' + w2).width < 168) l1 = (l1 ? l1 + ' ' : '') + w2; else l2 = (l2 ? l2 + ' ' : '') + w2; }
-  if(ctx.measureText(l2).width > 170){ ctx.font = `bold 16px ${FONT}`; }
-  ctx.fillText(l1, 226, l2 ? 650 : 663); if(l2) ctx.fillText(l2, 226, 676, 172);
-  if(L.hop){ ctx.fillStyle = `rgba(255,240,150,${L.hop*0.6})`; ctx.beginPath(); ctx.arc(115, 740, 70*(1.2 - L.hop*0.2), 0, 6.29); ctx.fill(); }
-  // 오늘의 탐험 (체크 · 진행 · 보상)
-  DAILY_MISSIONS.forEach((ms, i) => {
-    const ry = [742, 781, 820, 858][i], v = Math.min(ms.n, Math.floor(m[ms.k] || 0)), ok = !!m.got[ms.k];
-    lbCover(1236, ry - 14, 30, 28, '#fcfaf1', 4);
-    ctx.strokeStyle = '#6d7c5b'; ctx.lineWidth = 2.5; ctx.fillStyle = ok ? '#43a047' : '#eef3e6'; rr(1240, ry - 11, 22, 22, 4); ctx.fill(); ctx.stroke();
-    if(ok){ ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1245, ry); ctx.lineTo(1250, ry + 6); ctx.lineTo(1258, ry - 6); ctx.stroke(); }
-    lbCover(1452, ry - 15, 96, 30, '#fcfaf1', 14); ctx.fillStyle = ok ? '#c8e6c9' : '#ebe8dd'; rr(1455, ry - 13, 90, 26, 13); ctx.fill();
-    ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = ok ? '#2e7d32' : '#4a4a4a'; ctx.textAlign = 'center'; ctx.fillText(`${v}/${ms.n}`, 1500, ry + 1);
-    lbCover(1550, ry - 17, 92, 34, '#fcfaf1', 8); ctx.font = '24px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText('🪙', 1568, ry + 1); ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = ok ? '#9e9e9e' : '#3a2412'; ctx.textAlign = 'left'; ctx.fillText(`+${DM_REWARD}`, 1584, ry + 1);
-  });
-  const allDone = DAILY_MISSIONS.every(ms => m.got[ms.k]);
-  L.ui.gift = [1570, 650, 1648, 728];
-  if(allDone && !m.gift){ const pul = 0.5 + Math.sin(S.time*0.15)*0.5; ctx.strokeStyle = `rgba(255,230,90,${0.5 + pul*0.5})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(1608, 689, 40 + pul*6, 0, 6.29); ctx.stroke(); }
-  if(m.gift){ ctx.fillStyle = 'rgba(46,125,50,.85)'; ctx.beginPath(); ctx.arc(1628, 710, 16, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1620, 710); ctx.lineTo(1626, 716); ctx.lineTo(1636, 704); ctx.stroke(); }
-  ctx.restore();
-}
-function iconBag(x, y, s){ ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -12, 7, Math.PI, 0); ctx.stroke();
-  const g = ctx.createLinearGradient(0, -14, 0, 20); g.addColorStop(0, '#ff6b6b'); g.addColorStop(1, '#c62828'); ctx.fillStyle = g; rr(-16, -14, 32, 34, 9); ctx.fill();
-  ctx.fillStyle = '#e53935'; rr(-16, -14, 32, 13, 7); ctx.fill(); ctx.fillStyle = '#ffcdd2'; rr(-9, 4, 18, 11, 4); ctx.fill(); ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(0, -1, 2.5, 0, 6.29); ctx.fill(); ctx.restore(); }
-function lbLiveInfo(){   // 그림 위 정보판을 실제 상태로 다시 그리기
-  const L = S.lobby, pr = curProf(), lv = townLevel(), m = dm(), found = DEX.counts.filter(c => c > 0).length;
-  ctx.save(); ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  // ── 탐험가 판 (얼굴을 누르면 바꿀 수 있어요)
-  goldPanel(58, 22, 416, 102, 51);
-  ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'left'; ctx.fillText(pr.name, 146, 50, 300);
-  ctx.fillStyle = '#140b04'; rr(144, 70, 302, 24, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,220,140,.35)'; ctx.lineWidth = 2; ctx.stroke();
-  if(lv.f > 0.02){ const xg = ctx.createLinearGradient(146, 0, 444, 0); xg.addColorStop(0, '#9bf05a'); xg.addColorStop(1, '#f2ea3c'); ctx.fillStyle = xg; rr(146, 72, Math.max(20, 298*clamp(lv.f, 0, 1)), 20, 10); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; rr(150, 74, Math.max(12, 290*clamp(lv.f, 0, 1)), 6, 3); ctx.fill(); }
-  ctx.font = `bold 20px ${FONT}`; ctx.fillStyle = '#ffe07a'; ctx.textAlign = 'right'; ctx.fillText(`${lv.xp.toLocaleString()} / ${lv.need.toLocaleString()} XP`, 444, 108);
-  const ah = L.ui.avHover ? 1.05 : 1;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(77, 76, 60, 0, 6.29); ctx.fill();
-  const ag = ctx.createRadialGradient(64, 52, 6, 75, 72, 58); ag.addColorStop(0, '#fff8d6'); ag.addColorStop(1, '#f5c860'); ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(75, 72, 57*ah, 0, 6.29); ctx.fill();
-  const rg = ctx.createLinearGradient(0, 14, 0, 130); rg.addColorStop(0, '#ffe8a0'); rg.addColorStop(1, '#b8801f'); ctx.strokeStyle = rg; ctx.lineWidth = 7; ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.font = `${62*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 75, 66);
-  goldPanel(36, 98, 80, 30, 15); ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(`Lv.${lv.lv}`, 76, 114);
-  ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(124, 32, 14, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#8a5a14'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = '#6b3a0a'; ctx.fillText('✎', 124, 33);
-  // ── 오른쪽 위: 지금 내 상태 (바뀌면 톡 튀어요)
-  const st = {vit:vit(), life:START_LIVES + (DEX.bonusLives || 0), bonus:DEX.bonusLives || 0, coin:DEX.coins, bag:bagCount()};
-  L.pop = L.pop || {}; L.prev = L.prev || st;
-  for(const k in st){ if(st[k] !== L.prev[k]){ L.pop[k] = 1; if(st[k] > L.prev[k]) for(let i=0;i<6;i++) L.sparks.push({x:{vit:1170, life:1300, bonus:1300, coin:1440, bag:1590}[k], y:54, vx:rand(-3,3), vy:rand(-4,-1), life:1}); } L.pop[k] = Math.max(0, (L.pop[k] || 0) - 0.06); }
-  L.prev = st;
-  const pp = k => 1 + Math.sin((L.pop[k] || 0)*Math.PI)*0.18;
-  // 활력 (아래 작은 칸에 막대)
-  goldPanel(1140, 58, 106, 46, 14); ctx.fillStyle = '#140b04'; rr(1152, 82, 82, 12, 6); ctx.fill();
-  if(st.vit){ const vg = ctx.createLinearGradient(1152, 0, 1234, 0); vg.addColorStop(0, '#ffe066'); vg.addColorStop(1, '#ff9f1c'); ctx.fillStyle = vg; rr(1152, 82, Math.max(12, 82*st.vit/20), 12, 6); ctx.fill(); }
-  goldPanel(1098, 22, 148, 62, 31); iconBolt(1132, 53, 1.05*pp('vit'));
-  ctx.font = `bold ${27*pp('vit')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'center'; ctx.fillText(`${st.vit}/20`, 1196, 54);
-  // 생명 (다음 판 시작 생명)
-  goldPanel(1252, 24, 114, 60, 30); iconHeart(1284, 54, 1.05*pp('life'));
-  ctx.font = `bold ${28*pp('life')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.life), st.bonus ? 1324 : 1330, 55);
-  if(st.bonus){ ctx.font = `bold 16px ${FONT}`; ctx.fillStyle = '#9bf05a'; ctx.fillText(`+${st.bonus}`, 1350, 40); }
-  // 코인
-  goldPanel(1372, 24, 148, 60, 30); iconCoin(1404, 54, 1.05*pp('coin'));
-  ctx.font = `bold ${(st.coin >= 10000 ? 23 : 27)*pp('coin')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(st.coin.toLocaleString(), 1467, 55);
-  // 가방 아이템
-  goldPanel(1526, 24, 128, 60, 30); iconBag(1560, 54, 1.05*pp('bag'));
-  ctx.font = `bold ${27*pp('bag')}px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(String(st.bag), 1612, 55);
-  for(const sp of L.sparks){ sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.2; sp.life -= 0.03; ctx.globalAlpha = Math.max(0, sp.life); ctx.fillStyle = '#fff59d'; ctx.beginPath(); ctx.arc(sp.x, sp.y, 3, 0, 6.29); ctx.fill(); }
-  ctx.globalAlpha = 1; L.sparks = L.sparks.filter(sp => sp.life > 0);
-  // 강릉분원 완성 n / 11
-  lbCover(822, 30, 100, 40, '#1c4470', 8); ctx.font = `bold 30px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.textAlign = 'right'; ctx.fillText(`${found} / ${GOAL}`, 915, 50);
-  lbCover(655, 72, 265, 26, '#1c4470', 12); ctx.fillStyle = '#0f2a44'; rr(660, 75, 255, 20, 10); ctx.fill();
-  if(found){ const qg = ctx.createLinearGradient(660, 0, 915, 0); qg.addColorStop(0, '#fff17a'); qg.addColorStop(1, '#ffc107'); ctx.fillStyle = qg; rr(660, 75, Math.max(20, 255*found/GOAL), 20, 10); ctx.fill(); }
-  // 마스코트 말풍선
-  const tips = mascotTips(), tip = tips[L.tipI % tips.length];
-  lbCover(138, 634, 176, 58, '#fcf9ee', 12);
-  ctx.font = `bold 19px ${FONT}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center';
-  const words = tip.split(' '); let l1 = '', l2 = ''; for(const w2 of words){ if(!l2 && ctx.measureText(l1 + ' ' + w2).width < 168) l1 = (l1 ? l1 + ' ' : '') + w2; else l2 = (l2 ? l2 + ' ' : '') + w2; }
-  if(ctx.measureText(l2).width > 170){ ctx.font = `bold 16px ${FONT}`; }
-  ctx.fillText(l1, 226, l2 ? 650 : 663); if(l2) ctx.fillText(l2, 226, 676, 172);
-  if(L.hop){ ctx.fillStyle = `rgba(255,240,150,${L.hop*0.6})`; ctx.beginPath(); ctx.arc(115, 740, 70*(1.2 - L.hop*0.2), 0, 6.29); ctx.fill(); }
-  // 오늘의 탐험 (체크 · 진행 · 보상)
-  DAILY_MISSIONS.forEach((ms, i) => {
-    const ry = [742, 781, 820, 858][i], v = Math.min(ms.n, Math.floor(m[ms.k] || 0)), ok = !!m.got[ms.k];
-    lbCover(1236, ry - 14, 30, 28, '#fcfaf1', 4);
-    ctx.strokeStyle = '#6d7c5b'; ctx.lineWidth = 2.5; ctx.fillStyle = ok ? '#43a047' : '#eef3e6'; rr(1240, ry - 11, 22, 22, 4); ctx.fill(); ctx.stroke();
-    if(ok){ ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1245, ry); ctx.lineTo(1250, ry + 6); ctx.lineTo(1258, ry - 6); ctx.stroke(); }
-    lbCover(1452, ry - 15, 96, 30, '#fcfaf1', 14); ctx.fillStyle = ok ? '#c8e6c9' : '#ebe8dd'; rr(1455, ry - 13, 90, 26, 13); ctx.fill();
-    ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = ok ? '#2e7d32' : '#4a4a4a'; ctx.textAlign = 'center'; ctx.fillText(`${v}/${ms.n}`, 1500, ry + 1);
-    lbCover(1550, ry - 17, 92, 34, '#fcfaf1', 8); ctx.font = '24px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText('🪙', 1568, ry + 1); ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = ok ? '#9e9e9e' : '#3a2412'; ctx.textAlign = 'left'; ctx.fillText(`+${DM_REWARD}`, 1584, ry + 1);
-  });
-  const allDone = DAILY_MISSIONS.every(ms => m.got[ms.k]);
-  L.ui.gift = [1570, 650, 1648, 728];
-  if(allDone && !m.gift){ const pul = 0.5 + Math.sin(S.time*0.15)*0.5; ctx.strokeStyle = `rgba(255,230,90,${0.5 + pul*0.5})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(1608, 689, 40 + pul*6, 0, 6.29); ctx.stroke(); }
-  if(m.gift){ ctx.fillStyle = 'rgba(46,125,50,.85)'; ctx.beginPath(); ctx.arc(1628, 710, 16, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1620, 710); ctx.lineTo(1626, 716); ctx.lineTo(1636, 704); ctx.stroke(); }
-  ctx.restore();
-}
 const lbPetalSprites = [];
 function lbPetalSprite(h){
   if(!lbPetalSprites[h]){ const c = document.createElement('canvas'); c.width = c.height = 40; const x = c.getContext('2d'), s2 = 16;
@@ -2771,8 +2492,18 @@ let lbComp = null, lbCompKey = '';
 function lbStaticKey(){
   const L = S.lobby, m = dm(), pr = curProf(), lv = townLevel(), tips = mascotTips();
   const anim = (L.pop && Object.values(L.pop).some(v => v > 0)) || (L.sparks && L.sparks.length);
-  return [LBS.id, LBS.img.ok, cv.width, cv.height, W, pr.name, pr.icon, lv.lv, lv.xp, DEX.counts.join(''), vit(), DEX.bonusLives || 0, DEX.coins, bagCount(),
+  return [LBS.id, LBS.img.ok, cv.width, cv.height, W, pr.name, pr.icon, pr.photo ? pr.photo.length + (faceImg(pr) ? 1 : 0) : 0, lv.lv, lv.xp, DEX.counts.join(''), vit(), DEX.bonusLives || 0, DEX.coins, bagCount(),
     DAILY_MISSIONS.map(ms => `${Math.floor(m[ms.k] || 0)}${m.got[ms.k] ? 1 : 0}`).join(','), m.gift, tips[L.tipI % tips.length], L.ui.avHover ? 1 : 0, anim ? S.time : 0].join('|');
+}
+function lbDrawChip(){   // 오늘의 날씨 칩 (누르면 다른 장면) — 바다 일렁임보다 위에 그려요
+  const L = S.lobby, O = (LB_UIOFF[LBS.id] || {}).quest || [0, 0];
+  ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.font = `bold 20px ${FONT}`;
+  const lt = `${LBS.def.label}  🔄`, lw = ctx.measureText(lt).width + 34, cx = 1010 + O[0], lx = cx - lw/2, ly = 112 + O[1], h = 36;
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; rr(lx + 1, ly + 3, lw, h, h/2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.94)'; rr(lx, ly, lw, h, h/2); ctx.fill(); ctx.strokeStyle = 'rgba(184,128,31,.9)'; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.fillStyle = '#3a2412'; ctx.fillText(lt, cx, ly + h/2 + 1);
+  L.ui.chip = [lx, ly, lx + lw, ly + h];
+  ctx.restore();
 }
 function lbDrawStatic(){   // 배경 그림 + 정보판을 한 장에 (값이 바뀔 때만 다시 그려요)
   const key = lbStaticKey();
@@ -2817,6 +2548,7 @@ function renderLobby(){
     if(S.petKey !== 'none'){ ctx.save(); ctx.translate(S.pet.x, S.pet.y); ctx.scale(0.8, 0.8); ctx.translate(-S.pet.x, -S.pet.y); drawPetInWorld(); ctx.restore(); }
     S.camX = keep; }
   lbDrawOverlayFx(F, t);
+  lbDrawChip();
   { const O = LB_UIOFF[LBS.id] || {}, pulse = 0.5 + Math.sin(S.time*0.1)*0.5;   // 움직이는 강조 (간판 빛 · 선물 · 마스코트)
     for(const sg of LB_SIGNS){ const on = (L.hover && L.hover.id === sg.id) || (L.press && L.press.door === sg.id) || (L.near && L.near.id === sg.id), [ox, oy] = O[sg.id] || [0, 0];
       const a = on ? 0.95 : Math.max(0, Math.sin(S.time*0.05 + sg.cx) - 0.6)*1.6; if(a <= 0.02) continue;
@@ -2829,6 +2561,31 @@ function renderLobby(){
   ctx.restore();
   drawToast();
 }
+const faceCache = {};
+function faceImg(p){   // 사진 얼굴 (그림으로 쓰려고 미리 불러 두기)
+  if(!p || !p.photo) return null;
+  let c = faceCache[p.id]; if(c && c.src === p.photo) return c.ok ? c.img : null;
+  c = faceCache[p.id] = {src:p.photo, ok:false, img:new Image()}; c.img.onload = () => { c.ok = true; if(typeof lbCompKey !== 'undefined') lbCompKey = ''; }; c.img.src = p.photo;
+  return null;
+}
+const facePicker = document.createElement('input'); facePicker.id = 'facePicker'; facePicker.type = 'file'; facePicker.accept = 'image/*'; facePicker.style.display = 'none'; document.body.appendChild(facePicker);
+function pickFacePhoto(){ facePicker.value = ''; facePicker.click(); }
+facePicker.onchange = () => {
+  const f = facePicker.files && facePicker.files[0]; if(!f) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const S2 = 192, c = document.createElement('canvas'); c.width = c.height = S2; const x = c.getContext('2d'); if(!x) return;
+    const side = Math.min(im.naturalWidth, im.naturalHeight), sx = (im.naturalWidth - side)/2, sy = Math.max(0, (im.naturalHeight - side)*0.4);   // 가운데(얼굴이 있을 만한 곳)를 네모로 자르기
+    x.fillStyle = '#fff'; x.fillRect(0, 0, S2, S2); x.drawImage(im, sx, sy, side, side, 0, 0, S2, S2);
+    URL.revokeObjectURL(url);
+    try{ curProf().photo = c.toDataURL('image/jpeg', 0.82); saveProf(); tone(880,.08,'triangle',.05); }
+    catch(e){ alert('사진을 저장하지 못했어요. 다른 사진으로 해 볼까요?'); }
+    if(screen === 'avatar') showScreen('avatar');
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); alert('이 사진은 열 수 없어요. 다른 사진을 골라 주세요.'); };
+  im.src = url;
+};
+function faceHTML(p){ return p && p.photo ? `<img class="face" src="${p.photo}" alt="">` : (p ? p.icon : ''); }
 function lbSign(sg, hov){   // 간판 새로 그리기 (그림 속 깨진 글자를 덮어요)
   const {cx, cy, r, right, col, icon, text} = sg;
   ctx.save(); ctx.textBaseline = 'middle';
@@ -2857,7 +2614,10 @@ function lbLiveInfo(){   // 그림 위 모든 정보판을 새로 그려요 (실
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(72, 66, 62, 0, 6.29); ctx.fill();
   const ag = ctx.createRadialGradient(58, 44, 6, 70, 62, 60); ag.addColorStop(0, '#fff8d6'); ag.addColorStop(1, '#f5c860'); ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(70, 62, 60*ah, 0, 6.29); ctx.fill();
   const rg = ctx.createLinearGradient(0, 2, 0, 122); rg.addColorStop(0, '#ffe8a0'); rg.addColorStop(1, '#b8801f'); ctx.strokeStyle = rg; ctx.lineWidth = 7; ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.font = `${64*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 70, 56);
+  const fimg = faceImg(pr);
+  if(fimg){ ctx.save(); ctx.beginPath(); ctx.arc(70, 62, 55*ah, 0, 6.29); ctx.clip(); ctx.drawImage(fimg, 70 - 55*ah, 62 - 55*ah, 110*ah, 110*ah); ctx.restore(); }
+  else { ctx.fillStyle = '#000'; ctx.font = `${64*ah}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(pr.icon, 70, 56); }
+  ctx.textAlign = 'center';
   goldPanel(30, 92, 80, 30, 15); ctx.font = `bold 21px ${FONT}`; ctx.fillStyle = '#fff6dc'; ctx.fillText(`Lv.${lv.lv}`, 70, 108);
   ctx.fillStyle = '#ffe07a'; ctx.beginPath(); ctx.arc(124, 24, 15, 0, 6.29); ctx.fill(); ctx.strokeStyle = '#8a5a14'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = `bold 19px ${FONT}`; ctx.fillStyle = '#6b3a0a'; ctx.fillText('✎', 124, 25);
   // ── 강릉분원 완성 n / 11
@@ -2871,9 +2631,6 @@ function lbLiveInfo(){   // 그림 위 모든 정보판을 새로 그려요 (실
   ctx.fillStyle = '#0b1c30'; rr(656, 60, 294, 24, 12); ctx.fill();
   if(found){ const yg = ctx.createLinearGradient(656, 0, 950, 0); yg.addColorStop(0, '#fff17a'); yg.addColorStop(1, '#ffc107'); ctx.fillStyle = yg; rr(656, 60, Math.max(24, 294*found/GOAL), 24, 12); ctx.fill(); }
   ctx.fillStyle = '#000'; ctx.font = '46px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(found >= GOAL ? '🏆' : '🏫', 1004, 58);
-  // 오늘의 날씨 (누르면 바꾸기)
-  if(LBS){ ctx.font = `bold 19px ${FONT}`; const lt = `${LBS.def.label}  🔄`, lw = ctx.measureText(lt).width + 30; const lx = 1010 - lw/2, ly = 110;
-    ctx.fillStyle = 'rgba(255,255,255,.88)'; rr(lx, ly, lw, 32, 16); ctx.fill(); ctx.strokeStyle = 'rgba(184,128,31,.8)'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#3a2412'; ctx.fillText(lt, 1010, ly + 17); L.ui.chip = [lx, ly, lx + lw, ly + 32]; }
   // ── 오른쪽 위: 지금 내 상태 (바뀌면 톡 튀어요)
   const st = {vit:vit(), life:START_LIVES + (DEX.bonusLives || 0), bonus:DEX.bonusLives || 0, coin:DEX.coins, bag:bagCount()};
   L.pop = L.pop || {}; L.prev = L.prev || st; L.sparks = L.sparks || [];
@@ -4995,7 +4752,7 @@ function showScreen(type){
   let html = '';
   if(type === 'title'){
     const ttl = titleOf(totalClears()), sv = loadJSON(pk('jungle_save')), dailyDone = DEX.daily[todayKey()];
-    html = `<button class="profchip" id="profBtn">${curProf().icon} ${escapeHTML(curProf().name)} ▾</button>
+    html = `<button class="profchip" id="profBtn">${faceHTML(curProf())} ${escapeHTML(curProf().name)} ▾</button>
       <h1>정글 점프 탐험대</h1>
       ${ttl ? `<div class="badge">${ttl}</div>` : ''}
       <p>보물상자 속 빛나는 글자를 모아<br>'강원특수교육원 강릉분원'을 완성하세요!</p>
@@ -5045,8 +4802,12 @@ function showScreen(type){
     html = classHTML(type);
   } else if(type === 'avatar'){
     const ICONS = ['🐵','🐒','🦍','🐯','🦁','🐰','🐸','🦊','🐼','🐨','🐻','🐶','🐱','🐹','🐧','🐥','🦉','🐬','🐳','🦄','🐢','🦖','🐙','🦋','🐞','🧒','👧','👦','🧑‍🚀','🦸','🧚','🤖'];
+    const me = curProf();
     html = `<h2>😊 탐험가 얼굴 고르기</h2><p class="keys">마을 왼쪽 위에 나오는 내 얼굴이에요</p>
-      <div class="iconpick big">${ICONS.map(ic => `<button class="ip${curProf().icon === ic ? ' on' : ''}" data-av="${ic}">${ic}</button>`).join('')}</div>
+      <div class="avnow">${me.photo ? `<img src="${me.photo}" alt="">` : `<span>${me.icon}</span>`}</div>
+      <div class="btnrow"><button class="go sm" id="avPhoto">📷 내 사진 올리기</button>${me.photo ? '<button class="go alt sm" id="avPhotoDel">🗑️ 사진 지우기</button>' : ''}</div>
+      <p class="keys">사진은 이 기기에만 저장되고 인터넷에 올라가지 않아요. 가운데 부분이 동그랗게 잘려요.</p>
+      <div class="iconpick big">${ICONS.map(ic => `<button class="ip${!me.photo && me.icon === ic ? ' on' : ''}" data-av="${ic}">${ic}</button>`).join('')}</div>
       <button class="go" id="goBtn">완료</button>`;
   } else if(type === 'townMap'){
     const all = [...DOORS.filter(d => d.id !== 'village'), ...VILLAGE];
@@ -5337,7 +5098,11 @@ function showScreen(type){
   on('teachBtn', () => askPin(() => showScreen('teacher')));
   if(type === 'barista' || type === 'cook') wireRoom(type);
   if(type === 'club') wireClub();
-  if(type === 'avatar') card.querySelectorAll('[data-av]').forEach(b => b.onclick = () => { curProf().icon = b.dataset.av; saveProf(); tone(880,.08,'triangle',.05); showScreen('avatar'); });
+  if(type === 'avatar'){
+    card.querySelectorAll('[data-av]').forEach(b => b.onclick = () => { const p = curProf(); p.icon = b.dataset.av; delete p.photo; saveProf(); tone(880,.08,'triangle',.05); showScreen('avatar'); });
+    const ph = document.getElementById('avPhoto'); if(ph) ph.onclick = () => pickFacePhoto();
+    const pd = document.getElementById('avPhotoDel'); if(pd) pd.onclick = () => { delete curProf().photo; saveProf(); showScreen('avatar'); };
+  }
   if(type === 'townMap') card.querySelectorAll('[data-tm]').forEach(b => b.onclick = () => { const id = b.dataset.tm, d = DOORS.find(x => x.id === id); if(d){ hideScreen(); enterDoor(d); } else { villageOpen = true; showScreen(VILLAGE.find(v => v.id === id).screen); } });
   if(type === 'village') card.querySelectorAll('[data-vg]').forEach(b => b.onclick = () => { tone(660,.08,'triangle',.04); showScreen(b.dataset.vg); });
   wirePang(type);
@@ -6433,7 +6198,7 @@ function runDiag(){
 function classHTML(type){
   if(type === 'profiles'){
     return `<h2>누가 할 차례예요?</h2>
-      <div class="profs">${PROF.list.map(p => { const d = profData(p.id); return `<button class="prof${p.id === PROF.cur ? ' on' : ''}" data-prof="${p.id}"><span>${p.icon}</span><b>${escapeHTML(p.name)}</b><small>${d.lastPlayed ? '최근 ' + new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '새 친구'}</small></button>`; }).join('')}
+      <div class="profs">${PROF.list.map(p => { const d = profData(p.id); return `<button class="prof${p.id === PROF.cur ? ' on' : ''}" data-prof="${p.id}"><span>${faceHTML(p)}</span><b>${escapeHTML(p.name)}</b><small>${d.lastPlayed ? '최근 ' + new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '새 친구'}</small></button>`; }).join('')}
         ${PROF.list.length < 30 ? `<button class="prof add" id="profAdd"><span>➕</span><b>새 친구</b><small>이름 만들기</small></button>` : ''}</div>
       <button class="go alt sm" id="goBtn">돌아가기</button>`;
   }
@@ -6458,7 +6223,7 @@ function classHTML(type){
       const d = profData(p.id), a = loadJSON(pkOf(p.id, 'jungle_access')) || {}, ana = d.ana || {}, lost = Object.entries(ana.lost || {}).sort((x, y) => y[1] - x[1])[0];
       const clears = d.clears ? (d.clears.easy || 0) + (d.clears.normal || 0) : 0, today = d.today && d.today.d === todayKey() ? d.today.sec : 0;
       const learn = d.learn || {}, learnN = (learn.spell || 0) + (learn.match || 0) + (learn.safe || 0) + (learn.quiz || 0) + (learn.math || 0);
-      return `<tr><td>${p.icon} ${escapeHTML(p.name)}</td><td>${fmtMin(today)}</td><td>${fmtMin(d.playSec || 0)}</td><td>${ana.runs || 0}판 · 완성 ${clears}</td>
+      return `<tr><td>${faceHTML(p)} ${escapeHTML(p.name)}</td><td>${fmtMin(today)}</td><td>${fmtMin(d.playSec || 0)}</td><td>${ana.runs || 0}판 · 완성 ${clears}</td>
         <td>${d.bestDist || 0}m</td><td>${Object.keys(d.safeSeen || {}).length}/${SAFE.length}</td><td>${learnN}회 · ⭐${learn.stars || 0}</td><td>${lost ? CAUSE[lost[0]] || lost[0] : '-'}</td>
         <td>${d.lastPlayed ? new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '-'}</td>
         <td class="acc">${[['oneHand','한손'],['assist','도움'],['symbols','그림']].map(([k,l]) => `<button data-pacc="${p.id}:${k}" class="${a[k] ? 'on' : ''}">${l}</button>`).join('')}</td>
@@ -6474,7 +6239,7 @@ function classHTML(type){
   }
   if(type === 'rest'){
     const p = curProf();
-    return `<h2>🙂 잠깐 쉬어요!</h2><p class="big">${p.icon} ${escapeHTML(p.name)}, ${TEACH.breakMin}분 동안 열심히 했어요!</p>
+    return `<h2>🙂 잠깐 쉬어요!</h2><p class="big">${faceHTML(p)} ${escapeHTML(p.name)}, ${TEACH.breakMin}분 동안 열심히 했어요!</p>
       <p>👀 먼 곳을 바라보고 눈을 쉬어요.<br>🙆 두 팔을 쭉~ 기지개를 켜요.<br>💧 물도 한 모금 마셔요.</p>
       <p class="stars" id="restCount">20</p>
       <button class="go" id="goBtn" disabled>계속하기</button>`;
@@ -7238,7 +7003,7 @@ function esportsHTML(){
     <p class="keys">파트너 ${pet.icon} ${pet.name} 스킬: ${pet.desc} (옷장에서 파트너를 바꿀 수 있어요)</p>
     <div class="setrow"><span>🔍 큰 판 (6×6, 과일 크게)</span><input type="checkbox" id="pgBig" ${opt.big ? 'checked' : ''}></div>
     <div class="setrow"><span>🔷 모양으로 구분 (과일마다 다른 테두리)</span><input type="checkbox" id="pgShape" ${opt.shapes ? 'checked' : ''}></div>
-    ${rank.length ? `<h3 class="wtitle">🏆 이번 주 우리 반 순위 (60초 도전)</h3><table class="rank">${rank.map((r, i) => `<tr><td>${['🥇','🥈','🥉','4','5'][i]}</td><td>${r.p.icon} ${escapeHTML(r.p.name)}</td><td>${r.s.toLocaleString()}</td></tr>`).join('')}</table>` : ''}
+    ${rank.length ? `<h3 class="wtitle">🏆 이번 주 우리 반 순위 (60초 도전)</h3><table class="rank">${rank.map((r, i) => `<tr><td>${['🥇','🥈','🥉','4','5'][i]}</td><td>${faceHTML(r.p)} ${escapeHTML(r.p.name)}</td><td>${r.s.toLocaleString()}</td></tr>`).join('')}</table>` : ''}
     <button class="go alt" id="goBtn">나가기</button>`;
 }
 function pangMapHTML(){
