@@ -172,6 +172,26 @@
   .tysp{margin:.2em 0;padding:.35em .8em;border-radius:12px;background:rgba(255,212,59,.18);color:#ffe066;font-weight:bold}
   .tybtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.45em;margin:.4em 0}
   .tybtns button{font:inherit;padding:.55em .3em;border-radius:14px;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.14);color:#fff;cursor:pointer} .tybtns small{opacity:.8}
+  #boot{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#2e7d4f,#14452e);color:#fff;font-family:system-ui,sans-serif;transition:opacity .6s}
+  #boot.hide{opacity:0;pointer-events:none} #boot>div{display:flex;flex-direction:column;align-items:center;gap:.4em;text-align:center}
+  #boot .bt{font-size:64px;animation:bootb 1s ease-in-out infinite} #boot b{font-size:26px} #boot small{opacity:.8}
+  #boot i{display:block;width:200px;height:10px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden} #boot em{display:block;width:40%;height:100%;background:#ffd43b;border-radius:5px;animation:bootl 1.2s ease-in-out infinite}
+  @keyframes bootb{50%{transform:translateY(-10px)}} @keyframes bootl{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+  .tywarn{background:rgba(255,212,59,.18);border:2px solid #ffd43b;border-radius:12px;padding:.4em .7em}
+  .tytut{display:flex;flex-direction:column;align-items:center;gap:.2em;width:100%;padding:.8em;border-radius:18px;border:3px solid #fff;background:linear-gradient(180deg,#69db7c,#2f9e44);color:#fff;font:inherit;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.25);animation:tutp 1.6s ease-in-out infinite} .tytut b{font-size:1.5em}
+  @keyframes tutp{50%{transform:scale(1.03)}}
+  .linkbtn{background:none;border:0;color:inherit;text-decoration:underline;font:inherit;opacity:.8;cursor:pointer}
+  .scanhl{outline:6px solid #ffd43b !important;outline-offset:3px;box-shadow:0 0 0 10px rgba(0,0,0,.55) !important;transform:scale(1.06);position:relative;z-index:5}
+  .cfz.g::after{content:'✓';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-weight:bold;font-size:1.1em;text-shadow:0 1px 2px #000}
+  .fest{position:relative;overflow:hidden;text-align:center} .fconf{position:absolute;inset:0;pointer-events:none} .fconf i{position:absolute;top:-10%;font-style:normal;font-size:28px;animation:fconf linear infinite}
+  @keyframes fconf{to{transform:translateY(560px) rotate(360deg)}}
+  .fparade{position:relative;height:130px;margin:.6em 0;overflow:hidden;background:linear-gradient(0deg,rgba(255,255,255,.15),transparent)} .fparade img{position:absolute;bottom:4px;height:92px;animation:fpar 10s linear infinite} .fparade img.king{height:118px}
+  @keyframes fpar{0%{left:-15%;transform:translateY(0)}25%{transform:translateY(-12px)}50%{transform:translateY(0)}75%{transform:translateY(-12px)}100%{left:105%;transform:translateY(0)}}
+  .reportc{background:#fffdf8 !important;color:#222 !important;max-width:900px} .reportc h2,.reportc h3{color:#1b5e20} .report{text-align:left} .rhead p{margin:.1em 0;color:#666}
+  .rtab{width:100%;border-collapse:collapse;margin:.3em 0 .8em;font-size:.9em} .rtab th,.rtab td{border:1px solid #ccc;padding:.35em .5em;text-align:left} .rtab th{background:#eef7ee;white-space:nowrap}
+  .rgrow{margin:.2em 0;padding-left:1.2em} .rchart{width:100%;max-width:620px;display:block;margin:.4em 0;background:#fff;border:1px solid #ddd;border-radius:8px}
+  .report textarea{width:100%;box-sizing:border-box;font:inherit;padding:.5em;border-radius:8px;border:1px solid #bbb}
+  @media print{ body *{visibility:hidden} #card, #card *{visibility:visible} #overlay{position:static} #card{position:absolute;left:0;top:0;width:100%;max-width:none;max-height:none;overflow:visible;box-shadow:none;border:0} .noprint,#xClose{display:none !important} }
   .tytabs{display:grid;grid-template-columns:1fr 1fr;gap:.4em;margin:0 0 .4em} .tytabs button{font:inherit;font-size:1.1em;padding:.5em;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.08);color:#fff;cursor:pointer} .tytabs button.on{background:#8d6e63;border-color:#ffe8cc}
   .tylv.cf:not(.lock){background:linear-gradient(180deg,#a1887f,#5d4037)}
   .cfstock{display:flex;flex-wrap:wrap;gap:.4em;align-items:center;justify-content:center;margin:.3em 0} .cfstock span{background:rgba(255,255,255,.12);border-radius:12px;padding:.2em .6em;font-weight:bold} .cfstock button{font:inherit;border-radius:12px;border:2px solid #ffe8cc;background:#6d4c41;color:#fff;padding:.3em .8em;cursor:pointer}
@@ -403,6 +423,7 @@
 </style>
 </head>
 <body>
+<div id="boot"><div><div class="bt">🐒</div><b>정글 점프 탐험대</b><small>강원특수교육원 강릉분원</small><i><em></em></i><span>불러오는 중…</span></div></div>
 <div id="wrap">
   <canvas id="game" aria-label="정글 점프 탐험대 게임 화면"></canvas>
   <div id="tapzone" aria-hidden="true"></div>
@@ -429,7 +450,8 @@ const cv = document.getElementById('game');
 let ctx = cv.getContext('2d');
 /* ---- 설정 (이 기기에 저장) ---- */
 function loadJSON(k){ try{ return JSON.parse(localStorage.getItem(k)) || null; }catch(e){ return null; } }
-function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); mirrorSoon(); }catch(e){ saveFail(); } }
+function saveFail(){ try{ if(typeof S !== 'undefined' && S && !window.__sfT){ window.__sfT = 1; setTimeout(() => window.__sfT = 0, 20000); S.toast = {text:'💾 이 기기의 저장 공간이 가득 찼어요. 선생님께 알려 주세요', t:0}; } }catch(e){} }
 const SET = Object.assign({bgm:0.45, sfx:1, shake:true, flash:true, btn:'m', perf:'auto', move:'joy', lang:'ko', tts:true, autoFull:true}, loadJSON('jungle_settings'));
 function saveSet(){ saveJSON('jungle_settings', SET); }
 let LIGHT = SET.perf === 'on';
@@ -442,7 +464,7 @@ const pk = k => pkOf(PROF.cur, k);
 const curProf = () => PROF.list.find(p => p.id === PROF.cur) || PROF.list[0];
 const ACCS = Object.assign({oneHand:false, assist:false, symbols:false}, loadJSON(pk('jungle_access')));   // 더 쉽게 하기 (선택)
 function saveAcc(){ saveJSON(pk('jungle_access'), ACCS); }
-const TEACH = Object.assign({pin:'', breakMin:20, dailyMin:0, allOpen:0}, loadJSON('jungle_teacher'));   // 선생님 설정
+const TEACH = Object.assign({pin:'', breakMin:20, dailyMin:0, allOpen:0, scanSec:1.6}, loadJSON('jungle_teacher'));   // 선생님 설정
 function saveTeach(){ saveJSON('jungle_teacher', TEACH); }   // 가벼운 모드 (효과 줄이기)
 let W = 960; const H = 540;   // 모바일에선 화면 비율에 맞춰 W가 넓어져요 (전체 화면)
 const FONT = '"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
@@ -549,7 +571,7 @@ function loadDex(){
   return d;
 }
 let DEX = loadDex();
-function saveDex(){ try{ localStorage.setItem(pk('jungle_dex'), JSON.stringify(DEX)); }catch(e){} }
+function saveDex(){ try{ localStorage.setItem(pk('jungle_dex'), JSON.stringify(DEX)); mirrorSoon(); }catch(e){ saveFail(); } }
 const totalClears = () => DEX.clears.easy + DEX.clears.normal;
 function owns(kind, k){
   const T = kind === 'skin' ? SKINS : kind === 'trail' ? TRAILS : PETS, it = T[k];
@@ -1158,7 +1180,7 @@ document.addEventListener('touchend', e => {
   if(now - lastTouchEnd < 380 && !(e.target.closest && e.target.closest('input, textarea, select'))){   // 빠른 두 번째 탭 = 확대 신호 → 막기
     e.preventDefault();
     const btn = e.target.closest && e.target.closest('button, summary, a, label, [role=button]');   // 단, 버튼은 그대로 눌러 줘요
-    if(btn && !btn.disabled) btn.click();
+    if(btn && !btn.disabled && !(ACCS.scan && typeof scanActive === 'function' && scanActive())) btn.click();
   }
   lastTouchEnd = now;
 }, {passive:false});
@@ -2179,6 +2201,7 @@ function enterLobby(){
   S.pet.x = st0.x; S.pet.y = st0.y - 40;
   lbSetScene(lbPickScene()); saveDex();
   dmCheck();
+  setTimeout(() => { if(S.state === 'lobby' && !screen) festCheck(); }, 900);
   const P = S.player; P.vx = 0; P.vy = 0; P.onGround = true; P.face = 1; P.x = S.lobby.px - P.w/2; P.y = S.lobby.py - P.h;
   S.camX = 0; S.particles = []; S.texts = [];
   hideScreen(); saveDex();
@@ -3053,14 +3076,14 @@ function houseInfo(h){
   }
   return null;
 }
-const DAILY_MISSIONS = [
+let DAILY_MISSIONS = [
   {k:'fruit',  icon:'🍎', text:'과일 10개 먹기',     n:10},
   {k:'safety', icon:'🛡️', text:'안전교육 1회 완료',  n:1},
   {k:'chest',  icon:'🎁', text:'보물 3개 수집',      n:3},
   {k:'dist',   icon:'🌴', text:'정글 500m 이동',     n:500}
 ];
 const DM_REWARD = 50;
-function dm(){ if(!DEX.dm || DEX.dm.d !== todayKey()) DEX.dm = {d:todayKey(), fruit:0, safety:0, chest:0, dist:0, got:{}, gift:false}; return DEX.dm; }
+function dm(){ if(!DEX.dm || DEX.dm.d !== todayKey()) DEX.dm = {d:todayKey(), fruit:0, safety:0, chest:0, dist:0, got:{}, gift:false}; const m = DEX.dm; if(!m.keys) m.keys = dmPick(m.d); DAILY_MISSIONS = m.keys.map(k => DM_POOL.find(x => x.k === k)).filter(Boolean); return m; }
 function dmAdd(k, n = 1){ if(typeof DEX === 'undefined') return; const m = dm(); m[k] = (m[k] || 0) + n; }
 function dmCheck(){   // 다 한 미션은 바로 보상
   const m = dm(); let any = false;
@@ -3069,7 +3092,7 @@ function dmCheck(){   // 다 한 미션은 바로 보상
 }
 function dmGift(){
   const m = dm(); if(m.gift || !DAILY_MISSIONS.every(ms => m.got[ms.k])) return false;
-  m.gift = true; gainXP(100); const it = pick(['giant','magnet','float','glow','fairy','heart']); DEX.items[it] = (DEX.items[it] || 0) + 1; DEX.coins += 50; saveDex();
+  m.gift = true; DEX.dmDays = (DEX.dmDays || 0) + 1; gainXP(100); const it = pick(['giant','magnet','float','glow','fairy','heart']); DEX.items[it] = (DEX.items[it] || 0) + 1; DEX.coins += 50; saveDex();
   S.toast = {text:`🎁 선물! ${BAG_ITEMS[it].icon} ${BAG_ITEMS[it].name} + 🪙50`, t:0}; seq([523,659,784,1047,1319], 90, 'triangle', .07);
   return true;
 }
@@ -5315,6 +5338,10 @@ function showScreen(type){
     html = tyLogHTML();
   } else if(type === 'tyBean'){
     html = cfBeanHTML();
+  } else if(type === 'report'){
+    html = reportHTML();
+  } else if(type === 'festival'){
+    html = festivalHTML();
   } else if(type === 'barista' || type === 'cook'){
     html = roomHTML(type) + '<p id="msg"></p>';
   } else if(type === 'bag'){
@@ -5516,6 +5543,8 @@ function showScreen(type){
   card.innerHTML = html;
   card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult','pangMap','tyResult','tyDeco','tyBook','tyRecipe','tyLog','tyBean','village','townMap','avatar','levelup','stageClear','stageFail'].includes(type));
   card.classList.toggle('mapc', type === 'stageMap');
+  card.classList.toggle('reportc', type === 'report');
+  card.classList.toggle('festc', type === 'festival');
   card.classList.toggle('titlec', type === 'title');
   overlay.classList.add('show'); document.body.classList.add('menuopen'); if(typeof doorBtnUpdate === 'function') doorBtnUpdate();
   const b = document.getElementById('goBtn') || {focus(){}};   // 학습 화면엔 없을 수 있어요
@@ -5540,6 +5569,8 @@ function showScreen(type){
     : type === 'tyResult' ? () => showScreen(TY && TY.kind === 'kitchen' ? 'cook' : 'barista')
     : type === 'tyDeco' || type === 'tyBook' || type === 'tyRecipe' || type === 'tyBean' ? () => showScreen(tyRoomKind === 'kitchen' ? 'cook' : 'barista')
     : type === 'tyLog' ? () => showScreen('teacher')
+    : type === 'report' ? () => showScreen('teacher')
+    : type === 'festival' ? () => { festShow = 0; if(S.state === 'lobby') hideScreen(); else showScreen('title'); }
     : type === 'profiles' ? () => showScreen('title')
     : type === 'profNew' ? () => { const d = window.PDRAFT, name = (d.name || '').trim(); if(!name){ setMsg('이름을 적어 주세요'); return; } const id = 'p' + Date.now(); PROF.list.push({id, name:name.slice(0, 8), icon:d.icon}); saveProf(); window.PDRAFT = null; switchProfile(id); }
     : type === 'pin' || type === 'pinNew' ? () => { pinNext = null; if(!TEACH.pin && window.__oldPin){ TEACH.pin = window.__oldPin; window.__oldPin = ''; } showScreen('title'); }
@@ -5596,6 +5627,9 @@ function showScreen(type){
   if(type === 'tyResult'){ on('tyAgain', () => tyStart(TY.kind, TY.lv)); on('tyNext', () => tyStart(TY.kind, TY.result.unlocked)); on('tyToDeco', () => { tyRoomKind = TY.kind; showScreen('tyDeco'); }); }
   if(type === 'tyDeco' || type === 'tyRecipe') wireTyScreen(type);
   if(type === 'tyBean') wireCfBean();
+  if(type === 'report'){ on('repPrint', () => window.print()); const mm = document.getElementById('repMemo'); if(mm) mm.oninput = () => { TEACH.memo = TEACH.memo || {}; TEACH.memo[repId] = mm.value; saveTeach(); }; }
+  if(type === 'festival') seq([523, 659, 784, 1047, 784, 1047, 1319, 1568], 140, 'triangle', .07);
+  on('festAgain', () => { festShow = DEX.fest; showScreen('festival'); });
   on('tTyLog', () => showScreen('tyLog'));
   if(type === 'club') wireClub();
   if(type === 'avatar'){
@@ -5834,7 +5868,7 @@ function mathLine(q){ return `${FRUIT_INFO[q.t].ko} 한 개에 ${q.p} 코인이�
 function learnStars(){ const m = LEARN.miss; return m === 0 ? 3 : m <= 2 ? 2 : 1; }
 function finishLearn(){
   const L = LEARN; L.finished = true;
-  const stars = learnStars(); DEX.learn[L.kind] = (DEX.learn[L.kind] || 0) + 1; DEX.learn.stars += stars; gainXP(stars*40);
+  const stars = learnStars(); dmAdd('learn'); DEX.learn[L.kind] = (DEX.learn[L.kind] || 0) + 1; DEX.learn.stars += stars; gainXP(stars*40);
   const total = DEX.learn.spell + DEX.learn.match + DEX.learn.shop;
   if(total >= 10) unlock('learn10'); if(DEX.learn.shop >= 5) unlock('shop5');
   if(L.room === 'cook'){ L.coins = 5 + stars*5; DEX.coins += L.coins; }
@@ -6105,6 +6139,220 @@ function wireRoom(type){
     seq([784,988,1175,1568], 70, 'triangle', .06); const it = BAG_ITEMS[r.give]; ROOM = null; re(); setMsg(`고마워요! ${it.icon} ${it.name}을(를) 받았어요`);
   };
 }
+/* ================= 🎓 첫 영업 따라 하기 (튜토리얼) ================= */
+const TUT_TXT = {greet:'손님이 왔어요! 큰 버튼을 눌러 인사해요 👋', add:'말풍선 그림과 같은 재료를 아래에서 눌러요 👇', blend:'큰 버튼을 세 번 눌러 갈아요 🌀', chop:'큰 버튼을 세 번 눌러 썰어요 🔪',
+  cook:'큰 버튼을 세 번 눌러 익혀요 🔥', plate:'큰 버튼을 눌러 접시에 담아요 🍽️', serve:'큰 버튼을 눌러 손님께 드려요 🙌', cup:'말풍선과 같은 잔을 아래에서 눌러요 🥤', grind:'큰 버튼을 세 번 눌러 원두를 갈아요 ⚙️',
+  tamp:'큰 버튼을 두 번 눌러 꾹 눌러요 ✋', extract:'추출 버튼을 누르고 커피가 나올 때까지 기다려요 ☕', steam:'큰 버튼을 세 번 눌러 우유를 데워요 🥛', wait:'손님을 기다려요. 곧 와요! ⏳'};
+const tyHintT = () => TY && TY.tut ? 1 : 6;
+function tyDrawCoach(x){
+  const T = TY; if(!T.tut || T.closing) return;
+  const st = tyStep() || (T.pick ? null : 'wait'), key = st || 'pick'; if(!st) return;
+  if(T.tutSaid !== key){ T.tutSaid = key; if(st !== 'wait') setTimeout(() => { if(TY === T && T.tutSaid === key) tySay(TUT_TXT[st].replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, '')); }, st === 'greet' ? 200 : 700); }
+  const f = tyFit(), bx = 24, by = Math.max(178, (clamp(f.h/500, 0.75, 1.25)*62 + 22 - f.oy)/f.k), bw = 390, bh = 96, a = FRIEND_ART.monkey;
+  x.save(); x.fillStyle = 'rgba(0,0,0,.2)'; rrOn(x, bx + 3, by + 6, bw, bh, 24); x.fill();
+  x.fillStyle = '#fffdf2'; rrOn(x, bx, by, bw, bh, 24); x.fill(); x.strokeStyle = '#51cf66'; x.lineWidth = 5; x.stroke();
+  if(a && a.ok){ const h = 92, w = h*a.img.width/a.img.height; x.drawImage(a.img, bx + 8, by + 2 + Math.sin(T.t*3)*3, w, h); }
+  x.font = `bold 15px ${FONT}`; x.fillStyle = '#2f9e44'; x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText('🎓 처음 영업 따라 하기', bx + 112, by + 20);
+  x.font = `bold 20px ${FONT}`; x.fillStyle = '#3a2412';
+  const t = TUT_TXT[st], words = t.split(' '); let l1 = '', l2 = '';
+  for(const w of words){ if(x.measureText(l1 + w).width < bw - 132 && !l2) l1 += w + ' '; else l2 += w + ' '; }
+  x.fillText(l1.trim(), bx + 112, by + 50); if(l2) x.fillText(l2.trim(), bx + 112, by + 76);
+  x.restore();
+}
+/* ================= 🎨 색 구분 도움 (게이지 무늬) ================= */
+const GA_PAT = {};
+function gaPat(tx, kind){
+  const key = kind; let c = GA_PAT[key];
+  if(!c){ c = GA_PAT[key] = document.createElement('canvas'); const s = kind === 'g' ? 26 : 14; c.width = c.height = s; const x = c.getContext('2d');
+    x.fillStyle = {r:'#ff9b9b', y:'#ffe38a', g:'#69db7c', p:'#f59f00'}[kind]; x.fillRect(0, 0, s, s);
+    if(kind === 'r'){ x.strokeStyle = 'rgba(150,20,20,.55)'; x.lineWidth = 3; x.beginPath(); x.moveTo(-2, s + 2); x.lineTo(s + 2, -2); x.moveTo(-2, 2); x.lineTo(2, -2); x.moveTo(s - 2, s + 2); x.lineTo(s + 2, s - 2); x.stroke(); }
+    if(kind === 'y'){ x.fillStyle = 'rgba(140,100,0,.45)'; x.beginPath(); x.arc(s/2, s/2, 2.2, 0, 6.29); x.fill(); }
+    if(kind === 'g'){ x.strokeStyle = 'rgba(255,255,255,.9)'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(7, 13); x.lineTo(11, 17); x.lineTo(19, 8); x.stroke(); }
+    if(kind === 'p'){ x.fillStyle = '#fff'; x.font = 'bold 11px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('★', s/2, s/2 + 1); }
+  }
+  try{ return tx.createPattern(c, 'repeat') || c; }catch(e){ return '#69db7c'; }
+}
+/* ================= 🛟 기록 보호 (IndexedDB 한 벌 더 · 사라지면 되찾기) ================= */
+var mirrorT = null, mirrorReady = false;
+function jjKeys(){ const o = {}; try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(/^jungle_/.test(k)) o[k] = localStorage.getItem(k); } }catch(e){} return o; }
+function mirrorSoon(){ if(!mirrorReady) return; clearTimeout(mirrorT); mirrorT = setTimeout(mirrorNow, 2500); }
+function mirrorNow(){ if(!mirrorReady || !window.indexedDB) return; try{ const o = jjKeys(); if(!o.jungle_dex && !o.jungle_profiles) return; idbSet('__mirror', {date:Date.now(), keys:o}).catch(() => {}); }catch(e){} }
+addEventListener('pagehide', mirrorNow);
+document.addEventListener('visibilitychange', () => { if(document.hidden) mirrorNow(); });
+(async () => {
+  try{
+    if(navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => { if(!p) navigator.storage.persist().catch(() => {}); }).catch(() => {});
+    if(!window.indexedDB){ mirrorReady = true; return; }
+    const cur = jjKeys();
+    if(!cur.jungle_dex && !cur.jungle_profiles){
+      const m = await idbGet('__mirror');
+      if(m && m.keys && m.keys.jungle_dex && !sessionStorage.getItem('jj_restored')){
+        sessionStorage.setItem('jj_restored', '1');
+        for(const [k, v] of Object.entries(m.keys)) try{ localStorage.setItem(k, v); }catch(e){}
+        alert('🛟 이 기기에서 기록이 지워져서, 자동 저장본(' + new Date(m.date).toLocaleString('ko-KR') + ')으로 되찾았어요. 다시 시작할게요.');
+        location.reload(); return;
+      }
+    }
+  }catch(e){}
+  mirrorReady = true; mirrorNow();
+})();
+async function mirrorInfo(){ try{ const m = await idbGet('__mirror'); return m && m.date ? m : null; }catch(e){ return null; } }
+function backupDays(){ return TEACH.lastBackup ? Math.floor((Date.now() - TEACH.lastBackup)/86400000) : null; }
+/* ================= 📜 오늘의 탐험: 날마다 바뀌는 할 일 ================= */
+const DM_POOL = [
+  {k:'fruit', icon:'🍎', text:'과일 10개 먹기', n:10, g:'j'},
+  {k:'dist', icon:'🌴', text:'정글 500m 이동', n:500, g:'j'},
+  {k:'chest', icon:'🎁', text:'보물 3개 수집', n:3, g:'j'},
+  {k:'safety', icon:'🛡️', text:'안전교육 1회 완료', n:1, g:'x'},
+  {k:'ty', icon:'☕', text:'체험실 영업 1번', n:1, g:'t', place:'village'},
+  {k:'cherry', icon:'🍒', text:'커피 체리 3개 줍기', n:3, g:'x', place:'village'},
+  {k:'learn', icon:'📚', text:'학습 1번 하기', n:1, g:'x'},
+  {k:'pang', icon:'🍉', text:'과일팡 1판', n:1, g:'x', place:'esports'},
+  {k:'song', icon:'🎵', text:'리듬 스타 1곡', n:1, g:'x', place:'club'}
+];
+function dmPick(d){
+  let s = (+d || 1) % 233280; const r = () => (s = (s*9301 + 49297) % 233280)/233280;
+  const ok = m => !m.place || placeOpen(m.place);
+  const J = DM_POOL.filter(m => m.g === 'j'), out = [J[Math.floor(r()*J.length)].k];
+  out.push(placeOpen('village') ? 'ty' : 'safety');
+  const X = DM_POOL.filter(m => !out.includes(m.k) && m.g !== 't' && ok(m));
+  while(out.length < 4 && X.length) out.push(X.splice(Math.floor(r()*X.length), 1)[0].k);
+  return out;
+}
+/* ================= 🎪 마을 축제 ================= */
+const FEST_GOALS = [30, 60, 100];
+function starTotal(){
+  let n = 0; const s = DEX.stageStars || {}; for(const k in s) n += s[k] || 0;
+  const ty = DEX.ty || {}; for(const kind in ty){ const st = ty[kind].stars || {}; for(const l in st) n += st[l] || 0; }
+  const ps = DEX.pangStage && DEX.pangStage.stars || {}; for(const k in ps) n += ps[k] || 0;
+  return n;
+}
+const festNext = () => FEST_GOALS[DEX.fest || 0] || null;
+function festLine(){ const g = festNext(), n = starTotal(); return g ? `🎪 마을 축제까지 ⭐ ${n}/${g}` : `🎪 마을 축제 ${DEX.fest}번 모두 열었어요! ⭐ ${n}`; }
+function festCheck(){
+  const g = festNext(); if(!g || starTotal() < g) return false;
+  DEX.fest = (DEX.fest || 0) + 1; DEX.coins += 100; gainXP(200); saveDex(); festShow = DEX.fest; showScreen('festival'); return true;
+}
+let festShow = 0;
+function festivalHTML(){
+  const n = festShow || DEX.fest || 1, animals = ['monkey', 'parrot', 'frog', 'penguin', 'owl', 'elephant', 'chameleon', 'sloth'];
+  const parade = animals.map((a, i) => `<img src="assets/animals/${a}.png" style="animation-delay:${-i*1.1}s" alt="">`).join('') + '<img class="king" src="assets/animals/gorilla_king.png" style="animation-delay:-9.5s" alt="">';
+  const conf = Array.from({length:26}, (_, i) => `<i style="left:${(i*37) % 100}%;animation-delay:${(i*0.23) % 3}s;animation-duration:${2.6 + (i % 5)*0.4}s">${['🎉', '✨', '🎊', '⭐', '🎈', '💖'][i % 6]}</i>`).join('');
+  return `<div class="fest"><div class="fconf">${conf}</div>
+    <h2>🎪 강릉분원 마을 축제${n > 1 ? ` ${n}번째` : ''}!</h2>
+    <p class="big">별 ⭐ ${starTotal()}개를 모았어요! 친구들이 모두 축하하러 왔어요</p>
+    <div class="fparade">${parade}</div>
+    <p class="coins">🪙 +100 · 🏅 축제 배지 ${DEX.fest || 1}개${festNext() ? ` · 다음 축제까지 ⭐ ${festNext()}` : ''}</p>
+    <button class="go" id="goBtn">🎉 고마워요!</button></div>`;
+}
+/* ================= 📄 학생별 리포트 ================= */
+let repId = null;
+function reportHTML(){
+  const p = PROF.list.find(x => x.id === repId) || PROF.list[0], d = p.id === PROF.cur ? DEX : profData(p.id), ana = d.ana || {}, learn = d.learn || {};
+  const CAUSE = {custom:'함정·적', water:'물', lava:'용암', spider:'조심 동물', poison:'독열매', vine:'가시 덩굴', gorilla:'고릴라', boss:'대장', etc:'기타'};
+  const lost = Object.entries(ana.lost || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k, v]) => `${CAUSE[k] || k} ${v}번`).join(', ') || '-';
+  const ss = d.stageStars || {}, stageSum = Object.values(ss).reduce((a, b) => a + (b || 0), 0), stageN = Object.keys(ss).filter(k => ss[k]).length;
+  const T = d.ty || {}, KN = {cafe:'🍹 과일 음료', coffee:'☕ 커피', kitchen:'🍳 요리'};
+  const avg = (L, f) => L.length ? (L.reduce((a, r) => a + f(r), 0)/L.length) : null, fx = v => v === null ? '-' : v.toFixed(1);
+  const tmRate = L => { let p2 = 0, n = 0; for(const r of L){ const m = /완벽 (\d+) · 잘했어요 (\d+) · 괜찮아요 (\d+) · 다시 (\d+)/.exec(r.tm || ''); if(m){ const a = m.slice(1).map(Number); p2 += a[0] + a[1]; n += a[0] + a[1] + a[2] + a[3]; } } return n ? Math.round(p2/n*100) + '%' : '-'; };
+  const payRate = L => { let ok = 0, n = 0; for(const r of L){ const m = /(\d+)\/(\d+)/.exec(r.pay || ''); if(m){ ok += +m[1]; n += +m[2]; } } return n ? Math.round(ok/n*100) + '%' : '-'; };
+  const rows = Object.keys(KN).map(k => { const D = T[k]; if(!D || !D.log || !D.log.length) return ''; const L = D.log.slice(-10), st = D.stars || {};
+    return `<tr><td>${KN[k]}</td><td>${D.days || D.log.length}번</td><td>${[1, 2, 3, 4].map(l => st[l] ? `${l}단계 ${'★'.repeat(st[l])}` : '').filter(Boolean).join(' · ') || '-'}</td><td>${fx(avg(L, r => r.miss))}</td><td>${fx(avg(L, r => r.hints))}</td><td>${tmRate(L)}</td><td>${payRate(L)}</td></tr>`; }).join('');
+  const all = Object.values(T).flatMap(D => (D && D.log) || []).sort((a, b) => a.d - b.d);
+  let growth = '<p class="keys">체험실 영업이 4번 이상 쌓이면 변화를 보여 줘요.</p>', chart = '';
+  if(all.length >= 4){
+    const h = Math.floor(all.length/2), A = all.slice(0, h), B = all.slice(h);
+    const cmp = (name, f, lowGood, unit) => { const a = avg(A, f), b = avg(B, f); const better = lowGood ? b < a : b > a, same = Math.abs(a - b) < 0.05;
+      return `<li><b>${name}</b> ${a.toFixed(1)}${unit} → ${b.toFixed(1)}${unit} ${same ? '➡️ 비슷해요' : better ? '📈 좋아졌어요' : '📉 조금 늘었어요'}</li>`; };
+    growth = `<ul class="rgrow">${cmp('다시 본 횟수(틀린 재료·손님)', r => r.miss, true, '번')}${cmp('도움 손가락', r => r.hints, true, '번')}${cmp('한 판 걸린 시간', r => r.sec/60, true, '분')}${cmp('받은 별', r => r.stars, false, '개')}</ul><p class="keys">앞의 ${A.length}번과 최근 ${B.length}번 영업의 평균을 비교했어요</p>`;
+    const L = all.slice(-14), mx = Math.max(3, ...L.map(r => Math.max(r.miss, r.hints))), bw = 520/L.length;
+    chart = `<svg class="rchart" viewBox="0 0 560 170" role="img" aria-label="최근 영업별 다시 본 횟수와 도움 횟수">
+      <line x1="30" y1="140" x2="550" y2="140" stroke="#999"/>${L.map((r, i) => { const x0 = 34 + i*bw, h1 = r.miss/mx*110, h2 = r.hints/mx*110;
+      return `<rect x="${x0}" y="${140 - h1}" width="${bw*0.38}" height="${h1}" fill="#e8590c" rx="2"/><rect x="${x0 + bw*0.42}" y="${140 - h2}" width="${bw*0.38}" height="${h2}" fill="#4dabf7" rx="2"/><text x="${x0 + bw*0.4}" y="156" font-size="10" text-anchor="middle" fill="#555">${new Date(r.d).getMonth() + 1}/${new Date(r.d).getDate()}</text>`; }).join('')}
+      <text x="34" y="14" font-size="12" fill="#e8590c">■ 다시 본 횟수</text><text x="150" y="14" font-size="12" fill="#1c7ed6">■ 도움 손가락</text><text x="30" y="166" font-size="10" fill="#777">(낮을수록 혼자서 잘해요)</text></svg>`;
+  }
+  const memo = (TEACH.memo || {})[p.id] || '';
+  return `<div class="report"><div class="rhead"><h2>📄 ${escapeHTML(p.name)} 학습 리포트</h2><p>정글 점프 탐험대 · 강원특수교육원 강릉분원 · 출력일 ${new Date().toLocaleDateString('ko-KR')}</p></div>
+    <h3>한눈에 보기</h3>
+    <table class="rtab"><tr><th>전체 이용 시간</th><td>${fmtMin(d.playSec || 0)}</td><th>마지막 이용</th><td>${d.lastPlayed ? new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '-'}</td></tr>
+      <tr><th>정글 모험</th><td>${ana.runs || 0}판 · 최고 ${d.bestDist || 0}m</td><th>스테이지</th><td>${stageN}/8곳 · 별 ${stageSum}/24</td></tr>
+      <tr><th>자주 잃은 곳</th><td>${lost}</td><th>오늘의 탐험 완료</th><td>${d.dmDays || 0}일</td></tr>
+      <tr><th>학습</th><td>이름 쓰기 ${learn.spell || 0} · 짝 맞추기 ${learn.match || 0} · 퀴즈 ${learn.quiz || 0} · 계산 ${learn.math || 0} · 별 ${learn.stars || 0}</td><th>안전 약속</th><td>${Object.keys(d.safeSeen || {}).length}/${SAFE.length}</td></tr>
+      <tr><th>마을 축제</th><td>${d.fest || 0}번</td><th>레벨</th><td>${typeof d.xp === 'number' ? '경험치 ' + d.xp : '-'}</td></tr></table>
+    <h3>체험실 (최근 10번 평균)</h3>
+    ${rows ? `<table class="rtab"><tr><th>체험실</th><th>영업</th><th>최고 별</th><th>다시 본</th><th>도움</th><th>타이밍 성공</th><th>계산 정답</th></tr>${rows}</table>` : '<p class="keys">아직 체험실 영업 기록이 없어요.</p>'}
+    <h3>변화</h3>${growth}${chart}
+    <h3>선생님 메모</h3><textarea id="repMemo" rows="3" placeholder="관찰 내용, 다음 목표 등을 적어요 (이 기기에 저장돼요)">${escapeHTML(memo)}</textarea>
+    <div class="btnrow noprint"><button class="go" id="repPrint">🖨️ 인쇄 · PDF로 저장</button><button class="go alt" id="goBtn">선생님 화면으로</button></div></div>`;
+}
+/* ================= 🔘 스캔 모드 (스위치 하나로 차례대로 고르기) ================= */
+const SCAN = {el:null, i:-1, t:0};
+const SCAN_OFF = ['pin', 'pinNew', 'teacher', 'diag', 'report', 'tyLog', 'profNew', 'itemEdit'];
+const scanActive = () => !!ACCS.scan && !SCAN_OFF.includes(screen);
+const scanSec = () => TEACH.scanSec || 1.6;
+function scanList(){ return [...card.querySelectorAll('button, summary')].filter(e => !e.disabled && e.offsetParent !== null && !e.closest('.noscan')); }
+function scanClear(){ if(SCAN.el) SCAN.el.classList.remove('scanhl'); SCAN.el = null; }
+function scanTick(){
+  if(!scanActive() || screen === 'tycoon' || !overlay.classList.contains('show')){ scanClear(); SCAN.i = -1; return; }
+  const L = scanList(); if(!L.length){ scanClear(); return; }
+  if(SCAN.el && !L.includes(SCAN.el)){ scanClear(); SCAN.i = -1; SCAN.t = Date.now(); }
+  if(SCAN.el && Date.now() - SCAN.t < scanSec()*1000) return;
+  SCAN.i = (SCAN.i + 1) % L.length; SCAN.t = Date.now();
+  scanClear(); SCAN.el = L[SCAN.i]; SCAN.el.classList.add('scanhl');
+  try{ SCAN.el.scrollIntoView({block:'nearest', inline:'nearest'}); }catch(e){}
+  tone(520, .04, 'sine', .025);
+  if(ACCS.symbols) say(SCAN.el.textContent.replace(/[\u{1F000}-\u{1FFFF}☀-➿️▾▴▶]/gu, '').trim().slice(0, 20), 'ko-KR');
+}
+setInterval(scanTick, 150);
+function scanSelect(e){
+  if(e){ e.preventDefault(); e.stopImmediatePropagation(); }
+  if(screen === 'tycoon'){ tyScanSelect(); return; }
+  if(!overlay.classList.contains('show')){ if(S && S.state === 'lobby') showScreen('townMap'); return; }
+  const el = SCAN.el; if(!el) return;
+  tone(880, .06, 'triangle', .05); scanClear(); SCAN.i = -1; SCAN.t = Date.now();
+  el.click();
+}
+addEventListener('keydown', e => { if(scanActive() && !e.repeat && (e.code === 'Space' || e.code === 'Enter') && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) scanSelect(e); }, true);
+addEventListener('pointerdown', e => { if(scanActive() && (overlay.classList.contains('show') || (S && S.state === 'lobby' && !screen)) && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) scanSelect(e); }, true);
+addEventListener('click', e => { if(scanActive() && e.isTrusted && overlay.classList.contains('show') && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))){ e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+/* 체험실 안에서의 스캔 */
+function tyScanTargets(){
+  const T = TY, G = TY_GEO[T.kind], out = [];
+  if(T.pick){ T.pick.btns.forEach(([bx, by, bw, bh], i) => out.push({k:'pick', i, r:[bx, by, bw, bh]})); return out; }
+  const [ax, ay, aw, ah] = G.act, st = tyStep();
+  out.push({k:'act', r:[ax, ay, aw, ah]});
+  if(st === 'add' || st === 'cup') tyPal().forEach(t => { const [bx, by, r] = tyBtnXY(t); out.push({k:'ing', t, r:[bx - r - 6, by - r - 6, 2*r + 12, 2*r + 12]}); });
+  if(T.lv === 4 && (st === 'greet' || st === 'serve')) T.custs.slice(0, T.front).forEach(c => { if(!c.walking) out.push({k:'cust', c, r:[c.x - 100, (c.headTop || 260) - 20, 200, G.occ - (c.headTop || 260) + 30]}); });
+  return out;
+}
+function tyScanUpdate(dt){
+  const T = TY; if(!ACCS.scan || T.closing) return;
+  const L = tyScanTargets(); T.scan = T.scan || {i:0, t:0};
+  const W = T.work, lock = W && W.g && W.g.run;
+  if(lock){ T.scan.i = 0; T.scan.t = 0; }
+  else { T.scan.t += dt; if(T.scan.t >= scanSec()){ T.scan.t = 0; T.scan.i = (T.scan.i + 1) % Math.max(1, L.length); tone(520, .03, 'sine', .02); } }
+  if(T.scan.i >= L.length) T.scan.i = 0;
+  T.scanL = L;
+}
+function tyScanSelect(){
+  const T = TY; if(!T || T.stopped) return;
+  if(T.closing){ if(T.closing.t > 1 && !T.finished){ T.finished = true; tyFinish(); } return; }
+  const L = T.scanL || tyScanTargets(), g = L[(T.scan && T.scan.i) || 0]; if(!g) return;
+  tone(880, .05, 'triangle', .05);
+  if(g.k === 'pick'){ if(T.pick.type === 'pay') tyPayChoose(g.i); else if(T.pick.type === 'baby') cfBabyChoose(g.i); else if(T.pick.type === 'order') tyOrderChoose(g.i); }
+  else if(g.k === 'act') tyAction(true);
+  else if(g.k === 'ing') tyAddIng(g.t);
+  else if(g.k === 'cust'){ const st = tyStep(); if(st === 'greet' && !g.c.greeted) tyGreet(g.c); else if(st === 'serve' && T.work && T.work.cust === g.c) tyServe(g.c); }
+  const W = T.work; if(!(W && W.g && W.g.run)){ T.scan.i = 0; T.scan.t = -0.3; }
+}
+function tyScanDraw(x){
+  const T = TY; if(!ACCS.scan || !T.scanL || T.closing) return;
+  const g = T.scanL[(T.scan && T.scan.i) || 0]; if(!g) return;
+  const [rx, ry, rw, rh] = g.r, pul = 0.6 + Math.sin(T.t*8)*0.4;
+  x.save(); x.strokeStyle = `rgba(255,212,59,${pul})`; x.lineWidth = 10; rrOn(x, rx - 8, ry - 8, rw + 16, rh + 16, 22); x.stroke();
+  x.strokeStyle = '#1c1c1c'; x.lineWidth = 3; rrOn(x, rx - 14, ry - 14, rw + 28, rh + 28, 26); x.stroke();
+  const pr = Math.min(1, (T.scan.t || 0)/scanSec()); x.fillStyle = '#ffd43b'; x.fillRect(rx, ry + rh + 12, rw*pr, 6); x.restore();
+}
 /* ================= 체험실 타이쿤: ☕ 바리스타 · 🍳 요리 (같은 엔진) ================= */
 const TY_W = 1376, TY_H = 768;
 const TY_ART = {};
@@ -6325,7 +6573,7 @@ function cfBeanHTML(){
   let roast;
   if(R.phase === 'peel') roast = `<div class="cfpan"><img src="assets/coffee/cherry.png" style="transform:scale(${1 - R.peel*0.2})"></div><p>🍒 체리 껍질을 벗겨요 (${R.peel}/3)</p><button class="go sm" id="cfPeel">👆 껍질 벗기기</button>`;
   else if(R.phase === 'roast' && cfGaugeOn()){ const z = cfRoastZones(), L = v => (11.03 + v*78.21).toFixed(2);
-    roast = `<p class="cfgtitle">🔥 원하는 색에서 <b>✋ 멈추기</b>! 초록 칸 = 딱 좋아요 · 가운데 금색 = ✨ 특급</p>
+    roast = `<p class="cfgtitle">🔥 원하는 색에서 <b>✋ 멈추기</b>! ✓ 칸 = 딱 좋아요 · 가운데 금색 = ✨ 특급 · 빗금 = 탐</p>
       <div class="cfg"><img src="assets/coffee/ui/gauge_roast.png" alt=""><div class="cfgt"><i class="cfz g" style="left:${(z.g0*100).toFixed(1)}%;width:${((z.g1 - z.g0)*100).toFixed(1)}%"></i><i class="cfz p" style="left:${(z.p0*100).toFixed(1)}%;width:${((z.p1 - z.p0)*100).toFixed(1)}%"></i><i class="cfz b" style="left:${(z.burn*100).toFixed(1)}%;width:${((1 - z.burn)*100).toFixed(1)}%"></i></div><img class="cfga" id="cfArrow" src="assets/coffee/ui/arrow_down.png" style="left:${L(R.p)}%" alt=""></div>
       <div class="cfglab">${[[z.early/2, '🟢 생두'], [(z.early + z.g0)/2, '🟡 연하게'], [(z.g0 + z.g1)/2, '🟤 딱 좋아요'], [(z.g1 + z.burn)/2, '🟫 진하게'], [(z.burn + 1)/2, '🔥 탐']].map(([v, t]) => `<span style="left:${L(v)}%">${t}</span>`).join('')}</div>
       <p id="cfStage">${cfRoastName(R.p)}</p><button class="go" id="cfStop">✋ 멈추기</button>`; }
@@ -6399,6 +6647,7 @@ function cfCollect(){
   for(const h of S.cherries){ if(h.got) continue; const [hx, hy] = pos(h);
     if(hitCircle(hx, hy, 16, 2)){ h.got = true; const D = cfData(); if(h.gold) D.gold++; else D.cherry++;
       floatText(hx, hy - 20, h.gold ? '✨ 황금 원두!' : '🍒 커피 체리!', h.gold ? '#ffe066' : '#ff8787'); tone(h.gold ? 1319 : 988, .1, 'triangle', .05);
+      if(!h.gold) dmAdd('cherry');
       if(!D.found){ D.found = true; S.toast = {text:'🍒 커피 체리를 찾았어요! 바리스타 체험실 🫘 원두 공방에서 볶아요', t:0}; say('커피 체리를 찾았어요!', 'ko-KR'); }
       saveDex(); } }
 }
@@ -6457,7 +6706,7 @@ function gaTap(){
   if(st === 'extract') cfStartExtract(true);
   W.g = gaNew(st, true); T.idle = 0;
   tone(st === 'extract' ? 330 : 440, .12, 'triangle', .05);
-  if(!T.gTold){ T.gTold = true; tySay('초록색에서 멈춰요!'); }
+  if(!T.gTold){ T.gTold = true; tySay('체크 표시 칸에서 멈춰요!'); }
 }
 function gaUpdate(dt){
   const T = TY, W = T.work; if(!W) return; const g = W.g; if(!g) return;
@@ -6500,14 +6749,14 @@ function gaDrawTy(x){
   const p = g.p, pulse = g.flash > 0 ? 0.5 + Math.sin(T.t*30)*0.5 : 0, inG = p >= g.g0 && p <= g.g1 && g.run;
   const zones = (tx, v2c, horiz) => {   // 색 구간 칠하기
     const seg = (a, b, col) => { tx.fillStyle = col; v2c(tx, Math.max(0, a), Math.min(1, b)); };
-    seg(0, 1, '#ff9b9b'); seg(g.y0, g.y1, '#ffe38a'); seg(g.g0, g.g1, inG ? `rgb(${120 + pulse*80},${230},${140 + pulse*60})` : '#69db7c');
-    if(g.pw){ seg(g.p0, g.p1, '#f59f00'); }
+    seg(0, 1, gaPat(tx, 'r')); seg(g.y0, g.y1, gaPat(tx, 'y')); seg(g.g0, g.g1, gaPat(tx, 'g')); if(inG){ tx.globalAlpha = 0.35 + pulse*0.4; seg(g.g0, g.g1, '#ffffff'); tx.globalAlpha = 1; }
+    if(g.pw){ seg(g.p0, g.p1, gaPat(tx, 'p')); }
   };
   x.save();
   if(st === 'extract'){
     const gw = 520, gh = gw/5.46, gx = 800 - gw/2, gy = 446, G = GA.extract;
     x.fillStyle = 'rgba(30,20,10,.55)'; rrOn(x, gx - 16, gy - 70, gw + 32, gh + 84, 26); x.fill();
-    tyOutline(x, g.run ? '✋ 초록에서 멈춰요!' : g.res === 'retry' ? '🔄 다시 눌러 시작해요' : '☕ 눌러서 추출 시작!', gx + 14, gy - 42, 26, '#fff6dc', 'rgba(0,0,0,.5)', 'left');
+    tyOutline(x, g.run ? '✋ ✓ 칸에서 멈춰요!' : g.res === 'retry' ? '🔄 다시 눌러 시작해요' : '☕ 눌러서 추출 시작!', gx + 14, gy - 42, 26, '#fff6dc', 'rgba(0,0,0,.5)', 'left');
     tyOutline(x, `⏱️ ${Math.round(p*36)}초`, gx + gw - 10, gy - 42, 24, '#ffe066', 'rgba(0,0,0,.5)', 'right');
     gaPaint(x, 'extract', gx, gy, gw, gh, (tx, X, Y, TW, TH) => zones(tx, (c, a, b) => c.fillRect(X + a*TW, Y, (b - a)*TW, TH)));
     const ax = gx + gw*(G.x0 + p*(G.x1 - G.x0)), ay = gy + gh*G.y0 + 8, aa = gaArt('arrow_down');
@@ -6515,7 +6764,7 @@ function gaDrawTy(x){
   } else {
     const gh = 300, gw = gh*0.2549, gx = 1200 - gw/2, gy = 190, G = GA.thermo, tube = 0.80;
     x.fillStyle = 'rgba(30,20,10,.55)'; rrOn(x, gx - 90, gy - 64, gw + 190, gh + 76, 26); x.fill();
-    tyOutline(x, g.run ? '✋ 초록에서 멈춰요!' : '🥛 눌러서 데우기!', gx + gw/2 + 6, gy - 36, 24, '#fff6dc', 'rgba(0,0,0,.5)');
+    tyOutline(x, g.run ? '✋ ✓ 칸에서 멈춰요!' : '🥛 눌러서 데우기!', gx + gw/2 + 6, gy - 36, 24, '#fff6dc', 'rgba(0,0,0,.5)');
     gaPaint(x, 'thermo', gx, gy, gw, gh, (tx, X, Y, TW, TH) => {
       const yv = v => Y + TH*tube*(1 - v);
       tx.globalAlpha = 0.75; zones(tx, (c, a, b) => c.fillRect(X, yv(b), TW, yv(a) - yv(b))); tx.globalAlpha = 1;
@@ -6656,12 +6905,12 @@ function tyMenus(kind, lv){
   return {base, mine, all:[...base, ...mine]};
 }
 function tySteps(m, kind){ if(kind === 'coffee') return cfSteps(m); return kind === 'cafe' ? (TY && TY.motion ? ['greet', 'add', 'blend', 'pour', 'serve'] : ['greet', 'add', 'blend', 'serve']) : ['greet', 'add', ...m.steps, 'serve']; }
-function tyStart(kind, lv){
-  const O = tyOpt(), D = tyData(kind);
-  TY = {gaugeOn:kind === 'coffee' && O.gauge !== 'off', gSpeed:GA_SPEED[O.gauge] || 1, gHelp:0, gRetry:0, gq:{perfect:0, good:0, ok:0, retry:0}, kind, lv, relax:O.relax, jungle:O.jungle, motion:!O.tapOnly && lv >= 2, pay:O.pay, view:O.view, duo:O.duo, front:lv === 4 ? 2 : 1, total:lv === 4 ? 6 : 5,
+function tyStart(kind, lv, tut){
+  const O = tyOpt(), D = tyData(kind), scan = !!ACCS.scan;
+  TY = {tut:!!tut, gaugeOn:!tut && kind === 'coffee' && O.gauge !== 'off', gSpeed:GA_SPEED[O.gauge] || 1, gHelp:0, gRetry:0, gq:{perfect:0, good:0, ok:0, retry:0}, kind, lv, relax:O.relax, jungle:O.jungle, motion:!O.tapOnly && !scan && lv >= 2, pay:O.pay && !tut, view:tut ? 'pic' : O.view, duo:O.duo && !tut && !scan, front:lv === 4 ? 2 : 1, total:tut ? 3 : lv === 4 ? 6 : 5,
     t:0, last:performance.now(), lastF:0, custs:[], leavers:[], spawned:0, served:0, next:0.4, work:null, sel:null,
     mistakes:0, hints:0, hintOn:false, payMiss:0, payN:0, payOK:0, tips:0, patSum:0, fx:[], texts:[], idle:0, hintT:0, done:false, endT:0, closing:null,
-    lastLook:-1, press:{}, jungleUsed:0, special:D.spDay !== todayKey(), specialSpawned:false, specialDone:false, newRegs:[], pick:null, hold:null, gest:null, t0:Date.now(), banner:null};
+    lastLook:-1, press:{}, jungleUsed:0, special:!tut && D.spDay !== todayKey(), babyN:tut ? 1 : 0, specialSpawned:false, specialDone:false, newRegs:[], pick:null, hold:null, gest:null, t0:Date.now(), banner:null};
   screen = 'tycoon'; overlay.classList.remove('show'); document.body.classList.add('menuopen');
   if(typeof doorBtnUpdate === 'function') doorBtnUpdate(); if(typeof xClose !== 'undefined') xClose.style.display = 'none';
   bgmStop();
@@ -6669,6 +6918,7 @@ function tyStart(kind, lv){
   ktPreload(); for(const t of TY_PAL[kind][lv]) tyImg(t);
   if(kind === 'coffee') ['ui/gauge_extract', 'ui/gauge_thermo', 'ui/arrow_down', 'ui/arrow_left', 'ui/badge_perfect', 'ui/badge_good', 'ui/badge_ok', 'ui/badge_retry', 'baby', 'pitcher', 'tamper', 'portafilter', 'bean_roasted', 'bean_gold', ...CF_CUPS].forEach(cfArt);
   tstage.style.display = 'block'; tyResize();
+  if(TY.tut) TY.relax = true;
   if(TY.duo) TY.banner = {text:'👫 두 명이 함께: 🙋 손님 친구 · 👩‍🍳 점원 친구', t:0, dur:3};
   TY.raf = requestAnimationFrame(tyLoop);
 }
@@ -6955,7 +7205,8 @@ function tyUpdate(dt){
     if(W.cust && W.cust.hidden && !W.cust.revealed && st === 'add' && T.idle > 8) W.cust.revealed = true;   // 오래 고민하면 그림을 보여 줘요
   }
   if(tyStep() || T.pick) T.idle += dt;
-  const hv = T.hintT > 0 || T.idle > 6; if(hv && !T.hintOn) T.hints++; T.hintOn = hv;
+  tyScanUpdate(dt);
+  const hv = T.hintT > 0 || T.idle > tyHintT(); if(hv && !T.hintOn) T.hints++; T.hintOn = hv;
   if(T.hintT > 0) T.hintT -= dt;
   if(T.pick && T.pick.wrong > 0) T.pick.wrong -= dt;
   if(T.banner){ T.banner.t += dt; if(T.banner.t > T.banner.dur) T.banner = null; }
@@ -6967,6 +7218,8 @@ function tyUpdate(dt){
 }
 function tyFinish(){
   const T = TY, D = tyData(T.kind), avgPat = T.patSum/Math.max(1, T.served);
+  dmAdd('ty'); dmCheck();
+  if(T.tut){ D.tutDone = true; DEX.coins += T.tips + 10; gainXP(40); saveDex(); T.result = {tut:true, tips:T.tips, served:T.served, unlocked:1}; tyStop(); showScreen('tyResult'); seq([523, 659, 784, 1047, 1319], 110, 'triangle', .07); tySay('처음 영업 성공! 이제 혼자서도 할 수 있어요'); return; }
   const got = [true, T.mistakes <= 2, T.relax || avgPat >= 0.45], stars = got.filter(Boolean).length, prev = D.stars[T.lv] || 0;
   if(stars > prev) D.stars[T.lv] = stars;
   let unlocked = 0; if(stars >= 2 && T.lv < 4 && D.open < T.lv + 1){ D.open = T.lv + 1; unlocked = T.lv + 1; }
@@ -7067,7 +7320,7 @@ function tyDrawBubble(x, c, front, slot){
     const count = {};
     for(const [t] of items){
       count[t] = (count[t] || 0) + 1; const done = W && (t === 'steam_milk' ? W.steamed : (W.added[t] || 0) >= count[t]);
-      const pulse = W && W.steps[W.si] === 'add' && !done && !hide && (T.hintT > 0 || T.idle > 6) ? 1 + Math.sin(T.t*8)*0.08 : 1, is = iw - 4;
+      const pulse = W && W.steps[W.si] === 'add' && !done && !hide && (T.hintT > 0 || T.idle > tyHintT()) ? 1 + Math.sin(T.t*8)*0.08 : 1, is = iw - 4;
       if(hide && !done){ x.fillStyle = '#f1e3c2'; x.beginPath(); x.arc(ix + iw/2, by + 46, is/2, 0, 6.29); x.fill(); x.font = `bold ${is*0.6}px ${FONT}`; x.fillStyle = '#b08850'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('?', ix + iw/2, by + 48); }
       else { x.save(); x.translate(ix + iw/2, by + 46); x.scale(pulse, pulse); x.globalAlpha = done ? 0.45 : 1; x.drawImage(tyImg(t), -is/2, -is/2, is, is); x.restore(); }
       if(done){ x.fillStyle = '#40c057'; x.beginPath(); x.arc(ix + iw - 10, by + 64, 13, 0, 6.29); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 3.5; x.beginPath(); x.moveTo(ix + iw - 16, by + 64); x.lineTo(ix + iw - 11, by + 69); x.lineTo(ix + iw - 3, by + 59); x.stroke(); }
@@ -7209,7 +7462,7 @@ function tyActInfo(){   // 큰 버튼 글자 · 색
   return {st, lab, col, active, mo};
 }
 function tyDrawUI(x){
-  const T = TY, G = TY_GEO[T.kind], W = T.work, c0 = tyTarget(), hint = T.hintT > 0 || T.idle > 6, A = tyActInfo(), st = A.st;
+  const T = TY, G = TY_GEO[T.kind], W = T.work, c0 = tyTarget(), hint = T.hintT > 0 || T.idle > tyHintT(), A = tyActInfo(), st = A.st;
   const steps = W ? W.steps : c0 && c0.ordered ? tySteps(c0.menu, T.kind) : null, cur = W ? W.si : 0;
   if(steps){
     let cx = G.chips[0]; const cy = G.chips[1];
@@ -7362,6 +7615,7 @@ function tyDraw(){
   else if(T.kind === 'coffee') tyDrawCoffee(x, T.work);
   else tyDrawKitchen(x, T.work);
   tyDrawUI(x);
+  tyDrawCoach(x);
   T.custs.forEach((c, i) => { if(i >= T.front) tyDrawBubble(x, c, false); });
   for(const c of T.leavers) tyDrawBubble(x, c, false);
   T.custs.slice(0, T.front).forEach((c, i) => tyDrawBubble(x, c, true, i));
@@ -7379,6 +7633,7 @@ function tyDraw(){
   for(const e of T.texts){ const u = e.t/e.dur, a = Math.min(1, (1 - u)*3); x.globalAlpha = a; tyOutline(x, e.text, e.x, e.y - u*50, e.big ? 36 : 28, e.col, 'rgba(40,24,8,.85)'); x.globalAlpha = 1; }
   cfDrawZoom(x);
   gaDrawTy(x);
+  tyScanDraw(x);
   tyDrawPick(x);
   if(T.banner){ const b = T.banner, a = Math.min(1, b.t*4, (b.dur - b.t)*3); x.globalAlpha = a; x.fillStyle = 'rgba(30,20,10,.75)'; x.font = `bold 34px ${FONT}`; const bw = x.measureText(b.text).width + 60; rrOn(x, TY_W/2 - bw/2, 408, bw, 64, 32); x.fill(); tyOutline(x, b.text, TY_W/2, 441, 34, '#fff6dc', 'rgba(0,0,0,.4)'); x.globalAlpha = 1; }
   if(T.closing) tyDrawClosing(x, f);
@@ -7413,6 +7668,7 @@ tstage.addEventListener('pointerdown', e => {
   e.preventDefault(); const T = TY; if(!T || T.stopped) return;
   const p = tyPt(e), {ix, iy} = p;
   if(T.quitBtn && Math.hypot(p.sx - T.quitBtn[0], p.sy - T.quitBtn[1]) < T.quitBtn[2] + 8){ tyQuit(); return; }
+  if(ACCS.scan){ tyScanSelect(); return; }
   if(T.closing){ if(T.closing.t > 1 && !T.finished){ T.finished = true; tyFinish(); } return; }
   if(T.done) return;
   if(T.pick){ const i = T.pick.btns.findIndex(([bx, by, bw, bh]) => ix >= bx && ix <= bx + bw && iy >= by && iy <= by + bh); if(i >= 0){ T.idle = 0; if(T.pick.type === 'pay') tyPayChoose(i); else if(T.pick.type === 'baby') cfBabyChoose(i); else tyOrderChoose(i); } return; }
@@ -7470,11 +7726,12 @@ function tyPanelHTML(kind0){
   const regN = TY_LOOKS.filter(L => L.id && (D.reg[L.id] || 0) >= 3).length, sp = D.spDay !== todayKey();
   const seg = (k, opts) => `<span class="seg">${opts.map(([v, l]) => `<button data-tyv="${k}" data-v="${v}" class="${O[k] === v ? 'on' : ''}">${l}</button>`).join('')}</span>`;
   return `<div class="typanel">${tabs}<h3>🎮 오늘의 영업${kind === 'coffee' ? ' · ☕ 커피' : ''}</h3>
-    ${sp ? '<p class="tysp">👑 오늘의 특별 손님이 기다려요! (세 번째 손님)</p>' : ''}
+    ${sp && (D.tutDone || TEACH.allOpen) ? '<p class="tysp">👑 오늘의 특별 손님이 기다려요! (세 번째 손님)</p>' : ''}
     <p class="keys">${kind === 'coffee' ? '👋 인사 → 🥤 잔 고르기 → ⚙️ 원두 갈기 → ✋ 꾹 누르기 → ☕ 추출 → 🥛 우유 → 🙌 드리기 · 가끔 👶 아기 손님도 와요' : `손님에게 ${kind === 'cafe' ? '음료' : '요리'}를 만들어 드려요 · 👋 인사 → 🧺 재료 → ${kind === 'cafe' ? '🌀 갈기' : '🔪 썰기 · 🔥 익히기 · 🍽️ 담기'} → 🙌 드리기`}</p>
     ${kind === 'coffee' ? `<div class="cfstock"><span>🍒 ${CD.cherry}</span><span>🫘 ${CD.beans}</span><span>✨ ${CD.gold}</span><button data-tygo="tyBean">🫘 원두 공방 (볶기 · 커피나무 · 앵무새 배달)</button></div>` : ''}
-    <div class="tylvs">${[1, 2, 3, 4].map(l => { const ok = l <= open, st = D.stars[l] || 0; return `<button class="tylv${ok ? '' : ' lock'}${l === 4 ? ' l4' : ''}${kind === 'coffee' ? ' cf' : ''}" data-tylv="${l}" data-tyk="${kind}" ${ok ? '' : 'disabled'}><b>${ok ? l + '단계' : '🔒 ' + l + '단계'}</b><small>${TY_LVDESC[kind][l - 1]}</small><span>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`; }).join('')}</div>
-    <div class="tybtns"><button data-tygo="tyDeco">🛍️ 가게 꾸미기</button><button data-tygo="tyBook">📖 단골 도감 <small>${regN}/7</small></button>${kind === 'coffee' ? '<button data-tygo="tyBean">🫘 원두 공방</button>' : `<button data-tygo="tyRecipe">🧪 나만의 레시피 <small>${D.custom.length}/6</small></button>`}</div>
+    ${!D.tutDone && !TEACH.allOpen ? `<button class="tytut" data-tytut="${kind}"><b>🎓 처음 영업 따라 하기</b><small>원숭이 친구가 하나씩 알려 줘요 · 손님 3명</small></button><p class="keys"><button class="linkbtn" data-tyskip="${kind}">이미 할 줄 알아요 (건너뛰기)</button></p>` : `
+    <div class="tylvs">${[1, 2, 3, 4].map(l => { const ok = l <= open, st = D.stars[l] || 0; return `<button class="tylv${ok ? '' : ' lock'}${l === 4 ? ' l4' : ''}${kind === 'coffee' ? ' cf' : ''}" data-tylv="${l}" data-tyk="${kind}" ${ok ? '' : 'disabled'}><b>${ok ? l + '단계' : '🔒 ' + l + '단계'}</b><small>${TY_LVDESC[kind][l - 1]}</small><span>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`; }).join('')}</div>`}
+    ${D.days >= 1 || TEACH.allOpen ? `<div class="tybtns"><button data-tygo="tyDeco">🛍️ 가게 꾸미기</button><button data-tygo="tyBook">📖 단골 도감 <small>${regN}/7</small></button>${kind === 'coffee' ? '<button data-tygo="tyBean">🫘 원두 공방</button>' : `<button data-tygo="tyRecipe">🧪 나만의 레시피 <small>${D.custom.length}/6</small></button>`}</div>` : ''}
     <details class="tyset" id="tySet" ${tySetOpen ? 'open' : ''}><summary>⚙️ 영업 방법 고르기</summary>
       <div class="setrow"><span>주문 보기</span>${seg('view', [['pic', '🖼️ 그림'], ['sound', '🔊 소리만'], ['text', '🔤 글자만']])}</div>
       ${kind === 'coffee' ? `<div class="setrow"><span>🎯 타이밍 게이지</span>${seg('gauge', [['off', '끄기'], ['slow', '🐢 느리게'], ['normal', '보통'], ['fast', '🐇 빠르게']])}</div>` : ''}
@@ -7490,6 +7747,8 @@ let tySetOpen = false;
 function wireTyPanel(kind){
   tyRoomKind = kind === 'cafe' && DEX.tyTab === 'coffee' ? 'coffee' : kind;
   card.querySelectorAll('[data-tylv]').forEach(b => b.onclick = () => { tone(784, .08, 'triangle', .05); tyStart(b.dataset.tyk || kind, +b.dataset.tylv); });
+  card.querySelectorAll('[data-tytut]').forEach(b => b.onclick = () => { tone(784, .08, 'triangle', .05); tyStart(b.dataset.tytut, 1, true); });
+  card.querySelectorAll('[data-tyskip]').forEach(b => b.onclick = () => { tyData(b.dataset.tyskip).tutDone = true; saveDex(); const sc = card.scrollTop; showScreen(screen); card.scrollTop = sc; });
   card.querySelectorAll('[data-tytab]').forEach(b => b.onclick = () => { DEX.tyTab = b.dataset.tytab; saveDex(); tone(700, .06, 'triangle', .05); const sc = card.scrollTop; showScreen('barista'); card.scrollTop = sc; });
   card.querySelectorAll('[data-tyo]').forEach(b => b.onchange = e => { tyOpt()[b.dataset.tyo] = e.target.checked; saveDex(); });
   card.querySelectorAll('[data-tyv]').forEach(b => b.onclick = () => { tyOpt()[b.dataset.tyv] = b.dataset.v; saveDex(); tone(700, .05, 'triangle', .04); card.querySelectorAll(`[data-tyv="${b.dataset.tyv}"]`).forEach(o => o.classList.toggle('on', o === b)); });
@@ -7498,6 +7757,9 @@ function wireTyPanel(kind){
 }
 function tyResultHTML(){
   const T = TY, R = T && T.result; if(!R) return '<button class="go" id="goBtn">돌아가기</button>';
+  if(R.tut) return `<div class="sclear"><div class="conf">🎉✨🎊✨🎉</div><h2>🎓 처음 영업 성공!</h2><p class="big">손님 ${R.served}명에게 드렸어요. 이제 혼자서도 할 수 있어요!</p>
+    <p class="coins">🪙 +${R.tips + 10}</p><p class="keys">1단계부터 차례로 도전해요. 별 2개를 받으면 다음 단계가 열려요</p>
+    <div class="btnrow"><button class="go" id="tyNext">1단계 시작 ▶</button><button class="go alt" id="goBtn">체험실로</button></div></div>`;
   const cafe = T.kind !== 'kitchen', coffee = T.kind === 'coffee';
   return `<div class="sclear"><div class="conf">🎉✨🎊✨🎉</div><h2>${coffee ? '☕' : cafe ? '🍹' : '🍳'} 오늘의 영업 끝!</h2><p>${T.lv}단계 · 손님 ${R.served}명에게 ${cafe ? '음료' : '요리'}를 드렸어요</p>
     <div class="bigstars">${[0, 1, 2].map(i => `<span class="${R.got[i] ? 'on' : ''}" style="animation-delay:${0.2 + i*0.35}s">${R.got[i] ? '★' : '☆'}</span>`).join('')}</div>
@@ -7510,6 +7772,7 @@ function tyResultHTML(){
     ${R.payN ? `<p>🪙 계산 ${R.payN}번 중 ${R.payOK}번 한 번에 맞혔어요</p>` : ''}
     ${R.nextDeco ? `<p class="keys">🛍️ ${R.nextDeco.need ? `다음 꾸미기(${R.nextDeco.name})까지 🪙 ${R.nextDeco.need}` : `새 꾸미기(${R.nextDeco.name})를 살 수 있어요!`}</p>` : ''}
     ${R.unlocked ? `<p class="rec">🔓 ${R.unlocked}단계가 열렸어요!</p>` : ''}
+    <p class="keys">${festLine()}</p>
     <div class="btnrow">${R.unlocked ? `<button class="go" id="tyNext">${R.unlocked}단계 도전 ▶</button>` : ''}<button class="go${R.unlocked ? ' alt' : ''}" id="tyAgain">다시 하기</button>${R.nextDeco && !R.nextDeco.need ? '<button class="go alt" id="tyToDeco">🛍️ 꾸미기</button>' : ''}<button class="go alt" id="goBtn">체험실로</button></div></div>`;
 }
 function tyDecoHTML(kind){
@@ -8025,6 +8288,7 @@ function drawRhyHud(x, w, h, now){
 }
 function rhyGrade(){ const n = RH.notes.length || 1, acc = (RH.perfect + RH.great*0.8 + RH.good*0.5)/n; return {acc, g: acc >= 0.95 ? 'S' : acc >= 0.85 ? 'A' : acc >= 0.7 ? 'B' : 'C'}; }
 function rhyFinish(){
+  dmAdd('song');
   const {acc, g} = rhyGrade(); RH.grade = g; RH.acc = acc;
   if(RH.sched) clearInterval(RH.sched);
   hideStage();
@@ -8149,6 +8413,7 @@ let teacherOK = false, pinBuf = '', pinNext = null;
 function askPin(next){ pinNext = next; pinBuf = ''; showScreen(TEACH.pin ? 'pin' : 'pinNew'); }
 /* 백업 */
 function backupAll(){
+  TEACH.lastBackup = Date.now(); saveTeach();
   const data = {};
   for(const p of PROF.list){ data[p.id] = {}; for(const k of ['jungle_dex','jungle_save','jungle_best','jungle_mode','jungle_access']){ try{ const v = localStorage.getItem(pkOf(p.id, k)); if(v !== null) data[p.id][k] = v; }catch(e){} } }
   const extra = {}; for(const k of ['jungle_rank','jungle_settings','jungle_teacher','jungle_duo_names','jungle_last_name','jungle_repo_off']){ try{ const v = localStorage.getItem(k); if(v !== null) extra[k] = v; }catch(e){} }
@@ -8223,15 +8488,18 @@ function classHTML(type){
       return `<tr><td>${faceHTML(p)} ${escapeHTML(p.name)}</td><td>${fmtMin(today)}</td><td>${fmtMin(d.playSec || 0)}</td><td>${ana.runs || 0}판 · 완성 ${clears}</td>
         <td>${d.bestDist || 0}m</td><td>${Object.keys(d.safeSeen || {}).length}/${SAFE.length}</td><td>${learnN}회 · ⭐${learn.stars || 0}</td><td>${lost ? CAUSE[lost[0]] || lost[0] : '-'}</td>
         <td>${d.lastPlayed ? new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '-'}</td>
-        <td class="acc">${[['oneHand','한손'],['assist','도움'],['symbols','그림']].map(([k,l]) => `<button data-pacc="${p.id}:${k}" class="${a[k] ? 'on' : ''}">${l}</button>`).join('')}</td>
-        <td><button data-pren="${p.id}">이름</button> ${PROF.list.length > 1 ? `<button data-pdel="${p.id}">삭제</button>` : ''} <button data-ptime="${p.id}">+15분</button></td></tr>`;
+        <td class="acc">${[['oneHand','한손'],['assist','도움'],['symbols','그림'],['scan','스캔']].map(([k,l]) => `<button data-pacc="${p.id}:${k}" class="${a[k] ? 'on' : ''}">${l}</button>`).join('')}</td>
+        <td><button data-pren="${p.id}">이름</button> ${PROF.list.length > 1 ? `<button data-pdel="${p.id}">삭제</button>` : ''} <button data-ptime="${p.id}">+15분</button> <button data-prep="${p.id}">📄 리포트</button></td></tr>`;
     }).join('');
-    return `<h2>👩‍🏫 선생님 화면</h2>
+    const bd = backupDays(), bwarn = bd === null ? '💾 아직 기록 백업을 한 번도 안 했어요. 가끔 백업 파일을 저장해 두면 기기가 바뀌어도 기록을 지킬 수 있어요.' : bd >= 7 ? `💾 마지막 백업이 ${bd}일 전이에요. 새로 백업해 두세요.` : '';
+    return `<h2>👩‍🏫 선생님 화면</h2>${bwarn ? `<p class="tywarn">${bwarn} <button class="go alt sm" id="tBackup2">지금 백업</button></p>` : ''}
       <div class="tscroll"><table class="rank tt"><tr><th>학생</th><th>오늘</th><th>전체</th><th>플레이</th><th>최고</th><th>안전 카드</th><th>학습</th><th>자주 잃은 곳</th><th>마지막</th><th>쉬운 설정</th><th>관리</th></tr>${rows}</table></div>
-      <p class="keys">쉬운 설정: 한손 = 한 손 모드, 도움 = 자동 난이도 조절, 그림 = 그림·소리 안내 (학생마다 켜고 끌 수 있어요)</p>
+      <p class="keys">쉬운 설정: 한손 = 한 손 모드, 도움 = 자동 난이도 조절, 그림 = 그림·소리 안내, 스캔 = 스위치(버튼) 하나로 차례대로 비추다가 눌러서 고르기 (학생마다 켜고 끌 수 있어요)</p>
       <div class="setrow"><span>쉬는 시간 알림</span>${seg('breakMin', [[0,'끄기'],[10,'10분'],[15,'15분'],[20,'20분'],[30,'30분']])}</div>
       <div class="setrow"><span>하루 이용 시간</span>${seg('dailyMin', [[0,'제한 없음'],[20,'20분'],[30,'30분'],[45,'45분'],[60,'60분']])}</div>
       <div class="setrow"><span>마을 장소 열기</span>${seg('allOpen', [[0,'레벨에 따라 열기'],[1,'처음부터 모두 열기']])}</div>
+      <div class="setrow"><span>스캔 속도</span>${seg('scanSec', [[1,'1초'],[1.6,'1.6초'],[2.5,'2.5초'],[4,'4초']])}</div>
+      <p class="keys" id="tMirror">🛟 자동 저장본 확인 중…</p>
       <div class="btnrow"><button class="go alt sm" id="tBackup">💾 기록 백업 내보내기</button><button class="go alt sm" id="tRestore">📂 백업 불러오기</button><button class="go alt sm" id="tTyLog">☕🍳 체험실 기록</button><button class="go alt sm" id="tDiag">🔧 기기 점검</button><button class="go alt sm" id="tPin">🔑 비밀번호 바꾸기</button></div>
       <p id="msg"></p><button class="go" id="goBtn">나가기</button>`;
   }
@@ -8266,7 +8534,8 @@ function classHTML(type){
       ${row('🎒', '아이템', bagCount(), '요리 체험실, 동아리실', '정글 점프 중 🎒 가방에서 꺼내 쓰기')}
       ${row('❤️', '보너스 생명', `+${DEX.bonusLives || 0}`, '안전체험관 별 3개', '다음 정글 점프 한 판에서만 생명 더하기')}
       ${row('🏅', '업적 배지', `${ACHS.filter(a => DEX.ach[a.id]).length}/${ACHS.length}`, '여러 가지 도전', '도감에서 모아 보기')}
-      </div>
+      ${row('🎪', '마을 축제', festNext() ? `⭐ ${starTotal()}/${festNext()}` : `${DEX.fest}번`, '정글 스테이지 · 체험실 · 과일팡에서 별 모으기', `별이 ${FEST_GOALS.join('·')}개가 되면 친구들이 모두 모여 축제를 열어요`)}
+      </div>${DEX.fest ? '<p><button class="go alt sm" id="festAgain">🎪 축제 다시 보기</button></p>' : ''}
       <button class="go" id="goBtn">알았어요</button>`;
   }
   return '';
@@ -8321,6 +8590,11 @@ function wireClass(type){
       setMsg('오늘 이용 시간을 15분 늘렸어요');
     });
     on('tBackup', () => { saveDex(); backupAll(); setMsg('백업 파일을 저장했어요. 안전한 곳에 보관해 주세요.'); });
+    on('tBackup2', () => { saveDex(); backupAll(); showScreen('teacher'); setMsg('백업 파일을 저장했어요. 안전한 곳에 보관해 주세요.'); });
+    card.querySelectorAll('[data-prep]').forEach(b => b.onclick = () => { repId = b.dataset.prep; showScreen('report'); });
+    mirrorInfo().then(m => { const el = document.getElementById('tMirror'); if(!el) return;
+      el.innerHTML = m ? `🛟 자동 저장본: ${new Date(m.date).toLocaleString('ko-KR')} (이 기기 안에 기록을 한 벌 더 저장해요. 기록이 지워지면 다음 실행 때 저절로 되찾아요) <button class="go alt sm" id="tMirrorBtn">이 저장본으로 되돌리기</button>` : '🛟 자동 저장본이 아직 없어요 (조금 뒤 저절로 만들어져요)';
+      const mb = document.getElementById('tMirrorBtn'); if(mb) mb.onclick = () => { if(!confirm('자동 저장본으로 기록을 되돌릴까요? 지금 기록은 저장본 내용으로 바뀌어요.')) return; for(const [k, v] of Object.entries(m.keys)) try{ localStorage.setItem(k, v); }catch(e){} alert('되돌렸어요. 다시 시작할게요.'); location.reload(); }; });
     on('tRestore', () => pickBackup.click());
     on('tDiag', () => { runDiag(); showScreen('diag'); });
     on('tPin', () => { window.__oldPin = TEACH.pin; TEACH.pin = ''; pinBuf = ''; pinNext = () => { window.__oldPin = ''; showScreen('teacher'); }; showScreen('pinNew'); });
@@ -8953,7 +9227,7 @@ function pangFinish(){
   PG.coins = coins; PG.gained = gained; DEX.coins += coins;
   if(PG.mode === 'time'){ PG.newBest = PG.score > (DEX.pangBest || 0); if(PG.newBest) DEX.pangBest = PG.score; const wk = weekKey(); if(!DEX.pangWeek || DEX.pangWeek.w !== wk) DEX.pangWeek = {w:wk, s:0}; DEX.pangWeek.s = Math.max(DEX.pangWeek.s, PG.score); }
   if(PG.mode === 'daily'){ const d = todayKey(); if(!DEX.pangDaily || DEX.pangDaily.d !== d) DEX.pangDaily = {d, s:0}; PG.newBest = PG.score > DEX.pangDaily.s; DEX.pangDaily.s = Math.max(DEX.pangDaily.s, PG.score); }
-  DEX.pangPlays = (DEX.pangPlays || 0) + 1; gainXP(20 + Math.min(150, Math.floor(PG.score/200))); if(PG.score >= 10000) unlock('pang10k'); saveDex();
+  DEX.pangPlays = (DEX.pangPlays || 0) + 1; dmAdd('pang'); gainXP(20 + Math.min(150, Math.floor(PG.score/200))); if(PG.score >= 10000) unlock('pang10k'); saveDex();
   showScreen('pangResult');
 }
 /* ---- 조작 ---- */
@@ -9240,6 +9514,7 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 newGame(); showScreen(PROF.list.length > 1 ? 'profiles' : 'title'); loadSaved();
+{ const bt = document.getElementById('boot'); if(bt){ bt.classList.add('hide'); setTimeout(() => bt.remove(), 700); } }
 requestAnimationFrame(loop);
 })();
 </script>
