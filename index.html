@@ -164,11 +164,26 @@
   .startbig{font-size:clamp(24px,4.4vw,34px)!important;padding:.45em 1.6em!important}
   .typanel{background:linear-gradient(180deg,rgba(255,236,190,.16),rgba(255,255,255,.06));border:2px solid rgba(255,214,120,.55);border-radius:18px;padding:.6em .8em;margin:.4em 0 .6em}
   .typanel h3{margin:.1em 0 .2em;font-size:1.25em}
-  .tylvs{display:grid;grid-template-columns:repeat(3,1fr);gap:.5em;margin:.5em 0}
+  .tylvs{display:grid;grid-template-columns:repeat(4,1fr);gap:.45em;margin:.5em 0}
   .tylv{display:flex;flex-direction:column;align-items:center;gap:.15em;padding:.6em .4em;border-radius:16px;border:3px solid #fff;background:linear-gradient(180deg,#ffb84d,#f08c00);color:#fff;font:inherit;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.25);min-height:96px}
   .tylv:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
   .tylv b{font-size:1.35em} .tylv small{font-size:.8em;opacity:.95;line-height:1.25} .tylv span{color:#fff3a0;font-size:1.15em;letter-spacing:.1em}
-  .tylv.lock{background:#6c757d;opacity:.7;cursor:default}
+  .tylv.lock{background:#6c757d;opacity:.7;cursor:default} .tylv.l4:not(.lock){background:linear-gradient(180deg,#b197fc,#7048e8)}
+  .tysp{margin:.2em 0;padding:.35em .8em;border-radius:12px;background:rgba(255,212,59,.18);color:#ffe066;font-weight:bold}
+  .tybtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.45em;margin:.4em 0}
+  .tybtns button{font:inherit;padding:.55em .3em;border-radius:14px;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.14);color:#fff;cursor:pointer} .tybtns small{opacity:.8}
+  details.tyset{margin:.4em 0;text-align:left} details.tyset summary{cursor:pointer;padding:.3em .6em;border-radius:12px;background:rgba(255,255,255,.1);display:inline-block}
+  .tydeco{text-align:left;margin:.5em 0} .tydeco h4{margin:.2em 0} .tydrow{display:flex;flex-wrap:wrap;gap:.4em}
+  .tyd{display:flex;flex-direction:column;align-items:center;gap:.1em;min-width:92px;padding:.45em .5em;border-radius:14px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:inherit;cursor:pointer}
+  .tyd i{font-style:normal;font-size:1.7em;line-height:1.2} .tyd .dot,.tyd i.dot{display:inline-block;width:1.1em;height:1.1em;border-radius:50%;border:2px solid #fff}
+  .tyd.on{border-color:#ffd43b;background:rgba(255,212,59,.2)} .tyd.buy{border-style:dashed} .tyd:disabled{opacity:.45;cursor:default} .tyd small{opacity:.85} .tyd button.sm{font:inherit;font-size:.8em;margin-top:.2em;border-radius:8px;border:0;padding:.15em .5em}
+  .tybook{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5em;margin:.5em 0}
+  .tyb{display:flex;flex-direction:column;align-items:center;padding:.5em;border-radius:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25)} .tyb.reg{border-color:#ff8fb1;background:rgba(255,143,177,.15)}
+  .tyb img{width:74px;height:74px;object-fit:contain} .tyb .h{color:#ff8fb1;letter-spacing:.1em} .tyb small{text-align:center;opacity:.9} .tyb em{font-style:normal;color:#ffe066;font-weight:bold}
+  .tyrec{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:.4em;margin:.5em 0}
+  .tyri{position:relative;display:flex;flex-direction:column;align-items:center;padding:.35em;border-radius:14px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:inherit;cursor:pointer}
+  .tyri img{width:52px;height:52px} .tyri.on{border-color:#b197fc;background:rgba(151,117,250,.25)} .tyri i{position:absolute;top:2px;right:6px;font-style:normal;background:#7048e8;border-radius:50%;width:1.5em;height:1.5em;line-height:1.5em;font-weight:bold}
+  @media (max-width:560px){ .tylvs{grid-template-columns:repeat(2,1fr)} }
   .tyopt{display:flex;align-items:center;gap:.4em;margin:.35em 0;font-size:.95em;cursor:pointer;text-align:left} .tyopt input{width:22px;height:22px;flex:none} .tyopt.off{opacity:.5}
   details.more{margin-top:.4em} details.more summary{cursor:pointer;list-style:none;display:inline-block;padding:.3em 1.1em;border-radius:999px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25)} details.more summary::-webkit-details-marker{display:none}
   #card.mapc{width:auto!important;max-width:none!important;padding:6px!important;background:transparent!important;box-shadow:none!important;border:0!important;overflow:hidden}
@@ -2125,7 +2140,7 @@ const VILLAGE = [   // 체험마을 안의 가게들
   {id:'dex',      name:'도서관',         icon:'📚', col:'#1565c0', desc:'글자 도감 · 배지', screen:'dex'},
   {id:'treasure', name:'보물 창고',      icon:'💎', col:'#f9a825', desc:'내 보물 안내', screen:'treasure'}
 ];
-const VILLAGE_ROOMS = ['barista','cook','esports','wardrobe','dex','treasure','pangMap','pangResult','tyResult'];
+const VILLAGE_ROOMS = ['barista','cook','esports','wardrobe','dex','treasure','pangMap','pangResult','tyResult','tyDeco','tyBook','tyRecipe'];
 let villageOpen = false, smSel = null;
 const TOWN_PATHS = [   // 걸을 수 있는 길 (정원길 · 호숫가 산책길 · 정자 앞 데크 · 해변 산책로)
   [[338,622],[372,648],[410,672],[440,700],[462,740],[486,786]],
@@ -5275,6 +5290,10 @@ function showScreen(type){
     html = rhyResultHTML();
   } else if(type === 'tyResult'){
     html = tyResultHTML();
+  } else if(type === 'tyDeco' || type === 'tyBook' || type === 'tyRecipe'){
+    html = (type === 'tyDeco' ? tyDecoHTML : type === 'tyBook' ? tyBookHTML : tyRecipeHTML)(tyRoomKind);
+  } else if(type === 'tyLog'){
+    html = tyLogHTML();
   } else if(type === 'barista' || type === 'cook'){
     html = roomHTML(type) + '<p id="msg"></p>';
   } else if(type === 'bag'){
@@ -5474,7 +5493,7 @@ function showScreen(type){
   }
   screen = type;
   card.innerHTML = html;
-  card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult','pangMap','tyResult','village','townMap','avatar','levelup','stageClear','stageFail'].includes(type));
+  card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult','pangMap','tyResult','tyDeco','tyBook','tyRecipe','tyLog','village','townMap','avatar','levelup','stageClear','stageFail'].includes(type));
   card.classList.toggle('mapc', type === 'stageMap');
   card.classList.toggle('titlec', type === 'title');
   overlay.classList.add('show'); document.body.classList.add('menuopen'); if(typeof doorBtnUpdate === 'function') doorBtnUpdate();
@@ -5498,6 +5517,8 @@ function showScreen(type){
     : type === 'pangResult' ? () => showScreen('esports')
     : type === 'pangMap' ? () => showScreen('esports')
     : type === 'tyResult' ? () => showScreen(TY && TY.kind === 'kitchen' ? 'cook' : 'barista')
+    : type === 'tyDeco' || type === 'tyBook' || type === 'tyRecipe' ? () => showScreen(tyRoomKind === 'kitchen' ? 'cook' : 'barista')
+    : type === 'tyLog' ? () => showScreen('teacher')
     : type === 'profiles' ? () => showScreen('title')
     : type === 'profNew' ? () => { const d = window.PDRAFT, name = (d.name || '').trim(); if(!name){ setMsg('이름을 적어 주세요'); return; } const id = 'p' + Date.now(); PROF.list.push({id, name:name.slice(0, 8), icon:d.icon}); saveProf(); window.PDRAFT = null; switchProfile(id); }
     : type === 'pin' || type === 'pinNew' ? () => { pinNext = null; if(!TEACH.pin && window.__oldPin){ TEACH.pin = window.__oldPin; window.__oldPin = ''; } showScreen('title'); }
@@ -5551,7 +5572,9 @@ function showScreen(type){
   on('treasBtn', () => showScreen('treasure'));
   on('teachBtn', () => askPin(() => showScreen('teacher')));
   if(type === 'barista' || type === 'cook') wireRoom(type);
-  if(type === 'tyResult'){ on('tyAgain', () => tyStart(TY.kind, TY.lv)); on('tyNext', () => tyStart(TY.kind, TY.result.unlocked)); }
+  if(type === 'tyResult'){ on('tyAgain', () => tyStart(TY.kind, TY.lv)); on('tyNext', () => tyStart(TY.kind, TY.result.unlocked)); on('tyToDeco', () => { tyRoomKind = TY.kind; showScreen('tyDeco'); }); }
+  if(type === 'tyDeco' || type === 'tyRecipe') wireTyScreen(type);
+  on('tTyLog', () => showScreen('tyLog'));
   if(type === 'club') wireClub();
   if(type === 'avatar'){
     card.querySelectorAll('[data-av]').forEach(b => b.onclick = () => { const p = curProf(); p.icon = b.dataset.av; delete p.photo; saveProf(); tone(880,.08,'triangle',.05); showScreen('avatar'); });
@@ -6108,38 +6131,59 @@ const TY_PAL = {
   cafe:{1:['strawberry','banana','orange','grape','watermelon','mango'], 2:['strawberry','banana','orange','grape','mango','milk','yogurt','honey','ice'], 3:['strawberry','banana','orange','grape','mango','milk','yogurt','honey','ice']},
   kitchen:{1:['apple','banana','strawberry','watermelon','egg'], 2:['apple','banana','watermelon','egg','wheat','honey','coconut','milk'], 3:['apple','banana','strawberry','mango','egg','wheat','honey','coconut','milk']}
 };
+TY_PAL.cafe[4] = TY_PAL.cafe[3]; TY_PAL.kitchen[4] = TY_PAL.kitchen[3];
+const tyPal = () => TY_PAL[TY.kind][TY.lv];
 const TY_GEO = {   // 그림 좌표 (1376 × 768)
-  cafe:{occ:521, sign:[682,177], signText:'바리스타 체험실', signEn:'BARISTA EXPERIENCE ROOM', slots:[[690,1],[1010,.8],[1200,.72]], blender:[470,566], cup:[905,566], chips:[40,580], row:{y:652, x0:92, x1:1000, r:42}, act:[1060,590,272,106]},
-  kitchen:{occ:521, sign:[682,177], signText:'요리 체험실', signEn:'COOKING EXPERIENCE ROOM', slots:[[690,1],[1030,.78],[1215,.7]], board:[402,538], stove:[897,540], plate:[1128,541], chips:[40,608], row:{y:694, x0:92, x1:1000, r:44}, act:[1060,628,272,112]}
+  cafe:{occ:521, sign:[682,177], signText:'바리스타 체험실', signEn:'BARISTA EXPERIENCE ROOM', slots:[[690,1],[1010,.8],[1200,.72]], slots4:[[575,1],[815,1],[1150,.74]], blender:[470,566], cup:[905,566], deco:[300,522], chips:[40,580], row:{y:652, x0:92, x1:1000, r:42}, act:[1060,590,272,106]},
+  kitchen:{occ:521, sign:[682,177], signText:'요리 체험실', signEn:'COOKING EXPERIENCE ROOM', slots:[[690,1],[1030,.78],[1215,.7]], slots4:[[575,1],[815,1],[1180,.72]], board:[402,538], stove:[897,540], plate:[1128,541], deco:[1296,516], chips:[40,608], row:{y:694, x0:92, x1:1000, r:44}, act:[1060,628,272,112]}
 };
+// 손님 모습 · 좋아하는 메뉴 · 기쁠 때 하는 몸짓
 const TY_LOOKS = [
-  {img:'monkey', h:236, dy:62}, {img:'chameleon', h:168, dy:34}, {img:'parrot', h:176, dy:-44, fly:true}, {img:'frog', h:206, dy:30},
-  {img:'penguin', h:246, dy:40}, {img:'owl', h:246, dy:40}, {img:'elephant', h:268, dy:66},
+  {id:'monkey', img:'monkey', h:236, dy:62, name:'원숭이', icon:'🐒', react:'flip', thanks:'우끼끼! 고마워요!', fav:{cafe:'바나나 주스', kitchen:'바나나 샐러드'}},
+  {id:'chameleon', img:'chameleon', h:168, dy:34, name:'카멜레온', icon:'🦎', react:'rainbow', thanks:'색이 바뀔 만큼 맛있어요!', fav:{cafe:'포도 주스', kitchen:'딸기 샐러드'}},
+  {id:'parrot', img:'parrot', h:176, dy:-44, fly:true, name:'앵무새', icon:'🦜', react:'loop', thanks:'고마워요! 고마워요!', fav:{cafe:'망고 주스', kitchen:'과일 샐러드'}},
+  {id:'frog', img:'frog', h:206, dy:30, name:'개구리', icon:'🐸', react:'hop', thanks:'개굴! 고마워요!', fav:{cafe:'수박 주스', kitchen:'수박 조각'}},
+  {id:'penguin', img:'penguin', h:246, dy:40, name:'펭귄', icon:'🐧', react:'waddle', thanks:'와~ 정말 좋아요!', fav:{cafe:'포도 슬러시', kitchen:'코코넛 수프'}},
+  {id:'owl', img:'owl', h:246, dy:40, name:'부엉이', icon:'🦉', react:'glow', thanks:'부엉~ 고마워요!', fav:{cafe:'꿀 바나나 라떼', kitchen:'우유 푸딩'}},
+  {id:'elephant', img:'elephant', h:268, dy:66, name:'코끼리', icon:'🐘', react:'spray', thanks:'뿌우~ 맛있어요!', fav:{cafe:'바나나 우유', kitchen:'팬케이크'}},
   {e:'🐰', c:'#ff8fb1'}, {e:'🐻', c:'#a1887f'}, {e:'🐼', c:'#90a4ae'}, {e:'🐱', c:'#ffb74d'}, {e:'🐶', c:'#64b5f6'},
-  {e:'🐸', c:'#81c784'}, {e:'🐧', c:'#4db6ac'}, {e:'🦊', c:'#ff8a65'}, {e:'🐨', c:'#b0bec5'}, {e:'🐯', c:'#ffca28'}
+  {e:'🦊', c:'#ff8a65'}, {e:'🐨', c:'#b0bec5'}, {e:'🐯', c:'#ffca28'}
 ];
+const TY_KING = {id:'king', art:'gorilla', h:300, dy:70, name:'고릴라 대장', icon:'👑', react:'drum', thanks:'우호호! 최고의 가게야!'};
 const TY_STEP = {
   greet:{icon:'👋', label:'어서 오세요!', chip:'인사', col:'#ff922b'},
   add:{icon:'🧺', label:'재료를 넣어요', chip:'재료', col:'#868e96'},
   blend:{icon:'🌀', label:'갈기', chip:'갈기', col:'#339af0', taps:3},
+  pour:{icon:'🫗', label:'따르기', chip:'따르기', col:'#1c7ed6'},
   chop:{icon:'🔪', label:'썰기', chip:'썰기', col:'#f08c00', taps:3},
   cook:{icon:'🔥', label:'익히기', chip:'익히기', col:'#fa5252', taps:3},
   plate:{icon:'🍽️', label:'접시에 담기', chip:'담기', col:'#845ef7'},
   serve:{icon:'🙌', label:'드리기', chip:'드리기', col:'#37b24d'}
 };
-const TY_LIMIT = {cafe:[0, 55, 65, 75], kitchen:[0, 80, 95, 110]};   // 손님이 느긋하게 기다리는 시간(초) — 지나도 떠나지 않아요
-let TY = null;
+const TY_LIMIT = {cafe:[0, 55, 65, 75, 95], kitchen:[0, 80, 95, 110, 140]};   // 손님이 느긋하게 기다리는 시간(초) — 지나도 떠나지 않아요
+const TY_LVDESC = {cafe:['과일 1가지 주스', '과일 + 우유·요거트·꿀·얼음', '개수까지 (딸기 2개 …)', '두 손님 동시 주문'], kitchen:['재료 1가지 · 썰거나 굽기', '재료 2가지 · 썰고 익히기', '개수까지 · 3단계 요리', '두 손님 동시 주문']};
+// 🛍️ 가게 꾸미기 (팁으로 사요)
+const TY_DECO = {
+  cup:{title:'🥤 컵·접시 색', items:[{id:'base', name:'기본', price:0, col:'#ff6b9d'}, {id:'sky', name:'하늘색', price:20, col:'#4dabf7'}, {id:'leaf', name:'초록색', price:20, col:'#51cf66'}, {id:'violet', name:'보라색', price:30, col:'#9775fa'}, {id:'gold', name:'황금색', price:60, col:'#fcc419'}]},
+  plant:{title:'🪴 조리대 장식', items:[{id:'none', name:'없음', price:0, e:''}, {id:'pot', name:'화분', price:30, e:'🪴'}, {id:'sun', name:'해바라기', price:40, e:'🌻'}, {id:'cactus', name:'선인장', price:40, e:'🌵'}, {id:'bear', name:'곰 인형', price:50, e:'🧸'}, {id:'cake', name:'케이크 모형', price:60, e:'🎂'}]},
+  sign:{title:'🪧 간판 장식', items:[{id:'none', name:'기본', price:0}, {id:'star', name:'별 장식', price:30}, {id:'flower', name:'꽃 장식', price:30}, {id:'bulb', name:'반짝 전구', price:40}, {id:'rainbow', name:'무지개', price:50}]},
+  light:{title:'💡 가게 조명', items:[{id:'none', name:'기본', price:0}, {id:'warm', name:'따뜻한 빛', price:30}, {id:'fairy', name:'요정 전구', price:50}, {id:'sparkle', name:'별빛', price:50}]},
+  music:{title:'🎵 가게 음악', items:[{id:'auto', name:'그날그날', price:0}, {id:'minuet', name:'미뉴에트', price:15}, {id:'canon', name:'캐논', price:15}, {id:'twinkle', name:'반짝반짝 작은 별', price:15}, {id:'turkish', name:'터키 행진곡', price:20}, {id:'susanna', name:'오! 수재나', price:15}, {id:'mac', name:'올드 맥도날드', price:15}]}
+};
+const TY_KDISH = {salad:{name:'샐러드', icon:'🥗', steps:['chop','plate']}, grill:{name:'구이', icon:'🍳', steps:['chop','cook','plate'], pan:true}, soup:{name:'수프', icon:'🍲', steps:['chop','cook','plate']}, cake:{name:'부침', icon:'🥞', steps:['cook','plate'], pan:true}};
+let TY = null, tyRoomKind = 'cafe', tyRecipeDraft = null;
 const tstage = document.createElement('canvas');
 tstage.id = 'tyStage';
 tstage.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:30;display:none;touch-action:none;background:#2b3a40';
 document.body.appendChild(tstage);
 const tctx = tstage.getContext('2d');
-const tyIcons = {};
+const tyIcons = {}, tyIconURL = {};
 function tyImg(t){
   if(FRUIT_INFO[t]) return pangImg(t);
   if(!tyIcons[t]){ const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d'); if(x){ x.translate(80, 80); drawTyIng(x, t); } tyIcons[t] = c; }
   return tyIcons[t];
 }
+function tyPic(t){ if(!tyIconURL[t]){ try{ tyIconURL[t] = tyImg(t).toDataURL(); }catch(e){ tyIconURL[t] = ''; } } return tyIconURL[t]; }   // 화면(HTML)에 쓰는 재료 그림
 function drawTyIng(x, t){   // 과일이 아닌 재료 아이콘 (코드로 그림)
   const lg = (y0, y1, a, b) => { const g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
   const shine = (cx, cy, rx, ry) => { x.fillStyle = 'rgba(255,255,255,.7)'; x.beginPath(); x.ellipse(cx, cy, rx, ry, -0.5, 0, 6.29); x.fill(); };
@@ -6193,18 +6237,43 @@ function drawTyIng(x, t){   // 과일이 아닌 재료 아이콘 (코드로 그�
     x.fillStyle = '#3e2a14'; for(const [cx, cy] of [[-34, -30], [-22, -42], [-40, -16]]){ x.beginPath(); x.arc(cx, cy, 5, 0, 6.29); x.fill(); }
   } else { x.font = '90px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('❓', 0, 0); }
 }
-function tyData(kind){ DEX.ty = DEX.ty || {}; return DEX.ty[kind] = Object.assign({open:1, stars:{}, days:0}, DEX.ty[kind]); }
-function tyOpenLv(kind){ return TEACH.allOpen ? 3 : clamp(tyData(kind).open, 1, 3); }
-function tySteps(m, kind){ return kind === 'cafe' ? ['greet', 'add', 'blend', 'serve'] : ['greet', 'add', ...m.steps, 'serve']; }
+/* ---- 저장 · 설정 ---- */
+function tyData(kind){
+  DEX.ty = DEX.ty || {};
+  const D = DEX.ty[kind] = Object.assign({open:1, stars:{}, days:0, reg:{}, favSeen:{}, spDay:'', badges:0, log:[], custom:[]}, DEX.ty[kind]);
+  D.deco = Object.assign({owned:[], eq:{}}, D.deco); D.deco.eq = Object.assign({cup:'base', plant:'none', sign:'none', light:'none', music:'auto'}, D.deco.eq);
+  return D;
+}
+function tyOpt(){ DEX.tyOpt = Object.assign({relax:!!DEX.tyRelax, jungle:!!DEX.tyJungle, tapOnly:false, pay:false, duo:false, view:'pic'}, DEX.tyOpt); return DEX.tyOpt; }
+function tyOpenLv(kind){ return TEACH.allOpen ? 4 : clamp(tyData(kind).open, 1, 4); }
+function tyDecoItem(kind, cat){ const D = tyData(kind), id = D.deco.eq[cat]; return TY_DECO[cat].items.find(i => i.id === id) || TY_DECO[cat].items[0]; }
+const tyOwned = (D, cat, id) => TY_DECO[cat].items.find(i => i.id === id).price === 0 || D.deco.owned.includes(cat + ':' + id);
+function tyNextDeco(kind){   // 아직 없는 꾸미기 중 가장 싼 것
+  const D = tyData(kind); let best = null;
+  for(const cat in TY_DECO) for(const it of TY_DECO[cat].items) if(!tyOwned(D, cat, it.id) && (!best || it.price < best.price)) best = Object.assign({cat}, it);
+  return best;
+}
+function tyRecipeLv(need){ const v = Object.values(need), tot = v.reduce((a, b) => a + b, 0); return v.length >= 3 || tot >= 3 ? 3 : v.length === 2 ? 2 : 1; }
+function tyMenus(kind, lv){
+  const L = Math.min(lv, 3), pal = TY_PAL[kind][lv];
+  const base = TY_MENU[kind].filter(m => m.lv <= L);
+  const mine = tyData(kind).custom.filter(m => m.lv <= L && Object.keys(m.need).every(t => pal.includes(t)));
+  return {base, mine, all:[...base, ...mine]};
+}
+function tySteps(m, kind){ return kind === 'cafe' ? (TY && TY.motion ? ['greet', 'add', 'blend', 'pour', 'serve'] : ['greet', 'add', 'blend', 'serve']) : ['greet', 'add', ...m.steps, 'serve']; }
 function tyStart(kind, lv){
-  tyData(kind);
-  TY = {kind, lv, relax:!!DEX.tyRelax, jungle:!!DEX.tyJungle, t:0, last:performance.now(), lastF:0, custs:[], leavers:[], spawned:0, served:0, total:5, next:0.4,
-    work:null, mistakes:0, tips:0, patSum:0, fx:[], texts:[], idle:0, hintT:0, done:false, endT:0, lastLook:-1, press:{}, jungleUsed:0};
+  const O = tyOpt(), D = tyData(kind);
+  TY = {kind, lv, relax:O.relax, jungle:O.jungle, motion:!O.tapOnly && lv >= 2, pay:O.pay, view:O.view, duo:O.duo, front:lv === 4 ? 2 : 1, total:lv === 4 ? 6 : 5,
+    t:0, last:performance.now(), lastF:0, custs:[], leavers:[], spawned:0, served:0, next:0.4, work:null, sel:null,
+    mistakes:0, hints:0, hintOn:false, payMiss:0, payN:0, payOK:0, tips:0, patSum:0, fx:[], texts:[], idle:0, hintT:0, done:false, endT:0, closing:null,
+    lastLook:-1, press:{}, jungleUsed:0, special:D.spDay !== todayKey(), specialSpawned:false, specialDone:false, newRegs:[], pick:null, hold:null, gest:null, t0:Date.now(), banner:null};
   screen = 'tycoon'; overlay.classList.remove('show'); document.body.classList.add('menuopen');
   if(typeof doorBtnUpdate === 'function') doorBtnUpdate(); if(typeof xClose !== 'undefined') xClose.style.display = 'none';
-  bgmStop(); if(soundOn && SET.bgm > 0) startSongBgm(pick(kind === 'cafe' ? ['minuet', 'canon', 'green'] : ['mac', 'row', 'susanna']));
+  bgmStop();
+  if(soundOn && SET.bgm > 0){ const mu = tyDecoItem(kind, 'music').id; startSongBgm(mu === 'auto' ? pick(kind === 'cafe' ? ['minuet', 'canon', 'green'] : ['mac', 'row', 'susanna']) : mu); }
   for(const t of TY_PAL[kind][lv]) tyImg(t);
   tstage.style.display = 'block'; tyResize();
+  if(TY.duo) TY.banner = {text:'👫 두 명이 함께: 🙋 손님 친구 · 👩‍🍳 점원 친구', t:0, dur:3};
   TY.raf = requestAnimationFrame(tyLoop);
 }
 function tyStop(){ if(!TY) return; if(TY.raf) cancelAnimationFrame(TY.raf); TY.stopped = true; tstage.style.display = 'none'; stopSongBgm(); }
@@ -6225,42 +6294,69 @@ function tyFit(){   // 그림을 화면에 맞추기 (아래쪽 기준, 위쪽 �
   const k = Math.max(Math.min(w/TY_W, h/TY_H), Math.min(w/TY_W, h/620));   // 옆은 자르지 않아요 (버튼이 있어요)
   return {k, w, h, ox:(w - TY_W*k)/2, oy:h - TY_H*k};
 }
+/* ---- 손님 ---- */
 function tyNewCust(){
-  const T = TY, menus = TY_MENU[T.kind].filter(m => m.lv <= T.lv), top = menus.filter(m => m.lv === T.lv);
-  const m = top.length && Math.random() < 0.65 ? pick(top) : pick(menus);
-  const artN = TY_LOOKS.filter(L => L.img && FRIEND_ART[L.img] && FRIEND_ART[L.img].ok).length;
-  let li, guard = 0;
-  do{ li = Math.floor(Math.random()*TY_LOOKS.length); guard++; }
-  while(guard < 40 && (li === T.lastLook || (artN >= 4 && !TY_LOOKS[li].img) || (TY_LOOKS[li].img && !(typeof FRIEND_ART !== 'undefined' && FRIEND_ART[TY_LOOKS[li].img] && FRIEND_ART[TY_LOOKS[li].img].ok)) || T.custs.some(c => c.look === TY_LOOKS[li])));
-  T.lastLook = li;
-  return {look:TY_LOOKS[li], menu:m, x:TY_W + 180, tx:TY_W + 180, sc:0.84, ts:0.84, pat:1, state:'walk', t:Math.random()*5, id:T.spawned, shakeT:0, bonus:false};
+  const T = TY, D = tyData(T.kind), M = tyMenus(T.kind, T.lv), top = M.base.filter(m => m.lv === Math.min(T.lv, 3));
+  const kingOk = typeof artGorilla !== 'undefined' && artGorilla.ok;
+  let look, m, special = false;
+  if(T.special && !T.specialSpawned && kingOk && T.spawned === (T.lv === 4 ? 3 : 2)){ look = TY_KING; m = pick(top.length ? top : M.base); special = true; T.specialSpawned = true; }
+  else {
+    const artN = TY_LOOKS.filter(L => L.img && FRIEND_ART[L.img] && FRIEND_ART[L.img].ok).length;
+    let li, guard = 0;
+    do{ li = Math.floor(Math.random()*TY_LOOKS.length); guard++; }
+    while(guard < 40 && (li === T.lastLook || (artN >= 4 && !TY_LOOKS[li].img) || (TY_LOOKS[li].img && !(FRIEND_ART[TY_LOOKS[li].img] && FRIEND_ART[TY_LOOKS[li].img].ok)) || T.custs.some(c => c.look === TY_LOOKS[li])));
+    T.lastLook = li; look = TY_LOOKS[li];
+  }
+  const favM = look.fav && M.base.find(x => x.name === look.fav[T.kind]);
+  let fav = false, custom = false;
+  if(!m){
+    if(favM && Math.random() < 0.5){ m = favM; fav = true; }
+    else if(M.mine.length && Math.random() < 0.3){ m = pick(M.mine); custom = true; }
+    else m = top.length && Math.random() < 0.65 ? pick(top) : pick(M.base);
+  }
+  const reg = !!look.id && !special && (D.reg[look.id] || 0) >= 3;
+  const c = {look, menu:m, x:TY_W + 180, tx:TY_W + 180, sc:0.84, ts:0.84, pat:1, state:'walk', t:Math.random()*5, id:T.spawned, shakeT:0, bonus:false,
+    fav, custom, special, reg, ordered:!T.duo, revealed:false};
+  c.hidden = T.view === 'sound' || (fav && reg && T.view === 'pic');
+  return c;
 }
-const tyStep = () => { const T = TY, c = T && T.custs[0]; if(!c || c.walking || c.state !== 'wait') return null; return T.work ? T.work.steps[T.work.si] : 'greet'; };
+const tyFront = () => TY.custs.slice(0, TY.front).filter(c => !c.walking && (c.state === 'wait' || c.state === 'pay'));
+function tyTarget(){ const T = TY; if(T.work) return T.work.cust; const F = tyFront().filter(c => c.state === 'wait' && c.ordered); return T.sel && F.includes(T.sel) ? T.sel : F[0] || null; }
+function tyStep(){ const T = TY; if(!T || T.pick || T.done) return null; if(T.work) return T.work.steps[T.work.si]; return tyTarget() ? 'greet' : null; }
+function tyMotion(st){ const T = TY; if(!T.motion || !T.work) return null; if(st === 'blend' || st === 'pour') return 'hold'; if(st === 'cook') return T.work.m.pan ? 'flip' : 'stir'; return null; }
 const tyAllAdded = W => Object.entries(W.m.need).every(([t, n]) => (W.added[t] || 0) >= n);
 function tySay(t){ say(t, 'ko-KR'); }
 function tyText(x, y, text, col, big){ TY.texts = TY.texts.filter(o => Math.abs(o.x - x) > 60 || Math.abs(o.y - y) > 40); TY.texts.push({x, y, text, col:col || '#fff', t:0, dur:big ? 1.6 : 1.3, big}); }
-function tyStationXY(){ const G = TY_GEO[TY.kind], W = TY.work; if(TY.kind === 'cafe') return G.blender; return W && W.at === 'stove' ? G.stove : W && W.at === 'plate' ? G.plate : G.board; }
-function tyAction(){
-  const T = TY, st = tyStep(), G = TY_GEO[T.kind], c = T.custs[0];
-  if(!st){ tyText(G.act[0] + G.act[2]/2, G.act[1] - 20, '손님을 기다려요 ⏳', '#fff'); return; }
+function tyActText(text){ const G = TY_GEO[TY.kind]; tyText(G.act[0] + G.act[2]/2, G.act[1] - 20, text, '#fff3a0'); }
+function tyStationXY(){ const G = TY_GEO[TY.kind], W = TY.work; if(TY.kind === 'cafe') return W && W.steps[W.si] === 'pour' ? G.cup : G.blender; return W && W.at === 'stove' ? G.stove : W && W.at === 'plate' ? G.plate : G.board; }
+function tyOrderSay(c){
+  if(TY.view === 'text') return;
+  if(c.hidden && c.reg && c.fav && TY.view === 'pic') tySay('늘 먹던 거 주세요!');
+  else tySay(`${c.menu.name} 주세요!`);
+}
+/* ---- 행동 ---- */
+function tyAction(fromKey){
+  const T = TY; if(!T || T.pick) return;
+  const st = tyStep(), G = TY_GEO[T.kind];
+  if(!st){ tyActText('손님을 기다려요 ⏳'); return; }
   T.press.act = 0.15;
-  if(st === 'greet'){
-    T.work = {m:c.menu, steps:tySteps(c.menu, T.kind), si:1, added:{}, taps:0, at:T.kind === 'cafe' ? 'blender' : (c.menu.steps[0] === 'cook' ? 'stove' : 'board'), shakeT:0, pourT:0, moveT:0, chopped:false, cooked:false, plated:false, autoT:0};
-    c.greeted = true; T.idle = 0;
-    tyText(c.x, G.occ - 40, '어서 오세요! 😊', '#fff3a0', true); tySay('어서 오세요!');
-    seq([659, 880], 90, 'triangle', .05);
-    setTimeout(() => { if(TY === T && T.work && T.custs[0] === c) tySay(`${c.menu.name} 주세요!`); }, 900);
-    return;
-  }
-  const W = T.work;
-  if(st === 'add'){ tyText(G.act[0] + G.act[2]/2, G.act[1] - 20, '말풍선의 재료를 눌러요 👇', '#fff3a0'); T.hintT = 3; tone(330, .08, 'sine', .03); return; }
+  if(st === 'greet'){ tyGreet(tyTarget()); return; }
+  const W = T.work, c = W.cust;
+  if(st === 'add'){ tyActText('말풍선의 재료를 눌러요 👇'); T.hintT = 3; tone(330, .08, 'sine', .03); return; }
   if(st === 'serve'){
     if(T.kind === 'cafe' && W.pourT < 1) return;
-    tyServe(); return;
+    if(T.lv === 4 && !fromKey){ tyActText('👉 주문한 손님을 눌러요'); T.hintT = 3; return; }
+    tyServe(c); return;
   }
   if(st === 'plate'){
     W.at = 'plate'; W.plated = true; W.moveT = 0.001; tone(784, .1, 'triangle', .05); T.idle = 0;
     tyText(G.plate[0], G.plate[1] - 110, `${W.m.icon} 완성!`, '#fff3a0', true); tyAdvance(); return;
+  }
+  const mo = tyMotion(st);
+  if(mo){   // 여러 가지 조리 동작: 키보드나 오래 기다리면 눌러도 조금씩
+    if(fromKey || T.idle > 12){ tyProg(0.34); if(!fromKey) tyActText('눌러도 괜찮아요 👍'); }
+    else { tyActText(mo === 'hold' ? '꾹 누르고 있어요 ✋' : mo === 'stir' ? '동그랗게 돌려요 🔄' : '위로 쓱 밀어요 ⬆️'); T.hintT = 2.5; }
+    return;
   }
   const need = TY_STEP[st].taps || 3;
   W.taps++; W.shakeT = 0.3; T.idle = 0; vibe(12);
@@ -6269,30 +6365,51 @@ function tyAction(){
   if(st === 'cook'){ tone(240 + W.taps*40, .18, 'triangle', .04); W.heat = 1; }
   const [sx, sy] = tyStationXY();
   tyText(sx, sy - 160, ['하나!', '둘!', '셋!'][Math.min(2, W.taps - 1)], '#ffffff', true);
-  if(W.taps >= need){
-    if(st === 'chop') W.chopped = true;
-    if(st === 'cook') W.cooked = true;
-    if(st === 'blend'){ W.blended = true; W.pourT = 0.001; seq([523, 659, 784], 70, 'triangle', .05); }
-    else seq([659, 784, 988], 70, 'triangle', .05);
-    tyAdvance();
-  }
+  if(W.taps >= need) tyStepDone(st);
+}
+function tyGreet(c){
+  const T = TY, G = TY_GEO[T.kind]; if(!c) return;
+  T.work = {cust:c, m:c.menu, steps:tySteps(c.menu, T.kind), si:1, added:{}, taps:0, prog:0, at:T.kind === 'cafe' ? 'blender' : (c.menu.steps[0] === 'cook' ? 'stove' : 'board'), shakeT:0, pourT:0, moveT:0, chopped:false, cooked:false, plated:false, autoT:0, flipT:0, flips:0};
+  c.greeted = true; T.sel = c; T.idle = 0;
+  tyText(c.x, G.occ - 40, c.special ? '어서 오세요, 대장님! 👑' : '어서 오세요! 😊', '#fff3a0', true); tySay('어서 오세요!');
+  seq([659, 880], 90, 'triangle', .05);
+  setTimeout(() => { if(TY === T && T.work && T.work.cust === c) tyOrderSay(c); }, 900);
+}
+function tyProg(v){   // 길게 누르기 · 돌리기 · 밀기 진행
+  const T = TY, W = T.work; if(!W) return; const st = W.steps[W.si];
+  W.prog = Math.min(1, W.prog + v); T.idle = 0;
+  if(st === 'pour') W.pourT = W.prog;
+  if(st === 'blend') W.shakeT = 0.15;
+  if(st === 'cook') W.heat = 1;
+  if(W.prog >= 1) tyStepDone(st);
+}
+function tyStepDone(st){
+  const T = TY, W = T.work;
+  if(st === 'chop') W.chopped = true;
+  if(st === 'cook') W.cooked = true;
+  if(st === 'blend'){ W.blended = true; if(!T.motion) W.pourT = 0.001; seq([523, 659, 784], 70, 'triangle', .05); }
+  else if(st === 'pour'){ W.pourT = 1; seq([659, 784, 988], 70, 'triangle', .05); }
+  else seq([659, 784, 988], 70, 'triangle', .05);
+  T.hold = null; T.gest = null; tyAdvance();
 }
 function tyAdvance(){
   const T = TY, W = T.work; if(!W) return;
-  W.si++; W.taps = 0; T.idle = 0;
+  W.si++; W.taps = 0; W.prog = 0; T.idle = 0;
   const st = W.steps[W.si];
   if(T.kind === 'kitchen' && st === 'cook' && W.at !== 'stove'){ W.at = 'stove'; W.moveT = 0.001; }   // 썬 재료를 냄비·팬으로
 }
 function tyAddIng(t){
-  const T = TY, st = tyStep(), G = TY_GEO[T.kind];
+  const T = TY; if(!T || T.pick) return;
+  const st = tyStep(), G = TY_GEO[T.kind];
   T.press['i_' + t] = 0.15;
   if(!st){ tone(330, .06, 'sine', .03); return; }
-  if(st === 'greet'){ tyText(G.act[0] + G.act[2]/2, G.act[1] - 20, '먼저 인사해요 👋', '#fff3a0'); T.hintT = 3; tone(330, .08, 'sine', .03); return; }
-  if(st !== 'add'){ tyText(G.act[0] + G.act[2]/2, G.act[1] - 20, '재료는 다 넣었어요! 👉', '#fff3a0'); T.hintT = 2; return; }
-  const W = T.work, c = T.custs[0], n = W.m.need[t] || 0;
+  if(st === 'greet'){ tyActText('먼저 인사해요 👋'); T.hintT = 3; tone(330, .08, 'sine', .03); return; }
+  if(st !== 'add'){ tyActText('재료는 다 넣었어요! 👉'); T.hintT = 2; return; }
+  const W = T.work, c = W.cust, n = W.m.need[t] || 0;
   if(!n){   // 틀린 재료: 벌점 없이 다시 보기
-    T.mistakes++; c.shakeT = 0.45; T.press['x_' + t] = 0.4; T.hintT = 3.5;
+    T.mistakes++; c.shakeT = 0.45; T.press['x_' + t] = 0.4; T.hintT = 3.5; c.revealed = true;
     tyText(c.x, G.occ - 40, '주문을 다시 볼까요? 🤔', '#ffe3e3', true); tySay('주문을 다시 볼까요?');
+    if(T.view === 'sound') setTimeout(() => { if(TY === T && T.work === W) tyOrderSay(c); }, 1300);
     tone(260, .15, 'sine', .04); return;
   }
   if((W.added[t] || 0) >= n){ tyText(c.x, G.occ - 40, '충분해요! 👍', '#fff'); return; }
@@ -6304,34 +6421,82 @@ function tyAddIng(t){
   if(SET.tts) tySay(tyName(t));
   if(tyAllAdded(W)){ W.autoT = 0.45; seq([784, 988], 70, 'triangle', .05); }
 }
-function tyServe(){
-  const T = TY, W = T.work, c = T.custs[0], G = TY_GEO[T.kind];
-  const tip = (T.relax ? 12 : 5 + Math.round(12*c.pat))*(c.bonus ? 2 : 1);
-  T.tips += tip; T.patSum += T.relax ? 1 : c.pat; T.served++;
+function tyServe(c){
+  const T = TY, W = T.work, G = TY_GEO[T.kind]; if(!W || W.cust !== c) return;
   const [sx, sy] = T.kind === 'cafe' ? G.cup : G.plate;
   T.fx.push({type:'fly', emoji:T.kind === 'cafe' ? '🥤' : W.m.icon, col:W.m.col, x0:sx, y0:sy - 60, x1:c.x, y1:G.occ - 90, t:0, dur:0.45, size:90});
+  T.work = null; T.sel = null; T.idle = 0; c.served = true;
+  if(T.pay){ c.state = 'pay'; setTimeout(() => { if(TY === T) tyPayOpen(c); }, 500); tone(700, .08, 'triangle', .05); return; }
+  tyServeEnd(c);
+}
+function tyServeEnd(c){
+  const T = TY, G = TY_GEO[T.kind], D = tyData(T.kind), L = c.look;
+  let tip = (T.relax ? 12 : 5 + Math.round(12*c.pat))*(c.bonus ? 2 : 1);
+  if(c.special){ tip += 20; T.specialDone = true; D.spDay = todayKey(); D.badges = (D.badges || 0) + 1; }
+  if(c.custom) tip += 3;
+  T.tips += tip; T.patSum += T.relax ? 1 : c.pat; T.served++;
+  if(L.id && !c.special){ const n0 = D.reg[L.id] || 0; D.reg[L.id] = n0 + 1; if(n0 + 1 === 3) T.newRegs.push(L); }
+  if(c.fav && L.id) D.favSeen[L.id] = true;
   for(let i=0;i<8;i++) T.fx.push({type:'heart', x:c.x + rand(-60, 60), y:G.occ - rand(120, 220), vx:rand(-40, 40), vy:rand(-120, -60), t:0, dur:1.2});
   const f = tyFit();
   for(let i=0;i<Math.min(8, 2 + Math.floor(tip/4));i++) T.fx.push({type:'coin', x0:c.x + rand(-40, 40), y0:G.occ - 150, x1:(f.w - 150 - f.ox)/f.k, y1:(34 - f.oy)/f.k, t:-i*0.06, dur:0.7});
-  tyText(c.x, G.occ - 40, `감사합니다! 💖 🪙+${tip}`, '#fff3a0', true); tySay('감사합니다!');
-  seq([784, 988, 1175, 1568], 70, 'triangle', .06); vibe(25);
-  c.state = 'happy'; c.happyT = 1.1; T.leavers.push(c); T.custs.shift(); T.work = null; T.idle = 0;
+  tyText(c.x, G.occ - 40, `${c.special ? '👑 ' : ''}고마워요! 💖 🪙+${tip}`, '#fff3a0', true);
+  tySay(L.thanks || '감사합니다!');
+  tyReactFx(c);
+  vibe(25);
+  c.state = 'happy'; c.happyT = 1.8; T.leavers.push(c); T.custs = T.custs.filter(x => x !== c);
   if(T.spawned < T.total) T.next = Math.min(T.next, 1.6);
-  if(T.served >= T.total){ T.done = true; T.endT = 2.2; }
+  if(T.duo && T.served < T.total) T.banner = {text:'🔄 역할을 바꿔도 좋아요!', t:0, dur:2};
+  if(T.served >= T.total){ T.done = true; T.endT = 2.0; }
 }
-function tyFinish(){
-  const T = TY, D = tyData(T.kind), avgPat = T.patSum/Math.max(1, T.served);
-  const got = [true, T.mistakes <= 2, T.relax || avgPat >= 0.45], stars = got.filter(Boolean).length, prev = D.stars[T.lv] || 0;
-  if(stars > prev) D.stars[T.lv] = stars;
-  let unlocked = 0; if(stars >= 2 && T.lv < 3 && D.open < T.lv + 1){ D.open = T.lv + 1; unlocked = T.lv + 1; }
-  D.days++;
-  const R = {stars, got, prev, unlocked, served:T.served, mistakes:T.mistakes, tips:T.tips, coins:T.tips + 10 + (stars === 3 ? 10 : 0), gifts:[]};
-  if(T.kind === 'cafe'){ const before = vit(); DEX.vit = Math.min(20, (DEX.vit || 0) + (stars === 3 ? 2 : 1)); R.vit = vit() - before; if(!R.vit){ R.vitMax = true; R.coins += 10; } }
-  else { for(let i=0;i<(stars === 3 ? 2 : 1);i++){ const k = pick(['giant', 'magnet', 'heart', 'power', 'fairy', 'float', 'glow']); DEX.items[k] = (DEX.items[k] || 0) + 1; R.gifts.push(k); } }
-  DEX.coins += R.coins; gainXP(50 + stars*20); saveDex();
-  T.result = R; tyStop(); showScreen('tyResult');
-  seq(stars === 3 ? [523, 659, 784, 1047, 1319] : [523, 659, 784, 1047], 110, 'triangle', .07);
-  tySay(`오늘의 영업 끝! 별 ${stars}개`);
+function tyReactFx(c){   // 동물마다 기쁠 때 몸짓 · 소리
+  const T = TY, G = TY_GEO[T.kind], r = c.look.react, x = c.x, y = G.occ - 160;
+  const S2 = {flip:[784, 1047, 1319], rainbow:[659, 831, 988, 1245], loop:[988, 1175, 988, 1319], hop:[392, 523, 392, 523], waddle:[523, 587, 659, 587, 523], glow:[1047, 1319, 1568], spray:[196, 247, 294, 392], drum:[110, 110, 147, 110, 165]}[r] || [784, 988, 1175, 1568];
+  seq(S2, r === 'drum' ? 110 : 80, r === 'spray' || r === 'drum' ? 'sawtooth' : 'triangle', r === 'drum' ? .05 : .06);
+  if(r === 'spray') for(let i=0;i<22;i++) T.fx.push({type:'drop', x:x + 90*c.sc, y:(c.headTop || y) + 20, vx:rand(-60, 160), vy:rand(-360, -200), t:-i*0.03, dur:1.3});
+  if(r === 'waddle' || r === 'drum') for(let i=0;i<5;i++) T.fx.push({type:'note', x:x + rand(-80, 80), y:y - rand(0, 60), t:-i*0.15, dur:1.4, e:r === 'drum' ? '💥' : pick(['🎵', '🎶'])});
+  if(r === 'glow' || r === 'rainbow' || r === 'flip') for(let i=0;i<12;i++) T.fx.push({type:'spark', x:x + rand(-110, 110), y:y + rand(-120, 60), t:-i*0.05, dur:1, col:r === 'glow' ? '#ffe066' : `hsl(${i*30},90%,65%)`});
+  if(r === 'hop') tyText(x + 120, y - 40, '개굴! 🎵', '#b8ff7a', true);
+  if(r === 'drum') tyText(x + 140, y - 60, '우호호! 👑', '#ffe066', true);
+}
+/* ---- 🪙 계산하기 ---- */
+function tyPayOpen(c){
+  const T = TY, L = Math.min(T.lv, 3), n = Object.values(c.menu.need).reduce((a, b) => a + b, 0);
+  let price, paid, coin, ans, q;
+  if(L === 1){ price = clamp(n + 1 + Math.floor(Math.random()*3), 2, 5); paid = price; coin = 1; ans = price; q = '손님이 낸 돈은 모두 몇 개예요?'; }
+  else if(L === 2){ price = 2 + Math.floor(Math.random()*3); paid = 5; coin = 5; ans = 5 - price; q = '거스름돈은 몇 개예요?'; }
+  else { price = 5 + Math.floor(Math.random()*5); paid = 10; coin = 10; ans = 10 - price; q = '거스름돈은 몇 개예요?'; }
+  const set = new Set([ans]); let d = 1; while(set.size < 3){ if(ans + d <= 10) set.add(ans + d); if(set.size < 3 && ans - d >= (L === 1 ? 1 : 0)) set.add(ans - d); d++; }
+  T.pick = {type:'pay', c, price, paid, coin, ans, q, L, choices:shuffle([...set]), wrong:0, tries:0, btns:[]};
+  T.idle = 0;
+  tySay(L === 1 ? `${c.menu.name}는 ${price}원이에요. 손님이 낸 돈을 세어 봐요` : `${c.menu.name}는 ${price}원이에요. ${paid}원을 받았어요. 거스름돈은 얼마일까요?`);
+}
+function tyPayChoose(i){
+  const T = TY, P = T.pick, v = P.choices[i]; if(v === undefined) return;
+  P.tries++;
+  if(v === P.ans){
+    T.payN++; if(P.tries === 1) T.payOK++;
+    seq([988, 1319], 80, 'triangle', .06); tySay(P.L === 1 ? `맞아요! ${v}원` : `맞아요! 거스름돈 ${v}원`);
+    T.pick = null; tyServeEnd(P.c); return;
+  }
+  T.payMiss++; P.wrong = 0.5; P.hint = true; P.bad = i; tone(260, .15, 'sine', .04);
+  tySay(P.L === 1 ? '다시 세어 볼까요? 하나씩 세어 봐요' : `${P.price}에서 ${P.paid}까지 세어 봐요`);
+}
+/* ---- 👫 두 명이 함께: 손님 친구가 주문 고르기 ---- */
+function tyOrderOpen(c){
+  const T = TY, M = tyMenus(T.kind, T.lv), top = M.all.filter(m => m.lv === Math.min(T.lv, 3));
+  const pool = shuffle([...(top.length >= 4 ? top : M.all)]), ch = [];
+  if(c.special) ch.push(c.menu);
+  for(const m of pool){ if(ch.length >= 4) break; if(!ch.includes(m)) ch.push(m); }
+  T.pick = {type:'order', c, choices:shuffle(ch), btns:[]};
+  tySay('손님 친구 차례! 먹고 싶은 것을 골라요');
+}
+function tyOrderChoose(i){
+  const T = TY, P = T.pick, m = P.choices[i]; if(!m) return;
+  const c = P.c; c.menu = m; c.ordered = true; c.fav = !!(c.look.fav && c.look.fav[T.kind] === m.name); c.custom = !!m.custom;
+  c.hidden = T.view === 'sound'; T.pick = null; T.idle = 0;
+  tySay(`${m.name} 주세요!`); seq([784, 988], 80, 'triangle', .05);
+  T.banner = {text:'👩‍🍳 점원 친구 차례!', t:0, dur:1.8};
 }
 /* ---- 움직임 ---- */
 function tyLoop(){
@@ -6344,53 +6509,96 @@ function tyLoop(){
 }
 function tyUpdate(dt){
   const T = TY, G = TY_GEO[T.kind]; T.t += dt;
+  if(T.closing){ T.closing.t += dt; if(T.closing.t > 3.6 && !T.finished){ T.finished = true; tyFinish(); } return; }
   if(!T.done){
     T.next -= dt;
     if(!T.custs.length && T.spawned < T.total) T.next = Math.min(T.next, 0.6);
-    if(T.next <= 0 && T.spawned < T.total && T.custs.length < 3){ T.custs.push(tyNewCust()); T.spawned++; T.next = rand(6, 9) + T.lv*1.5; }
+    if(T.next <= 0 && T.spawned < T.total && T.custs.length < 3){ T.custs.push(tyNewCust()); T.spawned++; T.next = rand(6, 9) + Math.min(T.lv, 3)*1.5 - (T.lv === 4 ? 3 : 0); }
   }
-  T.custs.forEach((c, i) => { const s = G.slots[Math.min(i, 2)]; c.tx = s[0]; c.ts = s[1]; });
+  const slots = T.lv === 4 ? G.slots4 : G.slots;
+  T.custs.forEach((c, i) => { const s = slots[Math.min(i, 2)]; c.tx = s[0]; c.ts = s[1]; });
   for(const c of [...T.custs, ...T.leavers]){
     c.t += dt; c.sc += (c.ts - c.sc)*Math.min(1, dt*5);
     const d = c.tx - c.x, sp = 540*dt; c.x = Math.abs(d) <= sp ? c.tx : c.x + Math.sign(d)*sp; c.walking = Math.abs(c.tx - c.x) > 1;
     if(c.shakeT > 0) c.shakeT -= dt;
   }
-  const c0 = T.custs[0];
-  if(c0 && c0.state === 'walk' && !c0.walking){ c0.state = 'wait'; T.idle = 0; tone(988, .07, 'sine', .04); }
-  T.custs.forEach((c, i) => { if(i > 0 && c.state === 'wait') c.state = 'walk'; });
-  if(!T.relax && !T.done) T.custs.forEach((c, i) => { if(!c.walking) c.pat = Math.max(0.05, c.pat - dt*(i === 0 ? 1 : 0.5)/TY_LIMIT[T.kind][T.lv]); });
+  T.custs.forEach((c, i) => {
+    if(i < T.front && c.state === 'walk' && !c.walking){ c.state = 'wait'; T.idle = 0; tone(988, .07, 'sine', .04); if(c.special){ T.banner = {text:'👑 오늘의 특별 손님, 고릴라 대장!', t:0, dur:2.4}; tySay('오늘의 특별 손님이 왔어요!'); } }
+    if(i >= T.front && c.state === 'wait' && !c.greeted) c.state = 'walk';
+  });
+  if(T.duo && !T.pick && !T.work && !T.done){ const c = tyFront().find(x => x.state === 'wait' && !x.ordered); if(c) tyOrderOpen(c); }
+  if(!T.relax && !T.done && !T.pick) T.custs.forEach((c, i) => { if(!c.walking && c.state !== 'pay') c.pat = Math.max(0.05, c.pat - dt*(i < T.front ? 1 : 0.5)/TY_LIMIT[T.kind][T.lv]); });
   for(const c of T.leavers){ if(c.happyT > 0){ c.happyT -= dt; if(c.happyT <= 0){ c.tx = -240; c.ts = 0.84; } } }
   T.leavers = T.leavers.filter(c => c.happyT > 0 || c.x > -200);
   const W = T.work;
   if(W){
-    if(W.shakeT > 0) W.shakeT -= dt; if(W.chopT > 0) W.chopT -= dt; if(W.heat > 0) W.heat = Math.max(W.cooked ? 0.35 : 0, W.heat - dt*0.3);
+    if(W.shakeT > 0) W.shakeT -= dt; if(W.chopT > 0) W.chopT -= dt; if(W.flipT > 0) W.flipT -= dt;
+    if(W.heat > 0) W.heat = Math.max(W.cooked ? 0.35 : 0, W.heat - dt*0.3);
     if(W.autoT > 0){ W.autoT -= dt; if(W.autoT <= 0) tyAdvance(); }
-    if(W.pourT > 0 && W.pourT < 1) W.pourT = Math.min(1, W.pourT + dt/0.9);
+    if(!T.motion && W.pourT > 0 && W.pourT < 1) W.pourT = Math.min(1, W.pourT + dt/0.9);
     if(W.moveT > 0 && W.moveT < 1) W.moveT = Math.min(1, W.moveT + dt/0.45);
+    const st = W.steps[W.si];
+    if(T.hold && tyMotion(st) === 'hold'){ tyProg(dt/(st === 'blend' ? 1.3 : 1.0)); T.holdSnd = (T.holdSnd || 0) + dt; if(T.holdSnd > 0.22){ T.holdSnd = 0; tone(st === 'blend' ? 160 + W.prog*300 : 500 + W.prog*500, .12, st === 'blend' ? 'sawtooth' : 'sine', .03); } }
+    if(W.cust && W.cust.hidden && !W.cust.revealed && st === 'add' && T.idle > 8) W.cust.revealed = true;   // 오래 고민하면 그림을 보여 줘요
   }
-  if(tyStep()) T.idle += dt;
+  if(tyStep() || T.pick) T.idle += dt;
+  const hv = T.hintT > 0 || T.idle > 6; if(hv && !T.hintOn) T.hints++; T.hintOn = hv;
   if(T.hintT > 0) T.hintT -= dt;
+  if(T.pick && T.pick.wrong > 0) T.pick.wrong -= dt;
+  if(T.banner){ T.banner.t += dt; if(T.banner.t > T.banner.dur) T.banner = null; }
   for(const k in T.press) if(T.press[k] > 0) T.press[k] -= dt;
-  for(const f of T.fx){ f.t += dt; if(f.type === 'heart'){ f.x += f.vx*dt; f.y += f.vy*dt; } }
+  for(const f of T.fx){ f.t += dt; if(f.t > 0 && (f.type === 'heart' || f.type === 'drop' || f.type === 'note')){ if(f.type === 'drop') f.vy += 520*dt; else if(f.type === 'note'){ f.vx = 0; f.vy = -60; } f.x += (f.vx || 0)*dt; f.y += f.vy*dt; } }
   T.fx = T.fx.filter(f => f.t < f.dur);
   for(const x of T.texts) x.t += dt; T.texts = T.texts.filter(x => x.t < x.dur);
-  if(T.done && !T.finished){ T.endT -= dt; if(T.endT <= 0 && !T.leavers.length){ T.finished = true; tyFinish(); } else if(T.endT < -3){ T.finished = true; tyFinish(); } }
+  if(T.done && !T.closing){ T.endT -= dt; if((T.endT <= 0 && !T.leavers.length) || T.endT < -3){ T.closing = {t:0}; tySay(`오늘 영업 끝! 손님 ${T.served}명이 행복해요`); seq([784, 659, 523, 392], 150, 'triangle', .05); } }
+}
+function tyFinish(){
+  const T = TY, D = tyData(T.kind), avgPat = T.patSum/Math.max(1, T.served);
+  const got = [true, T.mistakes <= 2, T.relax || avgPat >= 0.45], stars = got.filter(Boolean).length, prev = D.stars[T.lv] || 0;
+  if(stars > prev) D.stars[T.lv] = stars;
+  let unlocked = 0; if(stars >= 2 && T.lv < 4 && D.open < T.lv + 1){ D.open = T.lv + 1; unlocked = T.lv + 1; }
+  D.days++;
+  const R = {stars, got, prev, unlocked, served:T.served, mistakes:T.mistakes, tips:T.tips, coins:T.tips + 10 + (stars === 3 ? 10 : 0), gifts:[], special:T.specialDone, newRegs:T.newRegs.map(L => L.icon + ' ' + L.name), payN:T.payN, payOK:T.payOK};
+  if(T.kind === 'cafe'){ const before = vit(); DEX.vit = Math.min(20, (DEX.vit || 0) + (stars === 3 ? 2 : 1)); R.vit = vit() - before; if(!R.vit){ R.vitMax = true; R.coins += 10; } }
+  else { for(let i=0;i<(stars === 3 ? 2 : 1);i++){ const k = pick(['giant', 'magnet', 'heart', 'power', 'fairy', 'float', 'glow']); DEX.items[k] = (DEX.items[k] || 0) + 1; R.gifts.push(k); } }
+  DEX.coins += R.coins;
+  D.log.push({d:Date.now(), lv:T.lv, stars, served:T.served, miss:T.mistakes, hints:T.hints, pay:T.pay ? `${T.payOK}/${T.payN}` : '', sec:Math.round((Date.now() - T.t0)/1000), relax:T.relax, view:T.view, motion:T.motion, duo:T.duo, sp:T.specialDone});
+  if(D.log.length > 60) D.log.splice(0, D.log.length - 60);
+  gainXP(50 + stars*20); saveDex();
+  const nd = tyNextDeco(T.kind); R.nextDeco = nd ? {name:TY_DECO[nd.cat].title.split(' ')[0] + ' ' + nd.name, need:Math.max(0, nd.price - DEX.coins)} : null;
+  T.result = R; tyStop(); showScreen('tyResult');
+  seq(stars === 3 ? [523, 659, 784, 1047, 1319] : [523, 659, 784, 1047], 110, 'triangle', .07);
+  tySay(`별 ${stars}개!`);
 }
 /* ---- 그리기 ---- */
 function tyOutline(x, text, cx, cy, size, fill, stroke, align){
   x.font = `bold ${size}px ${FONT}`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
   x.lineWidth = Math.max(3, size*0.22); x.strokeStyle = stroke || 'rgba(40,24,8,.85)'; x.strokeText(text, cx, cy); x.fillStyle = fill || '#fff'; x.fillText(text, cx, cy);
 }
-function tyBtnXY(t){ const G = TY_GEO[TY.kind], pal = TY_PAL[TY.kind][TY.lv], i = pal.indexOf(t), n = pal.length, R = G.row; const sp = (R.x1 - R.x0)/Math.max(1, n - 1); return [n === 1 ? (R.x0 + R.x1)/2 : R.x0 + sp*i, R.y, Math.min(R.r, sp*0.44)]; }
+function tyBtnXY(t){ const G = TY_GEO[TY.kind], pal = tyPal(), i = pal.indexOf(t), n = pal.length, R = G.row; const sp = (R.x1 - R.x0)/Math.max(1, n - 1); return [n === 1 ? (R.x0 + R.x1)/2 : R.x0 + sp*i, R.y, Math.min(R.r, sp*0.44)]; }
+function tyLookArt(L){ if(L.art === 'gorilla') return typeof artGorilla !== 'undefined' && artGorilla.ok ? artGorilla : null; const a = L.img && FRIEND_ART[L.img]; return a && a.ok ? a : null; }
 function tyDrawCust(x, c){
-  const G = TY_GEO[TY.kind], s = c.sc, L = c.look, happy = c.state === 'happy';
-  const bob = c.walking ? -Math.abs(Math.sin(c.t*10))*8*s : Math.sin(c.t*2.2 + c.id)*2.5*s, jump = happy ? -Math.abs(Math.sin(c.t*9))*18*s : 0, shx = c.shakeT > 0 ? Math.sin(c.t*70)*6 : 0;
-  const cx = c.x + shx, base = G.occ + bob + jump;
-  const art = L.img && typeof FRIEND_ART !== 'undefined' && FRIEND_ART[L.img];
-  if(art && art.ok){
+  const G = TY_GEO[TY.kind], s = c.sc, L = c.look, happy = c.state === 'happy', u = happy ? 1 - Math.max(0, c.happyT)/1.8 : 0;
+  let bob = c.walking ? -Math.abs(Math.sin(c.t*10))*8*s : Math.sin(c.t*2.2 + c.id)*2.5*s, jump = happy ? -Math.abs(Math.sin(c.t*9))*18*s : 0, shx = c.shakeT > 0 ? Math.sin(c.t*70)*6 : 0, rot = 0, lx = 0, ly = 0, hue = 0;
+  if(happy && c.happyT > 0){
+    const r = L.react;
+    if(r === 'flip' && u < 0.55){ const v = u/0.55; jump = -Math.sin(v*Math.PI)*110*s; rot = v*6.283; }
+    else if(r === 'hop'){ jump = -Math.abs(Math.sin(u*Math.PI*3))*70*s; }
+    else if(r === 'loop'){ lx = Math.sin(u*6.283)*70*s; ly = -(1 - Math.cos(u*6.283))*50*s; jump = 0; }
+    else if(r === 'waddle'){ rot = Math.sin(c.t*14)*0.2; jump = -Math.abs(Math.sin(c.t*7))*10*s; }
+    else if(r === 'drum'){ shx = Math.sin(c.t*50)*7; jump = 0; }
+    else if(r === 'rainbow') hue = u*720;
+  }
+  const cx = c.x + shx + lx, base = G.occ + bob + jump + ly;
+  const art = tyLookArt(L);
+  if(art){
     const im = art.img, h = L.h*s, w = h*im.width/im.height, top = base + L.dy*s - h + (L.fly ? Math.sin(c.t*3)*8*s : 0);
-    x.save(); x.translate(cx, 0); if(c.walking && c.tx < c.x) x.scale(-1, 1); x.drawImage(im, -w/2, top, w, h); x.restore();
+    if(L.react === 'glow' && happy && c.happyT > 0){ const g = x.createRadialGradient(cx + w*0.3, top + h*0.72, 4, cx + w*0.3, top + h*0.72, 90*s); g.addColorStop(0, `rgba(255,230,120,${0.7*(1 - u)})`); g.addColorStop(1, 'rgba(255,230,120,0)'); x.fillStyle = g; x.fillRect(cx - 200, top, 400, h); }
+    x.save(); x.translate(cx, top + h/2); if(rot) x.rotate(rot); if(c.walking && c.tx < c.x) x.scale(-1, 1);
+    if(hue && 'filter' in x) x.filter = `hue-rotate(${hue}deg) saturate(1.4)`;
+    x.drawImage(im, -w/2, -h/2, w, h); x.restore();
     c.headTop = top + 6*s;
+    if(c.special){ x.font = `${40*s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; for(let i=0;i<3;i++){ const a = c.t*2 + i*2.09; x.globalAlpha = 0.6 + Math.sin(c.t*4 + i)*0.3; x.fillText('✨', cx + Math.cos(a)*w*0.45, top + 30 + Math.sin(a)*20); } x.globalAlpha = 1; }
   } else {
     const col = L.c || '#90a4ae';
     x.fillStyle = 'rgba(0,0,0,.18)'; rrOn(x, cx - 60*s, base - 96*s, 128*s, 150*s, 52*s); x.fill();
@@ -6399,42 +6607,63 @@ function tyDrawCust(x, c){
     x.fillStyle = 'rgba(255,255,255,.9)'; x.beginPath(); x.moveTo(cx - 24*s, base - 100*s); x.lineTo(cx, base - 76*s); x.lineTo(cx + 24*s, base - 100*s); x.fill();
     const hy = happy ? base - 150*s : base - 26*s;
     x.fillStyle = '#ffe3c4'; for(const d of [-1, 1]){ x.beginPath(); x.arc(cx + d*70*s, hy + (happy ? Math.sin(c.t*12 + d)*6*s : 0), 17*s, 0, 6.29); x.fill(); }
-    x.font = `${124*s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(L.e, cx, base - 160*s);
+    x.font = `${124*s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(L.e || '🙂', cx, base - 160*s);
     c.headTop = base - 226*s;
   }
 }
-function tyDrawBubble(x, c, front){
+function tyDrawBubble(x, c, front, slot){
   const T = TY, G = TY_GEO[T.kind]; if(c.headTop === undefined) return;
   const shx = c.shakeT > 0 ? Math.sin(c.t*70)*6 : 0, cx = c.x + shx;
   const patCol = c.pat > 0.6 ? '#51cf66' : c.pat > 0.3 ? '#fcc419' : '#ff8787', face = c.pat > 0.6 ? '😊' : c.pat > 0.3 ? '🙂' : '😟';
-  if(c.state === 'happy'){ tyPill(x, cx, c.headTop - 40, '💖 감사합니다!', 28); return; }
+  if(c.state === 'happy'){ tyPill(x, cx, c.headTop - 40, '💖 고마워요!', 28); return; }
+  if(c.state === 'pay'){ tyPill(x, cx, c.headTop - 40, '🪙 계산할게요!', 28); return; }
   if(!front || c.walking){   // 기다리는 손님: 작은 표시
     if(c.walking || T.relax) return;
     const y = c.headTop - 22, w = 70;
     x.fillStyle = 'rgba(0,0,0,.35)'; rrOn(x, cx - w/2 - 3, y - 7, w + 6, 14, 7); x.fill(); x.fillStyle = patCol; rrOn(x, cx - w/2, y - 4, w*c.pat, 8, 4); x.fill();
     return;
   }
-  if(!c.greeted){ tyPill(x, cx, c.headTop - 40, '👋 안녕하세요!', 30); if(!T.relax) tyPatBar(x, cx, c.headTop - 4, 120, c.pat, patCol, face); return; }
-  const W = T.work, items = []; for(const [t, n] of Object.entries(c.menu.need)) for(let i=0;i<n;i++) items.push([t, i]);
-  const dishW = T.kind === 'kitchen' ? 80 : 0, iw = 64, bw = 36 + dishW + items.length*iw, bh = 122, bx = cx - bw/2, bottom = c.headTop - 16, by = bottom - bh;
+  if(!c.ordered){ tyPill(x, cx, c.headTop - 40, '🤔 뭘 먹을까?', 30); return; }
+  const W = T.work && T.work.cust === c ? T.work : null;
+  if(!c.greeted && T.lv !== 4){ tyPill(x, cx, c.headTop - 40, c.special ? '👑 특별 주문이 있어요!' : '👋 안녕하세요!', 30); if(!T.relax) tyPatBar(x, cx, c.headTop - 4, 120, c.pat, patCol, face); return; }
+  const hide = c.hidden && !c.revealed, text = T.view === 'text';
+  const items = []; for(const [t, n] of Object.entries(c.menu.need)) for(let i=0;i<n;i++) items.push([t, i]);
+  const two = T.lv === 4, iw = two ? 52 : 64, dishW = T.kind === 'kitchen' ? (two ? 66 : 80) : 0;
+  let bw = 36 + dishW + items.length*iw; const bh = 122;
+  if(text){ x.font = `bold 26px ${FONT}`; bw = Math.max(bw, x.measureText(c.menu.name).width + 60); }
+  const bottom = c.headTop - 16, by = bottom - bh;
+  let bx = cx - bw/2; if(two) bx = slot === 0 ? cx - bw + 70 : cx - 70;
+  const active = T.work ? T.work.cust === c : tyTarget() === c;
   x.save();
   x.fillStyle = 'rgba(0,0,0,.18)'; rrOn(x, bx + 3, by + 6, bw, bh, 26); x.fill();
-  x.fillStyle = '#fffdf6'; rrOn(x, bx, by, bw, bh, 26); x.fill(); x.strokeStyle = '#e9b949'; x.lineWidth = 4; x.stroke();
+  x.fillStyle = '#fffdf6'; rrOn(x, bx, by, bw, bh, 26); x.fill(); x.strokeStyle = two && active ? '#f08c00' : '#e9b949'; x.lineWidth = two && active ? 7 : 4; x.stroke();
   x.fillStyle = '#fffdf6'; x.beginPath(); x.moveTo(cx - 16, bottom - 2); x.lineTo(cx, bottom + 18); x.lineTo(cx + 16, bottom - 2); x.fill();
-  x.strokeStyle = '#e9b949'; x.beginPath(); x.moveTo(cx - 16, bottom); x.lineTo(cx, bottom + 18); x.lineTo(cx + 16, bottom); x.stroke();
-  let ix = bx + 18;
-  if(dishW){ x.font = '64px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(c.menu.icon, ix + 34, by + 46); ix += dishW; }
-  const count = {};
-  for(const [t] of items){
-    count[t] = (count[t] || 0) + 1; const done = W && (W.added[t] || 0) >= count[t];
-    const pulse = W && W.steps[W.si] === 'add' && !done && (T.hintT > 0 || T.idle > 6) ? 1 + Math.sin(T.t*8)*0.08 : 1;
-    x.save(); x.translate(ix + iw/2, by + 46); x.scale(pulse, pulse); x.globalAlpha = done ? 0.45 : 1; x.drawImage(tyImg(t), -30, -30, 60, 60); x.restore();
-    if(done){ x.fillStyle = '#40c057'; x.beginPath(); x.arc(ix + iw - 10, by + 64, 13, 0, 6.29); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 3.5; x.beginPath(); x.moveTo(ix + iw - 16, by + 64); x.lineTo(ix + iw - 11, by + 69); x.lineTo(ix + iw - 3, by + 59); x.stroke(); }
-    ix += iw;
+  x.strokeStyle = two && active ? '#f08c00' : '#e9b949'; x.beginPath(); x.moveTo(cx - 16, bottom); x.lineTo(cx, bottom + 18); x.lineTo(cx + 16, bottom); x.stroke();
+  const tag = c.special ? '👑 특별 주문' : c.custom ? '⭐ 나만의 메뉴' : c.reg ? '💖 단골' : '';
+  if(tag){ x.font = `bold 18px ${FONT}`; const tw = x.measureText(tag).width + 20; x.fillStyle = c.special ? '#f59f00' : c.custom ? '#7048e8' : '#e64980'; rrOn(x, bx + 14, by - 16, tw, 28, 14); x.fill(); x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText(tag, bx + 24, by - 1); }
+  if(text){   // 글자만 보기: 읽기 연습
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#3a2412'; x.font = `bold 28px ${FONT}`; x.fillText(c.menu.name, bx + bw/2, by + 40, bw - 24);
+    const parts = Object.entries(c.menu.need).map(([t, n]) => { const ok = W && (W.added[t] || 0) >= n; return (ok ? '✓' : '') + tyName(t) + (n > 1 ? ` ${n}개` : ''); });
+    x.font = `bold 21px ${FONT}`; x.fillStyle = '#6b4a1c'; x.fillText(parts.join(' · '), bx + bw/2, by + 88, bw - 24);
+  } else {
+    let ix = bx + 18;
+    if(dishW){ x.font = `${two ? 52 : 64}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(c.menu.icon || '🍽️', ix + dishW/2 - 6, by + 46); ix += dishW; }
+    const count = {};
+    for(const [t] of items){
+      count[t] = (count[t] || 0) + 1; const done = W && (W.added[t] || 0) >= count[t];
+      const pulse = W && W.steps[W.si] === 'add' && !done && !hide && (T.hintT > 0 || T.idle > 6) ? 1 + Math.sin(T.t*8)*0.08 : 1, is = iw - 4;
+      if(hide && !done){ x.fillStyle = '#f1e3c2'; x.beginPath(); x.arc(ix + iw/2, by + 46, is/2, 0, 6.29); x.fill(); x.font = `bold ${is*0.6}px ${FONT}`; x.fillStyle = '#b08850'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('?', ix + iw/2, by + 48); }
+      else { x.save(); x.translate(ix + iw/2, by + 46); x.scale(pulse, pulse); x.globalAlpha = done ? 0.45 : 1; x.drawImage(tyImg(t), -is/2, -is/2, is, is); x.restore(); }
+      if(done){ x.fillStyle = '#40c057'; x.beginPath(); x.arc(ix + iw - 10, by + 64, 13, 0, 6.29); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 3.5; x.beginPath(); x.moveTo(ix + iw - 16, by + 64); x.lineTo(ix + iw - 11, by + 69); x.lineTo(ix + iw - 3, by + 59); x.stroke(); }
+      ix += iw;
+    }
+    x.font = `bold ${two ? 21 : 24}px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#5a3a14';
+    const label = hide ? (T.view === 'sound' ? '🔊 눌러서 다시 듣기' : '💖 늘 먹던 거요!') : c.menu.name;
+    x.fillText(label, bx + bw/2, by + 98, bw - 20);
   }
-  x.font = `bold 24px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#5a3a14'; x.fillText(c.menu.name, cx, by + 98, bw - 20);
   x.restore();
-  if(!T.relax) tyPatBar(x, cx + bw/2 + 36, by + 30, 0, c.pat, patCol, face);
+  c.bubble = [bx, by, bw, bh];
+  if(!T.relax) tyPatBar(x, two && slot === 0 ? bx - 36 : bx + bw + 36, by + 30, 0, c.pat, patCol, face);
 }
 function tyPill(x, cx, cy, text, size){
   x.font = `bold ${size}px ${FONT}`; const w = x.measureText(text).width + 36, h = size + 26;
@@ -6449,35 +6678,37 @@ function tyPatBar(x, cx, cy, w, pat, col, face){
   x.font = '34px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(face, cx, cy + 2);
 }
 function tyDrawBlender(x, W){
-  const [bx, by] = TY_GEO.cafe.blender, sh = W && W.shakeT > 0 ? Math.sin(TY.t*80)*5 : 0;
+  const T = TY, [bx, by] = TY_GEO.cafe.blender, sh = W && W.shakeT > 0 ? Math.sin(T.t*80)*5 : 0;
   x.save(); x.translate(bx + sh, by);
   x.fillStyle = 'rgba(0,0,0,.18)'; x.beginPath(); x.ellipse(0, 2, 72, 12, 0, 0, 6.29); x.fill();
   const gb = x.createLinearGradient(0, -62, 0, 0); gb.addColorStop(0, '#b2f2dc'); gb.addColorStop(1, '#63c7a5');
   x.fillStyle = gb; rrOn(x, -64, -62, 128, 62, 20); x.fill(); x.strokeStyle = 'rgba(40,110,90,.45)'; x.lineWidth = 3; x.stroke();
   x.fillStyle = '#ff8a65'; x.beginPath(); x.arc(0, -31, 13, 0, 6.29); x.fill(); x.fillStyle = 'rgba(255,255,255,.6)'; x.beginPath(); x.arc(-4, -35, 4, 0, 6.29); x.fill();
   const jar = () => { x.beginPath(); x.moveTo(-44, -64); x.lineTo(44, -64); x.lineTo(60, -214); x.lineTo(-60, -214); x.closePath(); };
-  let level = 0, col = W ? W.m.col : '#fff';
-  if(W){ if(W.blended) level = 0.78*(1 - W.pourT); else if(W.si >= 2 && W.taps) level = 0.25*W.taps; }
+  let level = 0; const col = W ? W.m.col || '#ffb3c7' : '#fff', st = W && W.steps[W.si];
+  if(W){ if(W.blended) level = 0.78*(1 - W.pourT); else if(st === 'blend') level = 0.78*(T.motion ? W.prog : W.taps/3); }
   x.save(); jar(); x.clip();
   x.fillStyle = 'rgba(255,255,255,.28)'; x.fillRect(-70, -220, 140, 160);
-  if(W && !W.blended){   // 넣은 재료
-    let k = 0; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++){ const px = -24 + (k % 2)*48 + Math.sin(TY.t*20 + k)*(W.shakeT > 0 ? 6 : 0), py = -96 - Math.floor(k/2)*44; x.drawImage(tyImg(t), px - 26, py - 26, 52, 52); k++; }
-  }
-  if(level > 0){ const top = -64 - 150*level; x.fillStyle = col; x.globalAlpha = W.blended ? 0.95 : 0.55; x.fillRect(-70, top, 140, 160); x.globalAlpha = 1;
-    x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 4; x.beginPath(); for(let i=0;i<=12;i++){ const px = -60 + i*10, py = top + Math.sin(TY.t*(W.shakeT > 0 ? 30 : 4) + i)*4; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
-    if(W.shakeT > 0){ x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 3; for(let i=0;i<3;i++){ x.beginPath(); x.arc(0, -120, 18 + i*14, TY.t*20 + i, TY.t*20 + i + 2.2); x.stroke(); } } }
+  if(W && !W.blended){ let k = 0; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++){ const px = -24 + (k % 2)*48 + Math.sin(T.t*20 + k)*(W.shakeT > 0 ? 6 : 0), py = -96 - Math.floor(k/2)*44; x.globalAlpha = 1 - level*0.9; x.drawImage(tyImg(t), px - 26, py - 26, 52, 52); x.globalAlpha = 1; k++; } }
+  if(level > 0){ const top = -64 - 150*level; x.fillStyle = col; x.globalAlpha = W.blended ? 0.95 : 0.7; x.fillRect(-70, top, 140, 160); x.globalAlpha = 1;
+    x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 4; x.beginPath(); for(let i=0;i<=12;i++){ const px = -60 + i*10, py = top + Math.sin(T.t*(W.shakeT > 0 ? 30 : 4) + i)*4; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+    if(W.shakeT > 0){ x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 3; for(let i=0;i<3;i++){ x.beginPath(); x.arc(0, -120, 18 + i*14, T.t*20 + i, T.t*20 + i + 2.2); x.stroke(); } } }
   x.restore();
   jar(); x.strokeStyle = 'rgba(255,255,255,.95)'; x.lineWidth = 5; x.stroke(); x.strokeStyle = 'rgba(80,120,140,.35)'; x.lineWidth = 2; x.stroke();
   x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.moveTo(-40, -80); x.lineTo(-30, -80); x.lineTo(-44, -200); x.lineTo(-52, -200); x.fill();
   x.fillStyle = '#ff8a65'; rrOn(x, -66, -232, 132, 22, 10); x.fill(); x.fillStyle = '#e8590c'; rrOn(x, -14, -250, 28, 20, 8); x.fill();
+  if(T.motion && st === 'blend' && !W.blended) tyRing(x, 0, -140, 96, W.prog, '#339af0');
   x.restore();
-  if(W && W.blended && W.pourT > 0 && W.pourT < 1){   // 컵으로 따르기
-    const [cx2, cy2] = TY_GEO.cafe.cup; x.fillStyle = col;
-    for(let i=0;i<14;i++){ const u = ((TY.t*2.2 + i/14) % 1), px = bx + 40 + (cx2 - bx - 40)*u, py = by - 220 - Math.sin(u*Math.PI)*90 + (cy2 - 130 - (by - 220))*u; x.beginPath(); x.arc(px, py, 9, 0, 6.29); x.fill(); }
-  }
+  const pouring = W && W.blended && W.pourT > 0 && W.pourT < 1 && (!T.motion || T.hold);
+  if(pouring){ const [cx2, cy2] = TY_GEO.cafe.cup; x.fillStyle = col;
+    for(let i=0;i<14;i++){ const u = ((T.t*2.2 + i/14) % 1), px = bx + 40 + (cx2 - bx - 40)*u, py = by - 220 - Math.sin(u*Math.PI)*90 + (cy2 - 130 - (by - 220))*u; x.beginPath(); x.arc(px, py, 9, 0, 6.29); x.fill(); } }
+}
+function tyRing(x, cx, cy, r, p, col){   // 동작 진행 표시 (동그라미)
+  x.save(); x.lineCap = 'round'; x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 12; x.beginPath(); x.arc(cx, cy, r, 0, 6.29); x.stroke();
+  x.strokeStyle = col; x.lineWidth = 12; x.beginPath(); x.arc(cx, cy, r, -Math.PI/2, -Math.PI/2 + 6.283*Math.max(0.001, p)); x.stroke(); x.restore();
 }
 function tyDrawCup(x, W){
-  const [cx, cy] = TY_GEO.cafe.cup, fill = W && W.blended ? W.pourT : 0, col = W ? W.m.col : '#fff';
+  const T = TY, [cx, cy] = TY_GEO.cafe.cup, fill = W && W.blended ? W.pourT : 0, col = W ? W.m.col || '#ffb3c7' : '#fff', straw = tyDecoItem('cafe', 'cup').col;
   x.save(); x.translate(cx, cy);
   x.fillStyle = 'rgba(0,0,0,.16)'; x.beginPath(); x.ellipse(0, 2, 46, 9, 0, 0, 6.29); x.fill();
   const cup = () => { x.beginPath(); x.moveTo(-32, 0); x.lineTo(32, 0); x.lineTo(44, -130); x.lineTo(-44, -130); x.closePath(); };
@@ -6485,17 +6716,18 @@ function tyDrawCup(x, W){
   if(fill > 0){ x.fillStyle = col; x.fillRect(-50, -118*fill, 100, 120); x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(-50, -118*fill, 100, 6); }
   x.restore();
   cup(); x.strokeStyle = 'rgba(255,255,255,.95)'; x.lineWidth = 4; x.stroke();
+  x.fillStyle = straw; x.globalAlpha = 0.35; x.fillRect(-40, -100, 80, 26); x.globalAlpha = 1;   // 컵 띠
   x.fillStyle = 'rgba(255,255,255,.6)'; x.fillRect(-30, -120, 8, 100);
   x.fillStyle = 'rgba(255,255,255,.85)'; x.beginPath(); x.ellipse(0, -132, 48, 14, 0, 0, 6.29); x.fill(); x.beginPath(); x.ellipse(0, -140, 34, 22, 0, Math.PI, 0); x.fill();
-  x.strokeStyle = '#ff6b9d'; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(6, -150); x.lineTo(24, -200); x.stroke();
+  x.strokeStyle = straw; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(6, -150); x.lineTo(24, -200); x.stroke();
   x.strokeStyle = '#fff'; x.lineWidth = 3; x.setLineDash([6, 8]); x.beginPath(); x.moveTo(6, -150); x.lineTo(24, -200); x.stroke(); x.setLineDash([]);
+  if(T.motion && W && W.steps[W.si] === 'pour') tyRing(x, 0, -70, 84, W.pourT, '#1c7ed6');
   x.restore();
 }
 function tyDrawKitchen(x, W){
-  const G = TY_GEO.kitchen, T = TY, mv = W && W.moveT > 0 && W.moveT < 1 ? W.moveT : 1;
-  // 팬 · 냄비 (가스레인지 위)
+  const G = TY_GEO.kitchen, T = TY, mv = W && W.moveT > 0 && W.moveT < 1 ? W.moveT : 1, st = W && W.steps[W.si];
   const [sx, sy] = G.stove, pan = !W || !!W.m.pan || !W.m.steps.includes('cook');
-  const cooking = W && W.at === 'stove' && (W.steps[W.si] === 'cook' || W.cooked);
+  const cooking = W && W.at === 'stove' && (st === 'cook' || W.cooked);
   if(cooking && W.heat > 0){ for(let i=0;i<5;i++){ const fx = sx - 44 + i*22, fh = 16 + Math.sin(T.t*20 + i*2)*6; x.fillStyle = 'rgba(80,160,255,.85)'; x.beginPath(); x.ellipse(fx, sy - 10, 7, fh*0.6, 0, 0, 6.29); x.fill(); x.fillStyle = 'rgba(255,170,60,.9)'; x.beginPath(); x.ellipse(fx, sy - 14, 4, fh*0.4, 0, 0, 6.29); x.fill(); } }
   x.save(); x.translate(sx, sy - 14);
   if(pan){
@@ -6509,32 +6741,47 @@ function tyDrawKitchen(x, W){
   if(W && W.at === 'stove' && !W.plated){
     if(!pan) x.scale(1/0.85, 1/0.85);
     const items = []; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++) items.push(t);
-    const yb = pan ? -12 : -86;
+    const yb = pan ? -12 : -86, fl = W.flipT > 0 ? Math.sin((0.35 - W.flipT)/0.35*Math.PI) : 0;
+    x.save(); x.translate(0, -fl*90); if(fl) x.rotate(fl*Math.PI);
     if(W.cooked){ x.font = '66px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(W.m.icon, 0, yb - 12); }
     else items.forEach((t, i) => { const px = (i - (items.length - 1)/2)*44, py = yb - 10 + Math.sin(T.t*6 + i)*(W.heat > 0 ? 3 : 0); x.save(); x.translate(px, py); if(W.chopped) x.scale(0.8, 0.8); x.globalAlpha = mv; x.drawImage(tyImg(t), -26, -26, 52, 52); x.restore(); });
+    x.restore();
     if(W.heat > 0 || W.cooked){ x.fillStyle = 'rgba(255,255,255,.6)'; for(let i=0;i<4;i++){ const u = (T.t*0.6 + i/4) % 1; x.globalAlpha = (1 - u)*0.7; x.beginPath(); x.arc(-30 + i*20 + Math.sin(T.t*2 + i)*8, yb - 30 - u*90, 10 + u*14, 0, 6.29); x.fill(); } x.globalAlpha = 1; }
+    const mo = st === 'cook' && tyMotion('cook');
+    if(mo === 'stir'){ const a = W.prog*12.57 + (T.gest ? 0 : T.t*0.5); x.save(); x.translate(Math.cos(a)*40, yb - 30 + Math.sin(a)*10); x.rotate(0.5); x.font = '54px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('🥄', 0, 0); x.restore(); tyRing(x, 0, yb - 40, 118, W.prog, '#fa5252');
+      x.strokeStyle = 'rgba(255,255,255,.8)'; x.lineWidth = 5; x.setLineDash([10, 10]); x.beginPath(); x.ellipse(0, yb - 30, 70, 26, 0, 0, 6.29); x.stroke(); x.setLineDash([]); }
+    if(mo === 'flip'){ tyRing(x, 0, yb - 40, 110, W.prog, '#fa5252'); x.font = '48px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.globalAlpha = 0.6 + Math.sin(T.t*6)*0.3; x.fillText('⬆️', 0, yb - 110 - Math.abs(Math.sin(T.t*4))*14); x.globalAlpha = 1; }
   }
   x.restore();
-  // 도마 위
   const [bx, by] = G.board;
   if(W && W.at === 'board'){
     const items = []; for(const [t, n] of Object.entries(W.added)) for(let i=0;i<n;i++) items.push(t);
     items.forEach((t, i) => { const px = bx + (i - (items.length - 1)/2)*58, py = by - 26;
       if(W.chopped){ for(let k=0;k<3;k++){ x.save(); x.translate(px + (k - 1)*16, py + 8 + (k % 2)*6); x.rotate((k - 1)*0.4); x.drawImage(tyImg(t), -16, -16, 32, 32); x.restore(); } }
       else { const hop = W.chopT > 0 ? -Math.abs(Math.sin(T.t*30))*6 : 0; x.drawImage(tyImg(t), px - 28, py - 28 + hop, 56, 56); } });
-    if(W.chopT > 0 || W.steps[W.si] === 'chop'){ const k = W.chopT > 0 ? Math.sin((0.25 - W.chopT)/0.25*Math.PI) : 0; x.save(); x.translate(bx + 64, by - 118 + k*54); x.rotate(0.35 - k*0.25); x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('🔪', 0, 0); x.restore(); }
+    if(W.chopT > 0 || st === 'chop'){ const k = W.chopT > 0 ? Math.sin((0.25 - W.chopT)/0.25*Math.PI) : 0; x.save(); x.translate(bx + 64, by - 118 + k*54); x.rotate(0.35 - k*0.25); x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('🔪', 0, 0); x.restore(); }
   }
-  // 접시
-  const [px, py] = G.plate;
+  const [px, py] = G.plate, rim = tyDecoItem('kitchen', 'cup').col;
   x.fillStyle = 'rgba(0,0,0,.15)'; x.beginPath(); x.ellipse(px, py + 2, 92, 22, 0, 0, 6.29); x.fill();
-  x.fillStyle = '#ffffff'; x.beginPath(); x.ellipse(px, py - 4, 88, 22, 0, 0, 6.29); x.fill(); x.strokeStyle = '#dee2e6'; x.lineWidth = 3; x.beginPath(); x.ellipse(px, py - 4, 66, 15, 0, 0, 6.29); x.stroke();
+  x.fillStyle = '#ffffff'; x.beginPath(); x.ellipse(px, py - 4, 88, 22, 0, 0, 6.29); x.fill(); x.strokeStyle = rim; x.lineWidth = 5; x.beginPath(); x.ellipse(px, py - 4, 80, 19, 0, 0, 6.29); x.stroke();
+  x.strokeStyle = '#dee2e6'; x.lineWidth = 3; x.beginPath(); x.ellipse(px, py - 4, 60, 13, 0, 0, 6.29); x.stroke();
   if(W && W.plated){ x.save(); x.globalAlpha = mv; x.font = '92px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(W.m.icon, px, py - 50 - (1 - mv)*40); x.restore();
     x.fillStyle = `rgba(255,240,150,${0.4 + Math.sin(T.t*6)*0.2})`; for(let i=0;i<5;i++){ const a = T.t*2 + i*1.25; x.beginPath(); x.arc(px + Math.cos(a)*70, py - 50 + Math.sin(a)*30, 4, 0, 6.29); x.fill(); } }
 }
+function tyActInfo(){   // 큰 버튼 글자 · 색
+  const T = TY, st = tyStep(), W = T.work, S2 = st ? TY_STEP[st] : null, mo = st && tyMotion(st);
+  let lab = st ? `${S2.icon} ${S2.label}` : T.pick ? (T.pick.type === 'pay' ? '🪙 계산하기' : '🙋 주문 고르기') : '⏳ 손님을 기다려요', col = st ? S2.col : '#adb5bd';
+  if(st === 'serve') lab = T.lv === 4 ? '👉 손님을 눌러요' : `${S2.icon} ${T.kind === 'cafe' ? '음료' : '요리'} 드리기`;
+  if(st === 'serve' && T.kind === 'cafe' && !T.motion && W.pourT < 1){ lab = '🥤 따르는 중…'; col = '#74c0fc'; }
+  if(mo === 'hold') lab = st === 'blend' ? '🌀 꾹 누르고 있기' : '🫗 꾹 눌러 따르기';
+  if(mo === 'stir') lab = '🥄 동그랗게 돌리기';
+  if(mo === 'flip') lab = '🍳 위로 밀어 뒤집기';
+  const active = st && st !== 'add' && !(st === 'serve' && T.kind === 'cafe' && !T.motion && W.pourT < 1) && !(st === 'serve' && T.lv === 4);
+  return {st, lab, col, active, mo};
+}
 function tyDrawUI(x){
-  const T = TY, G = TY_GEO[T.kind], st = tyStep(), W = T.work, c0 = T.custs[0], hint = T.hintT > 0 || T.idle > 6;
-  // 순서 (그림 일정표)
-  const steps = W ? W.steps : c0 && !c0.walking ? tySteps(c0.menu, T.kind) : null, cur = W ? W.si : 0;
+  const T = TY, G = TY_GEO[T.kind], W = T.work, c0 = tyTarget(), hint = T.hintT > 0 || T.idle > 6, A = tyActInfo(), st = A.st;
+  const steps = W ? W.steps : c0 && c0.ordered ? tySteps(c0.menu, T.kind) : null, cur = W ? W.si : 0;
   if(steps){
     let cx = G.chips[0]; const cy = G.chips[1];
     steps.forEach((k, i) => { const S2 = TY_STEP[k], lab = `${i < cur ? '✓' : S2.icon} ${S2.chip}`; x.font = `bold 22px ${FONT}`; const w = x.measureText(lab).width + 24, on = i === cur;
@@ -6543,11 +6790,10 @@ function tyDrawUI(x){
       x.fillStyle = i < cur ? '#fff' : '#3a2412'; x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText(lab, cx + 12, cy + 1);
       cx += w + 8; if(i < steps.length - 1){ x.fillStyle = 'rgba(58,36,18,.7)'; x.fillText('›', cx - 2, cy); cx += 14; } });
   }
-  // 재료 버튼
-  const pal = TY_PAL[T.kind][T.lv];
+  const pal = tyPal();
   pal.forEach((t, i) => {
     const [bx, by, r] = tyBtnXY(t), pr = T.press['i_' + t] > 0 ? 0.9 : 1, wrong = T.press['x_' + t] > 0, sx = wrong ? Math.sin(T.t*70)*6 : 0;
-    const need = W && W.m.need[t] || 0, have = W && W.added[t] || 0, want = st === 'add' && need && have < need;
+    const need = W && W.m.need[t] || 0, have = W && W.added[t] || 0, hid = W && W.cust.hidden && !W.cust.revealed, want = st === 'add' && need && have < need && !hid;
     x.save(); x.translate(bx + sx, by); x.scale(pr, pr);
     x.fillStyle = 'rgba(0,0,0,.25)'; x.beginPath(); x.arc(2, 6, r, 0, 6.29); x.fill();
     const g = x.createRadialGradient(-r*0.3, -r*0.4, 2, 0, 0, r); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#f1e6cf');
@@ -6558,29 +6804,101 @@ function tyDrawUI(x){
     if(T.jungle && FRUIT_INFO[t] && (DEX.pantry[t] || 0) > 0){ x.fillStyle = 'rgba(46,125,50,.9)'; rrOn(x, -r - 6, -r - 4, 42, 22, 11); x.fill(); x.font = `bold 14px ${FONT}`; x.fillStyle = '#fff'; x.textAlign = 'center'; x.fillText(`🌴${Math.min(99, DEX.pantry[t])}`, -r + 15, -r + 8); }
     x.restore();
     tyOutline(x, tyName(t), bx, by + r + 16, 21, '#fff', 'rgba(60,36,10,.9)');
-    if(i < 9) { x.font = `bold 15px ${FONT}`; x.fillStyle = 'rgba(60,36,10,.55)'; x.textAlign = 'center'; if(!isTouch) x.fillText(String(i + 1), bx - r + 4, by + r - 6); }
+    if(i < 9 && !isTouch){ x.font = `bold 15px ${FONT}`; x.fillStyle = 'rgba(60,36,10,.55)'; x.textAlign = 'center'; x.fillText(String(i + 1), bx - r + 4, by + r - 6); }
   });
-  // 큰 행동 버튼
-  const [ax, ay, aw, ah] = G.act, S2 = st ? TY_STEP[st] : null, pr = T.press.act > 0 ? 0.95 : 1;
-  let lab = st ? `${S2.icon} ${S2.label}` : '⏳ 손님을 기다려요', col = st ? S2.col : '#adb5bd';
-  if(st === 'serve') lab = `${S2.icon} ${T.kind === 'cafe' ? '음료' : '요리'} 드리기`;
-  if(st === 'serve' && T.kind === 'cafe' && W.pourT < 1){ lab = '🥤 따르는 중…'; col = '#74c0fc'; }
-  const active = st && st !== 'add' && !(st === 'serve' && T.kind === 'cafe' && W.pourT < 1);
+  const [ax, ay, aw, ah] = G.act, holding = T.hold && A.mo === 'hold', pr = T.press.act > 0 || holding ? 0.94 : 1;
   x.save(); x.translate(ax + aw/2, ay + ah/2); x.scale(pr, pr);
   x.fillStyle = 'rgba(0,0,0,.28)'; rrOn(x, -aw/2 + 3, -ah/2 + 7, aw, ah, 30); x.fill();
-  const gg = x.createLinearGradient(0, -ah/2, 0, ah/2); gg.addColorStop(0, col); gg.addColorStop(1, 'rgba(0,0,0,.22)');
-  x.fillStyle = col; rrOn(x, -aw/2, -ah/2, aw, ah, 30); x.fill(); x.fillStyle = gg; x.fill();
-  x.strokeStyle = active && hint ? `rgba(255,240,150,${0.7 + Math.sin(T.t*8)*0.3})` : 'rgba(255,255,255,.85)'; x.lineWidth = active && hint ? 8 : 4; x.stroke();
-  const taps = st && TY_STEP[st].taps;
-  tyOutline(x, lab, 0, taps ? -12 : 0, lab.length > 8 ? 28 : 34, '#fff', 'rgba(0,0,0,.45)');
+  const gg = x.createLinearGradient(0, -ah/2, 0, ah/2); gg.addColorStop(0, A.col); gg.addColorStop(1, 'rgba(0,0,0,.22)');
+  x.fillStyle = A.col; rrOn(x, -aw/2, -ah/2, aw, ah, 30); x.fill(); x.fillStyle = gg; x.fill();
+  if(A.mo && W){ x.save(); rrOn(x, -aw/2, -ah/2, aw, ah, 30); x.clip(); x.fillStyle = 'rgba(255,255,255,.28)'; x.fillRect(-aw/2, -ah/2, aw*W.prog, ah); x.restore(); }
+  x.strokeStyle = A.active && hint ? `rgba(255,240,150,${0.7 + Math.sin(T.t*8)*0.3})` : 'rgba(255,255,255,.85)'; x.lineWidth = A.active && hint ? 8 : 4; rrOn(x, -aw/2, -ah/2, aw, ah, 30); x.stroke();
+  const taps = st && !A.mo && TY_STEP[st].taps;
+  tyOutline(x, A.lab, 0, taps ? -12 : 0, A.lab.length > 8 ? 26 : 34, '#fff', 'rgba(0,0,0,.45)');
   if(taps){ for(let i=0;i<taps;i++){ x.fillStyle = i < (W ? W.taps : 0) ? '#fff' : 'rgba(255,255,255,.35)'; x.beginPath(); x.arc((i - 1)*30, 28, 9, 0, 6.29); x.fill(); } }
+  if(A.mo === 'stir'){ const a = T.t*4; x.strokeStyle = 'rgba(255,255,255,.8)'; x.lineWidth = 3; x.beginPath(); x.arc(aw/2 - 34, -ah/2 + 30, 14, a, a + 4.5); x.stroke(); }
   x.restore();
-  // 도움 손가락
   if(hint && st){
-    let hx, hy;
-    if(st === 'add'){ const need = Object.keys(W.m.need).find(t => (W.added[t] || 0) < W.m.need[t]); if(need){ const b = tyBtnXY(need); hx = b[0]; hy = b[1] - b[2] - 10; } }
-    else if(active){ hx = ax + aw/2; hy = ay - 6; }
-    if(hx !== undefined){ x.font = '56px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText('👇', hx, hy - 26 - Math.abs(Math.sin(T.t*6))*12); }
+    let hx, hy, e = '👇';
+    if(st === 'add'){ const need = Object.keys(W.m.need).find(t => (W.added[t] || 0) < W.m.need[t]); if(need && !(W.cust.hidden && !W.cust.revealed)){ const b = tyBtnXY(need); hx = b[0]; hy = b[1] - b[2] - 10; } }
+    else if(st === 'serve' && T.lv === 4){ hx = W.cust.x; hy = G.occ - 60; }
+    else if(A.active){ hx = ax + aw/2; hy = ay - 6; if(A.mo === 'flip') e = '👆'; }
+    if(hx !== undefined){ x.font = '56px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(e, hx, hy - 26 - Math.abs(Math.sin(T.t*6))*12); }
+  }
+}
+function tyDrawDeco(x, phase){   // 가게 꾸미기 그리기
+  const T = TY, G = TY_GEO[T.kind], K = T.kind;
+  if(phase === 'bg'){
+    const L = tyDecoItem(K, 'light').id;
+    if(L === 'warm'){ x.fillStyle = 'rgba(255,170,80,.12)'; x.fillRect(0, 0, TY_W, TY_H); }
+    if(L === 'fairy'){ x.strokeStyle = 'rgba(80,60,40,.6)'; x.lineWidth = 2; x.beginPath(); for(let i=0;i<=40;i++){ const px = 120 + i*28, py = 238 + Math.sin(i/40*Math.PI)*34; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+      for(let i=0;i<20;i++){ const px = 134 + i*56, py = 246 + Math.sin((i*2 + 1)/40*Math.PI)*34, on = (Math.floor(T.t*2) + i) % 3; x.fillStyle = ['#ffd43b', '#ff8787', '#74c0fc'][i % 3]; x.globalAlpha = on ? 1 : 0.45; x.shadowColor = x.fillStyle; x.shadowBlur = on ? 14 : 0; x.beginPath(); x.arc(px, py, 7, 0, 6.29); x.fill(); } x.shadowBlur = 0; x.globalAlpha = 1; }
+    if(L === 'sparkle'){ x.fillStyle = '#fff'; for(let i=0;i<18;i++){ const px = (i*197) % 1200 + 90, py = 200 + (i*131) % 220, a = Math.max(0, Math.sin(T.t*2 + i*1.7)); x.globalAlpha = a*0.9; x.beginPath(); x.moveTo(px, py - 9*a); x.lineTo(px + 3, py); x.lineTo(px, py + 9*a); x.lineTo(px - 3, py); x.fill(); } x.globalAlpha = 1; }
+    const sg = tyDecoItem(K, 'sign').id, [gx, gy] = G.sign;
+    if(sg === 'bulb') for(let i=0;i<16;i++){ const a = i/16*6.283, px = gx + Math.cos(a)*195, py = gy + Math.sin(a)*64, on = (Math.floor(T.t*3) + i) % 2; x.fillStyle = on ? '#fff3a0' : '#e8a33c'; x.shadowColor = '#ffd43b'; x.shadowBlur = on ? 12 : 0; x.beginPath(); x.arc(px, py, 6, 0, 6.29); x.fill(); }
+    x.shadowBlur = 0;
+    if(sg === 'star' || sg === 'flower'){ x.font = '34px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; for(const [dx, dy] of [[-205, -30], [205, -30], [-190, 40], [190, 40]]){ x.save(); x.translate(gx + dx, gy + dy); x.rotate(Math.sin(T.t*2 + dx)*0.2); x.fillText(sg === 'star' ? '⭐' : '🌸', 0, 0); x.restore(); } }
+    if(sg === 'rainbow'){ x.lineWidth = 8; ['#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7', '#9775fa'].forEach((cl, i) => { x.strokeStyle = cl; x.globalAlpha = 0.85; x.beginPath(); x.arc(gx, gy + 40, 230 - i*8, Math.PI*1.08, Math.PI*1.92); x.stroke(); }); x.globalAlpha = 1; }
+  } else {
+    const p = tyDecoItem(K, 'plant'); if(p.e){ const [dx, dy] = G.deco; x.fillStyle = 'rgba(0,0,0,.18)'; x.beginPath(); x.ellipse(dx, dy + 2, 34, 8, 0, 0, 6.29); x.fill(); x.font = '72px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'bottom'; x.fillStyle = '#000'; x.fillText(p.e, dx, dy + 8); x.textBaseline = 'middle'; }
+  }
+}
+function tyDrawPick(x){   // 계산하기 · 주문 고르기 창
+  const T = TY, P = T.pick; if(!P) return;
+  const sh = P.wrong > 0 ? Math.sin(T.t*70)*8 : 0, px = 250 + sh, py = 214, pw = 876, ph = 356;
+  x.fillStyle = 'rgba(20,12,4,.35)'; x.fillRect(0, 0, TY_W, TY_H);
+  x.fillStyle = 'rgba(0,0,0,.25)'; rrOn(x, px + 4, py + 8, pw, ph, 30); x.fill();
+  x.fillStyle = '#fffaf0'; rrOn(x, px, py, pw, ph, 30); x.fill(); x.strokeStyle = '#e9b949'; x.lineWidth = 6; x.stroke();
+  P.btns = [];
+  if(P.type === 'pay'){
+    const m = P.c.menu;
+    tyOutline(x, `${T.kind === 'cafe' ? '🥤' : m.icon || '🍽️'} ${m.name} = 🪙 ${P.price}원`, px + pw/2, py + 40, 32, '#5a3a14', 'rgba(255,255,255,.9)');
+    const coins = P.coin === 1 ? P.paid : 1, cr = P.coin === 1 ? 34 : 40, gap = cr*2 + 16, x0 = P.coin === 1 ? px + pw/2 - (coins - 1)*gap/2 : px + pw/2 - 150;
+    for(let i=0;i<coins;i++){ const cx = x0 + i*gap, cy = py + 108;
+      x.fillStyle = P.coin === 10 ? '#dee2e6' : P.coin === 5 ? '#ffc078' : '#ffd43b'; x.beginPath(); x.arc(cx, cy, cr, 0, 6.29); x.fill(); x.strokeStyle = P.coin === 10 ? '#868e96' : '#e67700'; x.lineWidth = 4; x.stroke();
+      x.font = `bold ${cr*0.9}px ${FONT}`; x.fillStyle = P.coin === 10 ? '#495057' : '#a65f00'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(P.coin), cx, cy + 2);
+      if(P.hint && P.L === 1){ x.fillStyle = '#e64980'; x.beginPath(); x.arc(cx + cr*0.7, cy - cr*0.8, 16, 0, 6.29); x.fill(); x.font = `bold 20px ${FONT}`; x.fillStyle = '#fff'; x.fillText(String(i + 1), cx + cr*0.7, cy - cr*0.8 + 1); } }
+    if(P.L > 1){ x.font = `bold 22px ${FONT}`; x.fillStyle = '#6b4a1c'; x.textAlign = 'left'; x.fillText(`← 손님이 낸 돈 ${P.paid}원`, x0 + cr + 18, py + 108); }
+    if(P.hint && P.L > 1){   // 거스름돈 힌트: 값부터 받은 돈까지 세기
+      const n = P.paid - P.price, g2 = 44, sx = px + pw/2 - (n + 1)*g2/2 + 60;
+      x.font = `bold 20px ${FONT}`; x.fillStyle = '#e64980'; x.textAlign = 'right'; x.fillText(`${P.price}원부터 세어요 👉`, sx - 16, py + 170); x.textAlign = 'center';
+      for(let i=1;i<=n;i++){ x.fillStyle = '#ffd43b'; x.beginPath(); x.arc(sx + (i - 1)*g2, py + 170, 18, 0, 6.29); x.fill(); x.fillStyle = '#a65f00'; x.fillText(String(P.price + i), sx + (i - 1)*g2, py + 171); }
+    }
+    tyOutline(x, P.q, px + pw/2, py + 214, 28, '#3a2412', 'rgba(255,255,255,.9)');
+    P.choices.forEach((v, i) => { const bw = 200, bh = 96, bx = px + pw/2 - (3*bw + 40)/2 + i*(bw + 20), by = py + 240, bad = P.bad === i && P.wrong > 0;
+      x.fillStyle = 'rgba(0,0,0,.2)'; rrOn(x, bx + 3, by + 6, bw, bh, 24); x.fill();
+      x.fillStyle = bad ? '#ffc9c9' : '#ffe8a3'; rrOn(x, bx, by, bw, bh, 24); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 4; x.stroke();
+      tyOutline(x, `🪙 ${v}개`, bx + bw/2, by + bh/2, 38, '#5a3a14', 'rgba(255,255,255,.9)');
+      if(!isTouch){ x.font = `bold 16px ${FONT}`; x.fillStyle = 'rgba(90,58,20,.5)'; x.fillText(String(i + 1), bx + 18, by + 18); }
+      P.btns.push([bx, by, bw, bh]); });
+  } else {
+    tyOutline(x, '🙋 손님 친구 차례! 먹고 싶은 것을 골라요', px + pw/2, py + 38, 30, '#5a3a14', 'rgba(255,255,255,.9)');
+    P.choices.forEach((m, i) => { const bw = 196, bh = 262, bx = px + 22 + i*(bw + 18), by = py + 74;
+      x.fillStyle = 'rgba(0,0,0,.18)'; rrOn(x, bx + 3, by + 6, bw, bh, 22); x.fill();
+      x.fillStyle = '#fff'; rrOn(x, bx, by, bw, bh, 22); x.fill(); x.strokeStyle = m.custom ? '#7048e8' : '#e9b949'; x.lineWidth = 4; x.stroke();
+      if(T.kind === 'cafe'){ x.fillStyle = m.col || '#ffb3c7'; x.beginPath(); x.moveTo(bx + bw/2 - 30, by + 116); x.lineTo(bx + bw/2 + 30, by + 116); x.lineTo(bx + bw/2 + 40, by + 30); x.lineTo(bx + bw/2 - 40, by + 30); x.closePath(); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 3; x.stroke(); }
+      else { x.font = '84px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(m.icon || '🍽️', bx + bw/2, by + 74); }
+      const ks = Object.entries(m.need), iw = Math.min(46, (bw - 20)/Math.max(1, ks.length));
+      ks.forEach(([t, n], k) => { const ix = bx + bw/2 - ks.length*iw/2 + k*iw; x.drawImage(tyImg(t), ix + 2, by + 128, iw - 4, iw - 4); if(n > 1){ x.font = `bold 16px ${FONT}`; x.fillStyle = '#e8590c'; x.textAlign = 'center'; x.fillText('×' + n, ix + iw - 8, by + 130 + iw); } });
+      x.font = `bold 21px ${FONT}`; x.fillStyle = '#3a2412'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(m.name, bx + bw/2, by + 212, bw - 14);
+      if(m.custom){ x.font = `bold 16px ${FONT}`; x.fillStyle = '#7048e8'; x.fillText('⭐ 나만의 메뉴', bx + bw/2, by + 240); }
+      P.btns.push([bx, by, bw, bh]); });
+  }
+}
+function tyDrawClosing(x, f){   // 영업 마감: 셔터 · 저금통
+  const T = TY, C = T.closing, u = Math.min(1, C.t/0.8);
+  const sh = TY_H*0.62*u;
+  x.fillStyle = '#6d4c2f'; x.fillRect(0, 0, TY_W, sh);
+  x.strokeStyle = 'rgba(0,0,0,.25)'; x.lineWidth = 3; for(let y = 20; y < sh; y += 26){ x.beginPath(); x.moveTo(0, y); x.lineTo(TY_W, y); x.stroke(); }
+  if(u >= 1){
+    const [gx] = TY_GEO[T.kind].sign, sw = Math.sin(C.t*2)*0.06;
+    x.save(); x.translate(gx, 200); x.rotate(sw); x.fillStyle = '#fff3bf'; rrOn(x, -170, -10, 340, 110, 20); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 6; x.stroke();
+    tyOutline(x, '🌙 오늘 영업 끝!', 0, 30, 36, '#5a3a14', 'rgba(255,255,255,.9)'); x.font = `bold 20px ${FONT}`; x.fillStyle = '#8a5a20'; x.fillText('CLOSED', 0, 76); x.restore();
+    x.font = '120px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; const pop = 1 + Math.max(0, Math.sin(C.t*12))*0.04*(C.t < 3 ? 1 : 0); x.save(); x.translate(gx, 400); x.scale(pop, pop); x.fillText('🐷', 0, 0); x.restore();
+    const n = Math.min(16, 4 + Math.floor(T.tips/5));
+    for(let i=0;i<n;i++){ const v = clamp((C.t - 0.9 - i*0.12)/0.6, 0, 1); if(v <= 0 || v >= 1) continue; const sx0 = (f.w - 120 - f.ox)/f.k, sy0 = (34 - f.oy)/f.k, cx = sx0 + (gx - sx0)*v, cy = sy0 + (360 - sy0)*v - Math.sin(v*Math.PI)*140;
+      x.fillStyle = '#ffd43b'; x.beginPath(); x.arc(cx, cy, 16, 0, 6.29); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 3; x.stroke(); }
+    if(C.t > 1.6) tyOutline(x, `오늘 손님 ${T.served}명이 행복해요! 💖`, gx, 500, 34, '#fff', 'rgba(60,30,10,.9)');
   }
 }
 function tyDraw(){
@@ -6588,44 +6906,46 @@ function tyDraw(){
   x.setTransform(dpr, 0, 0, dpr, 0, 0); x.fillStyle = '#2b3a40'; x.fillRect(0, 0, f.w, f.h);
   if(!art.ok){ tyOutline(x, '체험실을 준비하는 중…', f.w/2, f.h/2, 24); return; }
   const img = art.img;
-  if(f.ox > 0.5 || f.oy > 0.5){   // 남는 곳은 그림을 흐리게 늘려 채워요
+  if(f.ox > 0.5 || f.oy > 0.5){
     if(!art.blur){ art.blur = document.createElement('canvas'); art.blur.width = 48; art.blur.height = 27; const bx = art.blur.getContext('2d'); if(bx) bx.drawImage(img, 0, 0, 48, 27); }
     const kk = Math.max(f.w/TY_W, f.h/TY_H)*1.1; x.drawImage(art.blur, (f.w - TY_W*kk)/2, (f.h - TY_H*kk)/2, TY_W*kk, TY_H*kk); x.fillStyle = 'rgba(20,30,40,.25)'; x.fillRect(0, 0, f.w, f.h);
   }
   x.save(); x.translate(f.ox, f.oy); x.scale(f.k, f.k);
   x.drawImage(img, 0, 0, TY_W, TY_H);
-  // 간판 글자
   const [gx, gy] = G.sign; tyOutline(x, G.signText, gx, gy - 8, 38, '#fffaf0', 'rgba(120,50,10,.55)'); x.font = `bold 13px ${FONT}`; x.fillStyle = 'rgba(255,250,240,.9)'; x.fillText(`— ${G.signEn} —`, gx, gy + 24);
-  // 손님 (뒤 → 앞)
+  tyDrawDeco(x, 'bg');
   const all = [...T.leavers, ...T.custs.slice().reverse()];
   for(const c of all) tyDrawCust(x, c);
-  // 카운터가 손님 아랫몸을 가려요
   x.drawImage(img, 0, G.occ, TY_W, TY_H - G.occ, 0, G.occ, TY_W, TY_H - G.occ);
-  // 조리대 위
+  if(tyDecoItem(T.kind, 'light').id === 'warm'){ x.fillStyle = 'rgba(255,170,80,.10)'; x.fillRect(0, G.occ, TY_W, TY_H - G.occ); }
+  tyDrawDeco(x, 'fg');
   if(T.kind === 'cafe'){ tyDrawBlender(x, T.work); tyDrawCup(x, T.work); }
   else tyDrawKitchen(x, T.work);
   tyDrawUI(x);
-  // 말풍선
-  for(const c of T.custs.slice(1)) tyDrawBubble(x, c, false);
+  T.custs.forEach((c, i) => { if(i >= T.front) tyDrawBubble(x, c, false); });
   for(const c of T.leavers) tyDrawBubble(x, c, false);
-  if(T.custs[0]) tyDrawBubble(x, T.custs[0], true);
-  // 효과
+  T.custs.slice(0, T.front).forEach((c, i) => tyDrawBubble(x, c, true, i));
   for(const e of T.fx){
-    const u = clamp(e.t/e.dur, 0, 1);
+    const u = clamp(e.t/e.dur, 0, 1); if(e.t < 0) continue;
     if(e.type === 'fly'){ const px = e.x0 + (e.x1 - e.x0)*u, py = e.y0 + (e.y1 - e.y0)*u - Math.sin(u*Math.PI)*80, s = e.size*(1 - u*0.35);
       if(e.ing) x.drawImage(tyImg(e.ing), px - s/2, py - s/2, s, s); else { x.font = `${s}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(e.emoji, px, py); } }
     else if(e.type === 'heart'){ x.globalAlpha = 1 - u; x.font = '34px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText('💖', e.x, e.y); x.globalAlpha = 1; }
-    else if(e.type === 'coin' && e.t > 0){ const px = e.x0 + (e.x1 - e.x0)*u, py = e.y0 + (e.y1 - e.y0)*u - Math.sin(u*Math.PI)*120; x.fillStyle = '#ffd43b'; x.beginPath(); x.arc(px, py, 16, 0, 6.29); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 3; x.stroke(); x.fillStyle = '#fff3bf'; x.beginPath(); x.arc(px - 5, py - 5, 5, 0, 6.29); x.fill(); }
+    else if(e.type === 'note'){ x.globalAlpha = 1 - u; x.font = '40px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#000'; x.fillText(e.e, e.x + Math.sin(e.t*8)*10, e.y); x.globalAlpha = 1; }
+    else if(e.type === 'drop'){ x.globalAlpha = 1 - u*0.6; x.fillStyle = '#74c0fc'; x.beginPath(); x.ellipse(e.x, e.y, 6, 9, 0, 0, 6.29); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.arc(e.x - 2, e.y - 3, 2, 0, 6.29); x.fill(); x.globalAlpha = 1; }
+    else if(e.type === 'spark'){ const a = Math.sin(u*Math.PI), s = 14*a; x.fillStyle = e.col; x.globalAlpha = a; x.beginPath(); x.moveTo(e.x, e.y - s); x.lineTo(e.x + s*0.3, e.y); x.lineTo(e.x, e.y + s); x.lineTo(e.x - s*0.3, e.y); x.fill(); x.globalAlpha = 1; }
+    else if(e.type === 'coin'){ const px = e.x0 + (e.x1 - e.x0)*u, py = e.y0 + (e.y1 - e.y0)*u - Math.sin(u*Math.PI)*120; x.fillStyle = '#ffd43b'; x.beginPath(); x.arc(px, py, 16, 0, 6.29); x.fill(); x.strokeStyle = '#e67700'; x.lineWidth = 3; x.stroke(); x.fillStyle = '#fff3bf'; x.beginPath(); x.arc(px - 5, py - 5, 5, 0, 6.29); x.fill(); }
   }
   for(const e of T.texts){ const u = e.t/e.dur, a = Math.min(1, (1 - u)*3); x.globalAlpha = a; tyOutline(x, e.text, e.x, e.y - u*50, e.big ? 36 : 28, e.col, 'rgba(40,24,8,.85)'); x.globalAlpha = 1; }
+  tyDrawPick(x);
+  if(T.banner){ const b = T.banner, a = Math.min(1, b.t*4, (b.dur - b.t)*3); x.globalAlpha = a; x.fillStyle = 'rgba(30,20,10,.75)'; x.font = `bold 34px ${FONT}`; const bw = x.measureText(b.text).width + 60; rrOn(x, TY_W/2 - bw/2, 408, bw, 64, 32); x.fill(); tyOutline(x, b.text, TY_W/2, 441, 34, '#fff6dc', 'rgba(0,0,0,.4)'); x.globalAlpha = 1; }
+  if(T.closing) tyDrawClosing(x, f);
   x.restore();
-  // 위쪽 정보 (화면 좌표)
   const s2 = clamp(f.h/500, 0.75, 1.25), icon = T.kind === 'cafe' ? '☕' : '🍳';
   x.save(); x.textBaseline = 'middle';
-  const pw = 250*s2; x.fillStyle = 'rgba(30,20,10,.72)'; rrOn(x, 10, 10, pw, 62*s2, 18*s2); x.fill(); x.strokeStyle = '#e9b949'; x.lineWidth = 2.5; x.stroke();
-  x.font = `bold ${17*s2}px ${FONT}`; x.fillStyle = '#fff6dc'; x.textAlign = 'left'; x.fillText(`${icon} 오늘의 영업 · ${T.lv}단계`, 22*s2, 10 + 20*s2);
+  const pw = 250*s2 + (T.total > 5 ? 34*s2 : 0); x.fillStyle = 'rgba(30,20,10,.72)'; rrOn(x, 10, 10, pw, 62*s2, 18*s2); x.fill(); x.strokeStyle = '#e9b949'; x.lineWidth = 2.5; x.stroke();
+  x.font = `bold ${17*s2}px ${FONT}`; x.fillStyle = '#fff6dc'; x.textAlign = 'left'; x.fillText(`${icon} 오늘의 영업 · ${T.lv}단계${T.special && !T.specialDone ? ' · 👑' : ''}`, 22*s2, 10 + 20*s2);
   for(let i=0;i<T.total;i++){ const cx = 30*s2 + i*34*s2, cy = 10 + 45*s2, on = i < T.served; x.fillStyle = on ? '#51cf66' : 'rgba(255,255,255,.25)'; x.beginPath(); x.arc(cx, cy, 12*s2, 0, 6.29); x.fill(); x.font = `bold ${13*s2}px ${FONT}`; x.fillStyle = '#fff'; x.textAlign = 'center'; x.fillText(on ? '✓' : String(i + 1), cx, cy + 1); }
-  if(T.relax){ x.font = `bold ${13*s2}px ${FONT}`; x.fillStyle = '#b8ff7a'; x.textAlign = 'left'; x.fillText('⏳ 느긋하게', 30*s2 + 5*34*s2 - 6*s2, 10 + 45*s2); }
+  if(T.relax){ x.font = `bold ${13*s2}px ${FONT}`; x.fillStyle = '#b8ff7a'; x.textAlign = 'left'; x.fillText('⏳ 느긋하게', 30*s2 + T.total*34*s2 - 6*s2, 10 + 45*s2); }
   const cw = 130*s2; x.fillStyle = 'rgba(30,20,10,.72)'; rrOn(x, f.w - cw - 70*s2, 12, cw, 46*s2, 23*s2); x.fill(); x.strokeStyle = '#e9b949'; x.stroke();
   x.font = `bold ${20*s2}px ${FONT}`; x.fillStyle = '#ffe07a'; x.textAlign = 'center'; x.fillText(`🪙 ${T.tips}`, f.w - cw/2 - 70*s2, 12 + 24*s2);
   const qx = f.w - 34*s2, qy = 12 + 23*s2; x.fillStyle = '#e03131'; x.beginPath(); x.arc(qx, qy, 23*s2, 0, 6.29); x.fill(); x.strokeStyle = '#fff6dc'; x.lineWidth = 3; x.stroke();
@@ -6635,52 +6955,181 @@ function tyDraw(){
   x.restore();
 }
 /* ---- 조작 ---- */
+function tyPt(e){ const r = tstage.getBoundingClientRect(), f = tyFit(), sx = e.clientX - r.left, sy = e.clientY - r.top; return {sx, sy, ix:(sx - f.ox)/f.k, iy:(sy - f.oy)/f.k}; }
+function tyGestStart(e, mo, cx, cy, p){
+  const T = TY;
+  if(mo === 'hold') T.hold = {pid:e.pointerId};
+  else if(mo === 'stir') T.gest = {type:'stir', pid:e.pointerId, cx, cy, a:Math.atan2(p.iy - cy, p.ix - cx)};
+  else if(mo === 'flip') T.gest = {type:'flip', pid:e.pointerId, y0:p.iy};
+  try{ tstage.setPointerCapture(e.pointerId); }catch(er){}
+  T.idle = 0;
+}
 tstage.addEventListener('touchstart', e => e.preventDefault(), {passive:false});   // 나간 뒤 아래 메뉴가 눌리는 '유령 클릭' 막기
 tstage.addEventListener('pointerdown', e => {
-  e.preventDefault(); const T = TY; if(!T || T.stopped || T.done) return;
-  const r = tstage.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
-  if(T.quitBtn && Math.hypot(sx - T.quitBtn[0], sy - T.quitBtn[1]) < T.quitBtn[2] + 8){ tyQuit(); return; }
-  const f = tyFit(), ix = (sx - f.ox)/f.k, iy = (sy - f.oy)/f.k, G = TY_GEO[T.kind];
-  const [ax, ay, aw, ah] = G.act;
-  if(ix >= ax - 10 && ix <= ax + aw + 10 && iy >= ay - 10 && iy <= ay + ah + 10){ tyAction(); return; }
-  for(const t of TY_PAL[T.kind][T.lv]){ const [bx, by, br] = tyBtnXY(t); if(Math.hypot(ix - bx, iy - by) < br + 12){ tyAddIng(t); return; } }
-  const c = T.custs[0], st = tyStep();
-  if(c && st && (st === 'greet' || st === 'serve') && Math.abs(ix - c.x) < 110 && iy > (c.headTop || 250) - 40 && iy < G.occ + 20){ tyAction(); return; }
+  e.preventDefault(); const T = TY; if(!T || T.stopped) return;
+  const p = tyPt(e), {ix, iy} = p;
+  if(T.quitBtn && Math.hypot(p.sx - T.quitBtn[0], p.sy - T.quitBtn[1]) < T.quitBtn[2] + 8){ tyQuit(); return; }
+  if(T.closing){ if(T.closing.t > 1 && !T.finished){ T.finished = true; tyFinish(); } return; }
+  if(T.done) return;
+  if(T.pick){ const i = T.pick.btns.findIndex(([bx, by, bw, bh]) => ix >= bx && ix <= bx + bw && iy >= by && iy <= by + bh); if(i >= 0){ T.idle = 0; if(T.pick.type === 'pay') tyPayChoose(i); else tyOrderChoose(i); } return; }
+  const G = TY_GEO[T.kind], [ax, ay, aw, ah] = G.act, A = tyActInfo(), st = A.st;
+  if(ix >= ax - 10 && ix <= ax + aw + 10 && iy >= ay - 10 && iy <= ay + ah + 10){
+    T.press.act = 0.15;
+    if(A.mo && !(T.idle > 12)){ tyGestStart(e, A.mo, ax + aw/2, ay + ah/2, p); if(A.mo !== 'hold') tyActText(A.mo === 'stir' ? '동그랗게 돌려요 🔄' : '위로 쓱 밀어요 ⬆️'); return; }
+    tyAction(); return;
+  }
+  for(const t of tyPal()){ const [bx, by, br] = tyBtnXY(t); if(Math.hypot(ix - bx, iy - by) < br + 12){ tyAddIng(t); return; } }
+  for(const c of T.custs.slice(0, T.front)){   // 손님 · 말풍선 누르기
+    if(c.walking) continue;
+    const onBody = Math.abs(ix - c.x) < 110 && iy > (c.headTop || 250) - 40 && iy < G.occ + 20, b = c.bubble, onBub = b && ix >= b[0] && ix <= b[0] + b[2] && iy >= b[1] && iy <= b[1] + b[3];
+    if(!onBody && !onBub) continue;
+    if(onBub && c.greeted && c.hidden && !c.revealed){ if(T.view === 'sound') tyOrderSay(c); else { c.revealed = true; tyOrderSay(c); } return; }
+    if(onBub && c.greeted && T.view !== 'text'){ tyOrderSay(c); if(!(st === 'serve' && T.lv === 4)) return; }
+    if(st === 'serve'){ if(T.work.cust === c){ if(T.kind === 'cafe' && !T.motion && T.work.pourT < 1) return; tyServe(c); } else { T.mistakes++; c.shakeT = 0.45; tyText(c.x, G.occ - 40, '이 손님 주문이 아니에요 🤔', '#ffe3e3', true); tySay('이 손님 주문이 아니에요'); T.hintT = 3; } return; }
+    if(st === 'greet' && c.state === 'wait' && c.ordered && !c.greeted){ tyGreet(c); return; }
+    return;
+  }
   const stn = T.kind === 'cafe' ? [G.blender, G.cup] : [G.board, G.stove, G.plate];
-  if(st && st !== 'greet' && st !== 'add' && stn.some(([px, py]) => Math.abs(ix - px) < 110 && iy > py - 230 && iy < py + 30)){ tyAction(); return; }
+  const hit = stn.find(([px, py]) => Math.abs(ix - px) < 110 && iy > py - 230 && iy < py + 30);
+  if(st && st !== 'greet' && st !== 'add' && hit){ if(A.mo){ tyGestStart(e, A.mo, hit[0], hit[1] - 60, p); return; } if(st !== 'serve' || T.lv !== 4) tyAction(); return; }
 });
+tstage.addEventListener('pointermove', e => {
+  const T = TY; if(!T || !T.gest || T.gest.pid !== e.pointerId || !T.work) return;
+  const p = tyPt(e), g = T.gest;
+  if(g.type === 'stir'){ const a = Math.atan2(p.iy - g.cy, p.ix - g.cx); let d = a - g.a; if(d > Math.PI) d -= 6.283; if(d < -Math.PI) d += 6.283; g.a = a; if(Math.abs(d) < 1.2){ tyProg(Math.abs(d)/(4*Math.PI)); T.gsnd = (T.gsnd || 0) + Math.abs(d); if(T.gsnd > 1.4){ T.gsnd = 0; tone(300 + T.work.prog*300, .1, 'triangle', .04); } } }
+  else if(g.type === 'flip' && !g.used && g.y0 - p.iy > 45){ g.used = true; const W = T.work; W.flipT = 0.35; W.flips++; tone(520 + W.flips*120, .12, 'triangle', .05); vibe(15); tyText(TY_GEO.kitchen.stove[0], TY_GEO.kitchen.stove[1] - 200, W.flips === 1 ? '휙! 한 번 더!' : '휙!', '#fff', true); tyProg(0.5); }
+});
+const tyUp = e => { const T = TY; if(!T) return; if(T.hold && T.hold.pid === e.pointerId) T.hold = null; if(T.gest && T.gest.pid === e.pointerId){ if(T.gest.type === 'flip' && T.work && T.work.flips === 0) tyActText('손가락을 위로 쓱 밀어요 ⬆️'); T.gest = null; } };
+tstage.addEventListener('pointerup', tyUp); tstage.addEventListener('pointercancel', tyUp);
 function tyKey(e){
-  if(e.repeat) return;
+  const T = TY; if(!T) return;
   if(e.code === 'Escape'){ e.preventDefault(); tyQuit(); return; }
-  if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); tyAction(); return; }
-  const m = /^(Digit|Numpad)([1-9])$/.exec(e.code); if(m){ const t = TY_PAL[TY.kind][TY.lv][+m[2] - 1]; if(t){ e.preventDefault(); tyAddIng(t); } }
+  if(e.repeat) return;
+  if(T.closing){ if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); if(T.closing.t > 1 && !T.finished){ T.finished = true; tyFinish(); } } return; }
+  const m = /^(Digit|Numpad)([1-9])$/.exec(e.code);
+  if(T.pick){ if(m){ e.preventDefault(); if(T.pick.type === 'pay') tyPayChoose(+m[2] - 1); else tyOrderChoose(+m[2] - 1); } return; }
+  if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); const A = tyActInfo(); if(A.mo === 'hold'){ T.hold = {pid:'key'}; T.idle = 0; return; } tyAction(true); return; }
+  if(m){ const t = tyPal()[+m[2] - 1]; if(t){ e.preventDefault(); tyAddIng(t); } }
 }
-document.addEventListener('visibilitychange', () => { if(TY && !TY.stopped) TY.last = performance.now(); });
-/* ---- 체험실 화면 · 결과 화면 ---- */
+addEventListener('keyup', e => { if(TY && TY.hold && TY.hold.pid === 'key' && (e.code === 'Space' || e.code === 'Enter')) TY.hold = null; });
+document.addEventListener('visibilitychange', () => { if(TY && !TY.stopped){ TY.last = performance.now(); TY.hold = null; TY.gest = null; } });
+/* ---- 체험실 화면 · 결과 · 꾸미기 · 도감 · 레시피 · 기록 ---- */
 function tyPanelHTML(kind){
   tyArt(kind);
-  const D = tyData(kind), open = tyOpenLv(kind), fruits = [...new Set(Object.values(TY_PAL[kind]).flat())].filter(t => FRUIT_INFO[t]), jn = fruits.reduce((a, t) => a + (DEX.pantry[t] || 0), 0);
-  const desc = kind === 'cafe' ? ['과일 1가지 주스', '과일 + 우유·요거트·꿀·얼음', '개수까지 (딸기 2개 …)'] : ['재료 1가지 · 썰거나 굽기', '재료 2가지 · 썰고 익히기', '개수까지 · 3단계 요리'];
-  return `<div class="typanel"><h3>🎮 오늘의 영업</h3><p class="keys">손님 5명에게 ${kind === 'cafe' ? '음료' : '요리'}를 만들어 드려요 · 👋 인사 → 🧺 재료 → ${kind === 'cafe' ? '🌀 갈기' : '🔪 썰기 · 🔥 익히기 · 🍽️ 담기'} → 🙌 드리기</p>
-    <div class="tylvs">${[1, 2, 3].map(l => { const ok = l <= open, st = D.stars[l] || 0; return `<button class="tylv${ok ? '' : ' lock'}" data-tylv="${l}" ${ok ? '' : 'disabled'}><b>${ok ? l + '단계' : '🔒 ' + l + '단계'}</b><small>${desc[l - 1]}</small><span>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`; }).join('')}</div>
-    <label class="tyopt"><input type="checkbox" id="tyRelax" ${DEX.tyRelax ? 'checked' : ''}> ⏳ 느긋하게 하기 (기다림 시간 표시 없음)</label>
-    <label class="tyopt${jn ? '' : ' off'}"><input type="checkbox" id="tyJungle" ${DEX.tyJungle && jn ? 'checked' : ''} ${jn ? '' : 'disabled'}> 🌴 정글에서 모은 과일 쓰기 (그 손님 팁 2배 · 창고 ${jn}개)</label>
-    <p class="keys">별 2개 이상이면 다음 단계가 열려요 · 영업을 마치면 ${kind === 'cafe' ? '⚡ 활력이 올라요' : '🎒 가방 아이템을 받아요'}</p></div>`;
+  const D = tyData(kind), O = tyOpt(), open = tyOpenLv(kind), fruits = [...new Set(Object.values(TY_PAL[kind]).flat())].filter(t => FRUIT_INFO[t]), jn = fruits.reduce((a, t) => a + (DEX.pantry[t] || 0), 0);
+  const regN = TY_LOOKS.filter(L => L.id && (D.reg[L.id] || 0) >= 3).length, sp = D.spDay !== todayKey();
+  const seg = (k, opts) => `<span class="seg">${opts.map(([v, l]) => `<button data-tyv="${k}" data-v="${v}" class="${O[k] === v ? 'on' : ''}">${l}</button>`).join('')}</span>`;
+  return `<div class="typanel"><h3>🎮 오늘의 영업</h3>
+    ${sp ? '<p class="tysp">👑 오늘의 특별 손님이 기다려요! (세 번째 손님)</p>' : ''}
+    <p class="keys">손님에게 ${kind === 'cafe' ? '음료' : '요리'}를 만들어 드려요 · 👋 인사 → 🧺 재료 → ${kind === 'cafe' ? '🌀 갈기' : '🔪 썰기 · 🔥 익히기 · 🍽️ 담기'} → 🙌 드리기</p>
+    <div class="tylvs">${[1, 2, 3, 4].map(l => { const ok = l <= open, st = D.stars[l] || 0; return `<button class="tylv${ok ? '' : ' lock'}${l === 4 ? ' l4' : ''}" data-tylv="${l}" ${ok ? '' : 'disabled'}><b>${ok ? l + '단계' : '🔒 ' + l + '단계'}</b><small>${TY_LVDESC[kind][l - 1]}</small><span>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`; }).join('')}</div>
+    <div class="tybtns"><button data-tygo="tyDeco">🛍️ 가게 꾸미기</button><button data-tygo="tyBook">📖 단골 도감 <small>${regN}/7</small></button><button data-tygo="tyRecipe">🧪 나만의 레시피 <small>${D.custom.length}/6</small></button></div>
+    <details class="tyset" id="tySet" ${tySetOpen ? 'open' : ''}><summary>⚙️ 영업 방법 고르기</summary>
+      <div class="setrow"><span>주문 보기</span>${seg('view', [['pic', '🖼️ 그림'], ['sound', '🔊 소리만'], ['text', '🔤 글자만']])}</div>
+      <label class="tyopt"><input type="checkbox" data-tyo="relax" ${O.relax ? 'checked' : ''}> ⏳ 느긋하게 하기 (기다림 시간 표시 없음)</label>
+      <label class="tyopt"><input type="checkbox" data-tyo="pay" ${O.pay ? 'checked' : ''}> 🪙 계산하기 (1단계 돈 세기 · 2~3단계 거스름돈)</label>
+      <label class="tyopt"><input type="checkbox" data-tyo="tapOnly" ${O.tapOnly ? 'checked' : ''}> 👆 누르기만 하기 (2단계부터 나오는 꾹 누르기·돌리기·밀기 끄기)</label>
+      <label class="tyopt"><input type="checkbox" data-tyo="duo" ${O.duo ? 'checked' : ''}> 👫 두 명이 함께 (손님 친구가 주문을 골라요)</label>
+      <label class="tyopt${jn ? '' : ' off'}"><input type="checkbox" data-tyo="jungle" ${O.jungle && jn ? 'checked' : ''} ${jn ? '' : 'disabled'}> 🌴 정글에서 모은 과일 쓰기 (그 손님 팁 2배 · 창고 ${jn}개)</label>
+    </details>
+    <p class="keys">별 2개 이상이면 다음 단계가 열려요 · 영업을 마치면 ${kind === 'cafe' ? '⚡ 활력이 올라요' : '🎒 가방 아이템을 받아요'} · 🪙 ${DEX.coins}</p></div>`;
 }
+let tySetOpen = false;
 function wireTyPanel(kind){
+  tyRoomKind = kind;
   card.querySelectorAll('[data-tylv]').forEach(b => b.onclick = () => { tone(784, .08, 'triangle', .05); tyStart(kind, +b.dataset.tylv); });
-  const r = document.getElementById('tyRelax'); if(r) r.onchange = e => { DEX.tyRelax = e.target.checked; saveDex(); };
-  const j = document.getElementById('tyJungle'); if(j) j.onchange = e => { DEX.tyJungle = e.target.checked; saveDex(); };
+  card.querySelectorAll('[data-tyo]').forEach(b => b.onchange = e => { tyOpt()[b.dataset.tyo] = e.target.checked; saveDex(); });
+  card.querySelectorAll('[data-tyv]').forEach(b => b.onclick = () => { tyOpt()[b.dataset.tyv] = b.dataset.v; saveDex(); tone(700, .05, 'triangle', .04); card.querySelectorAll(`[data-tyv="${b.dataset.tyv}"]`).forEach(o => o.classList.toggle('on', o === b)); });
+  card.querySelectorAll('[data-tygo]').forEach(b => b.onclick = () => { tone(700, .06, 'triangle', .05); showScreen(b.dataset.tygo); });
+  const ts = document.getElementById('tySet'); if(ts) ts.ontoggle = () => { tySetOpen = ts.open; };
 }
 function tyResultHTML(){
   const T = TY, R = T && T.result; if(!R) return '<button class="go" id="goBtn">돌아가기</button>';
   const cafe = T.kind === 'cafe';
   return `<div class="sclear"><div class="conf">🎉✨🎊✨🎉</div><h2>${cafe ? '☕' : '🍳'} 오늘의 영업 끝!</h2><p>${T.lv}단계 · 손님 ${R.served}명에게 ${cafe ? '음료' : '요리'}를 드렸어요</p>
     <div class="bigstars">${[0, 1, 2].map(i => `<span class="${R.got[i] ? 'on' : ''}" style="animation-delay:${0.2 + i*0.35}s">${R.got[i] ? '★' : '☆'}</span>`).join('')}</div>
-    <ul class="sgoal"><li class="ok">★ 손님 5명 모두 맞이하기</li><li class="${R.got[1] ? 'ok' : ''}">${R.got[1] ? '★' : '☆'} 주문 잘 보기 (다시 본 횟수 ${R.mistakes}번)</li><li class="${R.got[2] ? 'ok' : ''}">${R.got[2] ? '★' : '☆'} ${T.relax ? '느긋하게 영업하기' : '손님이 오래 기다리지 않게 하기'}</li></ul>
+    <ul class="sgoal"><li class="ok">★ 손님 모두 맞이하기</li><li class="${R.got[1] ? 'ok' : ''}">${R.got[1] ? '★' : '☆'} 주문 잘 보기 (다시 본 횟수 ${R.mistakes}번)</li><li class="${R.got[2] ? 'ok' : ''}">${R.got[2] ? '★' : '☆'} ${T.relax ? '느긋하게 영업하기' : '손님이 오래 기다리지 않게 하기'}</li></ul>
     <p class="coins">🪙 +${R.coins} (팁 ${R.tips}) · ${cafe ? (R.vitMax ? '⚡ 활력은 이미 최대예요' : `⚡ 활력 +${R.vit}`) : `🎒 ${R.gifts.map(k => BAG_ITEMS[k].icon + ' ' + BAG_ITEMS[k].name).join(', ')}`}${T.jungleUsed ? ` · 🌴 정글 과일 ${T.jungleUsed}개 사용` : ''}</p>
+    ${R.special ? '<p class="rec">👑 특별 손님 고릴라 대장을 대접했어요! 배지 +1</p>' : ''}
+    ${R.newRegs.length ? `<p class="rec">💖 새 단골: ${R.newRegs.join(', ')}</p>` : ''}
+    ${R.payN ? `<p>🪙 계산 ${R.payN}번 중 ${R.payOK}번 한 번에 맞혔어요</p>` : ''}
+    ${R.nextDeco ? `<p class="keys">🛍️ ${R.nextDeco.need ? `다음 꾸미기(${R.nextDeco.name})까지 🪙 ${R.nextDeco.need}` : `새 꾸미기(${R.nextDeco.name})를 살 수 있어요!`}</p>` : ''}
     ${R.unlocked ? `<p class="rec">🔓 ${R.unlocked}단계가 열렸어요!</p>` : ''}
-    <div class="btnrow">${R.unlocked ? `<button class="go" id="tyNext">${R.unlocked}단계 도전 ▶</button>` : ''}<button class="go${R.unlocked ? ' alt' : ''}" id="tyAgain">다시 하기</button><button class="go alt" id="goBtn">체험실로</button></div></div>`;
+    <div class="btnrow">${R.unlocked ? `<button class="go" id="tyNext">${R.unlocked}단계 도전 ▶</button>` : ''}<button class="go${R.unlocked ? ' alt' : ''}" id="tyAgain">다시 하기</button>${R.nextDeco && !R.nextDeco.need ? '<button class="go alt" id="tyToDeco">🛍️ 꾸미기</button>' : ''}<button class="go alt" id="goBtn">체험실로</button></div></div>`;
+}
+function tyDecoHTML(kind){
+  const D = tyData(kind);
+  return `<h2>🛍️ ${kind === 'cafe' ? '바리스타' : '요리'} 체험실 꾸미기</h2><p class="coins">🪙 ${DEX.coins} · 영업에서 받은 팁으로 사요</p>
+    ${Object.entries(TY_DECO).map(([cat, C]) => `<div class="tydeco"><h4>${C.title}</h4><div class="tydrow">${C.items.map(it => { const own = tyOwned(D, cat, it.id), eq = D.deco.eq[cat] === it.id, can = DEX.coins >= it.price;
+      const face = cat === 'cup' ? `<i class="dot" style="background:${it.col}"></i>` : cat === 'plant' ? `<i>${it.e || '∅'}</i>` : cat === 'sign' ? `<i>${{none:'🪧', star:'⭐', flower:'🌸', bulb:'💡', rainbow:'🌈'}[it.id]}</i>` : cat === 'light' ? `<i>${{none:'🔆', warm:'🧡', fairy:'✨', sparkle:'🌟'}[it.id]}</i>` : '<i>🎵</i>';
+      return `<button class="tyd${eq ? ' on' : ''}${own ? '' : ' buy'}" data-tyd="${cat}:${it.id}" ${!own && !can ? 'disabled' : ''}>${face}<b>${it.name}</b><small>${eq ? '✓ 쓰는 중' : own ? '쓰기' : `🪙 ${it.price}`}</small></button>`; }).join('')}</div></div>`).join('')}
+    <p id="msg"></p><button class="go" id="goBtn">체험실로</button>`;
+}
+function tyBookHTML(kind){
+  const D = tyData(kind), last = D.log.slice(-5).reverse();
+  return `<h2>📖 ${kind === 'cafe' ? '바리스타' : '요리'} 단골 도감</h2><p class="keys">같은 동물 손님을 3번 대접하면 💖 단골이 돼요. 단골은 가끔 "늘 먹던 거요!" 하고 주문해요 — 좋아하는 메뉴를 기억해 두세요!</p>
+    <div class="tybook">${TY_LOOKS.filter(L => L.id).map(L => { const n = D.reg[L.id] || 0, fav = L.fav[kind], seen = D.favSeen[L.id];
+      return `<div class="tyb${n >= 3 ? ' reg' : ''}"><img src="assets/animals/${L.img}.png" alt=""><b>${L.name}${n >= 3 ? ' 💖' : ''}</b><span class="h">${'♥'.repeat(Math.min(3, n))}${'♡'.repeat(Math.max(0, 3 - n))}</span><small>좋아하는 메뉴<br><em>${seen ? fav : '???'}</em></small></div>`; }).join('')}</div>
+    <p>👑 특별 손님 배지 ${D.badges || 0}개 · 영업 ${D.days}번</p>
+    ${last.length ? `<div class="tscroll"><table class="rank tt"><tr><th>날짜</th><th>단계</th><th>별</th><th>손님</th></tr>${last.map(r => `<tr><td>${new Date(r.d).toLocaleDateString('ko-KR')}</td><td>${r.lv}</td><td>${'★'.repeat(r.stars)}</td><td>${r.served}명${r.sp ? ' 👑' : ''}</td></tr>`).join('')}</table></div>` : ''}
+    <button class="go" id="goBtn">체험실로</button>`;
+}
+function tyRecipeHTML(kind){
+  const D = tyData(kind), R = tyRecipeDraft && tyRecipeDraft.kind === kind ? tyRecipeDraft : (tyRecipeDraft = {kind, need:{}, dish:'salad', name:''});
+  const pal = TY_PAL[kind][3], n = Object.values(R.need).reduce((a, b) => a + b, 0), auto = tyRecipeName(R);
+  return `<h2>🧪 나만의 ${kind === 'cafe' ? '음료' : '요리'} 레시피</h2><p class="keys">재료를 눌러 넣어요 (한 번 더 누르면 2개, 또 누르면 빼기 · 최대 4개). 만든 메뉴는 손님이 ⭐ 주문해요!</p>
+    <div class="tyrec">${pal.map(t => `<button class="tyri${R.need[t] ? ' on' : ''}" data-tyri="${t}"><img src="${tyPic(t)}" alt=""><b>${tyName(t)}</b>${R.need[t] ? `<i>${R.need[t]}</i>` : ''}</button>`).join('')}</div>
+    ${kind === 'kitchen' ? `<div class="setrow"><span>요리 종류</span><span class="seg">${Object.entries(TY_KDISH).map(([k, v]) => `<button data-tyk="${k}" class="${R.dish === k ? 'on' : ''}">${v.icon} ${v.name}</button>`).join('')}</span></div>` : ''}
+    <p>이름: <input class="namein" id="tyrName" maxlength="12" placeholder="${escapeHTML(auto || '재료를 골라요')}" value="${escapeHTML(R.name)}"> ${n ? `<span class="keys">(${tyRecipeLv(R.need)}단계 메뉴)</span>` : ''}</p>
+    <div class="btnrow"><button class="go" id="tyrSave" ${n && D.custom.length < 6 ? '' : 'disabled'}>⭐ 메뉴판에 올리기</button></div>
+    ${D.custom.length ? `<h4>내 메뉴판 (${D.custom.length}/6)</h4><div class="tydrow">${D.custom.map((m, i) => `<div class="tyd on"><i>${kind === 'cafe' ? `<span class="dot" style="background:${m.col}"></span>` : m.icon}</i><b>${escapeHTML(m.name)}</b><small>${Object.entries(m.need).map(([t, k]) => tyName(t) + (k > 1 ? '×' + k : '')).join(' ')}</small><button class="sm" data-tyrdel="${i}">지우기</button></div>`).join('')}</div>` : ''}
+    <p id="msg"></p><button class="go alt" id="goBtn">체험실로</button>`;
+}
+function tyRecipeName(R){
+  const ks = Object.keys(R.need); if(!ks.length) return '';
+  const nm = ks.slice(0, 2).map(tyName).join(' ');
+  return R.kind === 'cafe' ? nm + (R.need.milk ? ' 라떼' : R.need.ice ? ' 슬러시' : R.need.yogurt ? ' 스무디' : ' 주스') : nm + ' ' + TY_KDISH[R.dish].name;
+}
+function tyMixCol(need){   // 재료 색을 섞어 음료 색
+  let r = 0, g = 0, b = 0, n = 0;
+  for(const [t, k] of Object.entries(need)){ const hx = (t === 'milk' || t === 'yogurt' || t === 'ice') ? '#fff4e6' : FRUIT_COL[t] || '#ffb3c7'; const v = parseInt(hx.slice(1), 16); r += (v >> 16)*k; g += ((v >> 8) & 255)*k; b += (v & 255)*k; n += k; }
+  const f = v => Math.round(Math.min(255, v/n*0.7 + 255*0.3)).toString(16).padStart(2, '0');
+  return n ? `#${f(r)}${f(g)}${f(b)}` : '#ffb3c7';
+}
+function tyLogHTML(){
+  const nm = {cafe:'☕ 바리스타', kitchen:'🍳 요리'};
+  const rows = PROF.list.map(p => {
+    const d = p.id === PROF.cur ? DEX : profData(p.id), T = d.ty || {};
+    return ['cafe', 'kitchen'].map(k => { const L = (T[k] && T[k].log) || []; if(!L.length) return '';
+      const last = L.slice(-6).reverse();
+      return last.map((r, i) => `<tr><td>${i ? '' : faceHTML(p) + ' ' + escapeHTML(p.name)}</td><td>${i ? '' : nm[k]}</td><td>${new Date(r.d).toLocaleDateString('ko-KR')}</td><td>${r.lv}단계${r.duo ? ' 👫' : ''}</td><td>${'★'.repeat(r.stars)}</td><td>${r.miss}</td><td>${r.hints}</td><td>${r.pay || '-'}</td><td>${Math.floor(r.sec/60)}분 ${r.sec % 60}초</td><td>${{pic:'그림', sound:'소리', text:'글자'}[r.view] || '그림'}${r.motion ? '·동작' : ''}${r.relax ? '·느긋' : ''}</td></tr>`).join(''); }).join('');
+  }).join('');
+  return `<h2>☕🍳 체험실 영업 기록</h2><p class="keys">학생마다 최근 영업 6번 · 다시 본 = 틀린 재료·손님을 고른 횟수 · 도움 = 👇 도움 손가락이 나온 횟수 · 계산 = 한 번에 맞힌 수/전체</p>
+    <div class="tscroll"><table class="rank tt"><tr><th>학생</th><th>체험실</th><th>날짜</th><th>단계</th><th>별</th><th>다시 본</th><th>도움</th><th>계산</th><th>걸린 시간</th><th>방법</th></tr>${rows || '<tr><td colspan="10">아직 기록이 없어요</td></tr>'}</table></div>
+    <button class="go" id="goBtn">선생님 화면으로</button>`;
+}
+function wireTyScreen(type){
+  const kind = tyRoomKind, D = tyData(kind), re = () => { const sc = card.scrollTop; showScreen(type); card.scrollTop = sc; };
+  if(type === 'tyDeco') card.querySelectorAll('[data-tyd]').forEach(b => b.onclick = () => {
+    const [cat, id] = b.dataset.tyd.split(':'), it = TY_DECO[cat].items.find(i => i.id === id);
+    if(!tyOwned(D, cat, id)){ if(DEX.coins < it.price) return; DEX.coins -= it.price; D.deco.owned.push(cat + ':' + id); seq([784, 988, 1319], 70, 'triangle', .06); }
+    else tone(700, .06, 'triangle', .05);
+    D.deco.eq[cat] = id; saveDex(); re(); setMsg(`${it.name}${eul(it.name)} ${cat === 'music' ? '틀어요' : '꾸몄어요'}! 영업할 때 보여요`);
+  });
+  if(type === 'tyRecipe'){
+    const R = tyRecipeDraft;
+    card.querySelectorAll('[data-tyri]').forEach(b => b.onclick = () => { const t = b.dataset.tyri, tot = Object.values(R.need).reduce((a, v) => a + v, 0), cur = R.need[t] || 0;
+      if(cur >= 2 || (tot >= 4 && cur < 2)) delete R.need[t]; else R.need[t] = cur + 1; tone(620 + tot*80, .06, 'triangle', .05); re(); });
+    card.querySelectorAll('[data-tyk]').forEach(b => b.onclick = () => { R.dish = b.dataset.tyk; re(); });
+    const nm = document.getElementById('tyrName'); if(nm) nm.oninput = () => { R.name = nm.value; };
+    const sv = document.getElementById('tyrSave'); if(sv) sv.onclick = () => {
+      const name = (R.name || '').trim() || tyRecipeName(R); if(!name || !Object.keys(R.need).length || D.custom.length >= 6) return;
+      const m = {name:name.slice(0, 12), need:Object.assign({}, R.need), lv:tyRecipeLv(R.need), custom:true};
+      if(kind === 'cafe') m.col = tyMixCol(R.need); else { const K = TY_KDISH[R.dish]; m.icon = K.icon; m.steps = K.steps.slice(); if(K.pan) m.pan = true; }
+      D.custom.push(m); saveDex(); tyRecipeDraft = null; seq([784, 988, 1175, 1568], 70, 'triangle', .06); tySay(`${m.name}${eul(m.name)} 메뉴판에 올렸어요`); re(); setMsg(`⭐ ${m.name} — ${m.lv}단계부터 손님이 주문해요`);
+    };
+    card.querySelectorAll('[data-tyrdel]').forEach(b => b.onclick = () => { D.custom.splice(+b.dataset.tyrdel, 1); saveDex(); re(); });
+  }
 }
 /* ================= 동아리실: 리듬 스타 (저작권이 끝난 동요·민요·클래식 멜로디 + 내 음악) ================= */
 const SONGS = [
@@ -7211,7 +7660,7 @@ function wireRhyResult(){
 }
 /* ================= 교실 운영: 프로필 · 선생님 화면 · 이용 시간 · 백업 · 기기 점검 ================= */
 const SESSION = {sec:0, saveT:0};
-const ROOM_SCREENS = ['barista','cook','club','rhythm','rhyResult','learn','safety','learnMenu','bag','esports','pang','pangResult','pangMap','tycoon','tyResult'];
+const ROOM_SCREENS = ['barista','cook','club','rhythm','rhyResult','learn','safety','learnMenu','bag','esports','pang','pangResult','pangMap','tycoon','tyResult','tyDeco','tyBook','tyRecipe','tyLog'];
 function isActive(){ return S && ((S.state === 'play' && !S.paused) || (S.state === 'lobby' && !screen) || ROOM_SCREENS.includes(screen)); }
 function todaySec(){ return DEX.today && DEX.today.d === todayKey() ? DEX.today.sec : 0; }
 function todayExtra(){ return DEX.today && DEX.today.d === todayKey() ? (DEX.today.extra || 0) : 0; }
@@ -7328,7 +7777,7 @@ function classHTML(type){
       <div class="setrow"><span>쉬는 시간 알림</span>${seg('breakMin', [[0,'끄기'],[10,'10분'],[15,'15분'],[20,'20분'],[30,'30분']])}</div>
       <div class="setrow"><span>하루 이용 시간</span>${seg('dailyMin', [[0,'제한 없음'],[20,'20분'],[30,'30분'],[45,'45분'],[60,'60분']])}</div>
       <div class="setrow"><span>마을 장소 열기</span>${seg('allOpen', [[0,'레벨에 따라 열기'],[1,'처음부터 모두 열기']])}</div>
-      <div class="btnrow"><button class="go alt sm" id="tBackup">💾 기록 백업 내보내기</button><button class="go alt sm" id="tRestore">📂 백업 불러오기</button><button class="go alt sm" id="tDiag">🔧 기기 점검</button><button class="go alt sm" id="tPin">🔑 비밀번호 바꾸기</button></div>
+      <div class="btnrow"><button class="go alt sm" id="tBackup">💾 기록 백업 내보내기</button><button class="go alt sm" id="tRestore">📂 백업 불러오기</button><button class="go alt sm" id="tTyLog">☕🍳 체험실 기록</button><button class="go alt sm" id="tDiag">🔧 기기 점검</button><button class="go alt sm" id="tPin">🔑 비밀번호 바꾸기</button></div>
       <p id="msg"></p><button class="go" id="goBtn">나가기</button>`;
   }
   if(type === 'rest'){
