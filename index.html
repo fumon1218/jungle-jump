@@ -170,6 +170,15 @@
   .smwrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .smwrap svg path{fill:none;stroke-linecap:round;stroke-width:9}
   .smwrap svg .rdone{stroke:#ffd54f;filter:drop-shadow(0 0 6px #ffd54f)}
+  .smwrap svg .rsoon{stroke:rgba(255,255,255,.55);stroke-dasharray:3 20;stroke-width:7}
+  .smfog{position:absolute;right:0;top:0;width:12%;height:34%;pointer-events:none;background:radial-gradient(ellipse at 72% 45%,rgba(255,255,255,.9) 0,rgba(255,255,255,.6) 38%,rgba(255,255,255,0) 70%);animation:fogdrift 6s ease-in-out infinite alternate}
+  @keyframes fogdrift{from{transform:translateX(0)}to{transform:translateX(-3%)}}
+  .snode.soon{background:radial-gradient(circle at 40% 35%,#eceff1,#b0bec5);color:#607d8b;border-style:dashed;animation:soonbob 2.4s ease-in-out infinite}
+  .snode.soon span{background:#e53935;color:#fff}
+  @keyframes soonbob{0%,100%{transform:translate(-50%,-62%)}50%{transform:translate(-50%,-70%)}}
+  .soonsign{position:absolute;right:1.2%;top:27%;font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:0;background:linear-gradient(#8d5a2b,#6b4414);color:#fff6dc;border:3px solid #e9b949;border-radius:12px;padding:.3em .7em .35em;font-size:clamp(10px,1.3vw,16px);line-height:1.2;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35);transform:rotate(-4deg)}
+  .soonsign b{font-weight:400} .soonsign span{color:#ffe07a} .soonsign small{font-size:.75em;opacity:.85} .soonsign.sel{box-shadow:0 0 0 4px #ffd54f,0 4px 0 rgba(0,0,0,.35)}
+  .newtag{font-style:normal;font-size:.72em;background:#e53935;color:#fff;border-radius:999px;padding:.1em .6em;animation:snpulse 1.6s ease-in-out infinite}
   .smwrap svg .rnext{stroke:rgba(255,255,255,.85);stroke-dasharray:4 22}
   .snode{position:absolute;transform:translate(-50%,-62%);width:clamp(44px,6.2%,86px);aspect-ratio:1;border-radius:50%;border:4px solid #fff3c4;background:radial-gradient(circle at 40% 35%,#ffd86b,#e08a12);color:#4a2a0a;font-family:var(--font);cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
   .snode b{font-weight:400;font-size:clamp(16px,2.3vw,30px);line-height:1}
@@ -1279,18 +1288,20 @@ function newGame(opts = {}){
   if(opts.startStage > 0) startAtStage(opts.startStage);
 }
 /* ---- 스테이지 모드: 한 스테이지(400m)씩 도착 깃발까지 ---- */
-const stageFruitGoal = () => S.easy ? 10 : 15;
+const STAGE_LEN = 1300;   // 한 스테이지 길이(m) — 보통 50초~1분
+const stageFruitGoal = () => S.easy ? 15 : 25;
+const stageDiffX = x => S && S.stage ? S.stage.x0 + (x - S.stage.x0)*0.31 : x;   // 스테이지가 길어져도 난이도는 천천히 올라가요
 function stageOpen(i){ if(TEACH.allOpen || i === 0) return true; DEX.stageStars = DEX.stageStars || {}; return !!DEX.stageStars[i - 1] || i <= Math.max(DEX.stageOpen || 0, DEX.maxStage || 0); }
 const bossOpen = () => TEACH.allOpen || !!(DEX.stageStars && DEX.stageStars[7]);
 const endlessOpen = () => TEACH.allOpen || (DEX.maxStage || 0) >= 3;
 function nextStageIdx(){ DEX.stageStars = DEX.stageStars || {}; for(let i=0;i<8;i++) if(!DEX.stageStars[i]) return stageOpen(i) ? i : Math.max(0, i - 1); return 7; }
 function stageSetup(n){
   const x0 = n === 0 ? 120 : n*ZONE_LEN*10 + 140;
-  S.stage = {n, x0, x1:n*ZONE_LEN*10 + 120 + ZONE_LEN*10, d0:Math.floor((x0 - 120)/10), fruit0:S.fruitCount, chest0:S.treasures, goal:null, done:false, letterGot:false, friendDue:true};
+  S.stage = {n, x0, x1:x0 + STAGE_LEN*10, d0:Math.floor((x0 - 120)/10), fruit0:S.fruitCount, chest0:S.treasures, goal:null, done:false, letterGot:false, friendDue:true};
   S.found = DEX.counts.map(c => c > 0);                                   // 모은 글자는 그대로
   S.order = shuffle([...Array(GOAL).keys()].filter(i => !S.found[i]));    // 아직 없는 글자만 나와요
   S.nextChestX = Math.min(S.nextChestX, x0 + 1100);                      // 보물상자는 꼭 하나 일찍
-  S.nextChase = n >= 1 ? S.stage.d0 + 170 : 1e9;                          // 스테이지 2부터 추격전 한 번
+  S.nextChase = n >= 1 ? S.stage.d0 + 380 : 1e9;                          // 스테이지 2부터 추격전 한 번
   S.zoneIdx = n; S.banner = {text:`${ZONES[n].icon} ${ZONES[n].name}`, t:0};
   setTimeout(() => { if(S.stage && S.state === 'play') S.toast = {text:`목표: 🏁 도착 · 🍎 과일 ${stageFruitGoal()}개 · 🎁 보물상자 찾기`, t:0}; }, 1800);
 }
@@ -1407,7 +1418,7 @@ function genPlatform(){
     const x = S.genX + 80, y = clamp(S.lastY, 320, 400), p = {x, y, baseY:y, w:720, amp:0, phase:0, dy:0, seed:0.5, zone:zoneAtX(S.stage.x0 + 10), goal:true};
     S.plats.push(p); S.stage.goal = p; S.genX = x + p.w + 1e7; return;
   }
-  const d = S.genX/1000;
+  const d = stageDiffX(S.genX)/1000;
   const prevEnd = S.genX, prevY = S.lastY;
   const swingHere = prevEnd > 1500 && gr() < 0.12;
   const gap = ((S.easy ? grand(45,85) + Math.min(d*4, 30) : grand(55,105) + Math.min(d*7, 65)) + (swingHere ? grand(110,150) : 0))*(1 - 0.13*assistLv());   // 도움 단계마다 틈이 좁아져요
@@ -1444,9 +1455,9 @@ function genPlatform(){
   spawnCustom(p);
 }
 
-function zoneAtX(px){ return ZONES[Math.floor(Math.max(0, px - 120)/10/ZONE_LEN) % ZONES.length].key; }
+function zoneAtX(px){ if(S && S.stage) return ZONES[S.stage.n].key; return ZONES[Math.floor(Math.max(0, px - 120)/10/ZONE_LEN) % ZONES.length].key; }
 function populate(p){
-  const d = p.x/1000, ez = S.easy;
+  const d = stageDiffX(p.x)/1000, ez = S.easy;
   if(false && p.x > S.nextHutX){   // (게임 중 학습 오두막은 뺐어요 — 로비의 체험실로 옮겼어요)
     S.huts.push({plat:p, ox:p.w/2, used:false});
     const st = Math.floor((p.x - 120)/10/ZONE_LEN) + 1;
@@ -1669,6 +1680,7 @@ function dayState(){
   const q = (t-0.88)/0.12; return {dark:0.6*(1-q), tint:[255,150,190, Math.sin(q*Math.PI)*0.18]};
 }
 function zoneMix(){
+  if(S.stage) return [S.stage.n, S.stage.n, 0];
   const m = Math.max(0, (S.camX + 200)/10), zi = Math.floor(m/ZONE_LEN);
   const b = clamp((m % ZONE_LEN - (ZONE_LEN - 40))/40, 0, 1);
   return [zi % ZONES.length, (zi + 1) % ZONES.length, b];
@@ -3224,7 +3236,7 @@ function update(k){
   if(target > S.camX) S.camX += (target - S.camX)*Math.min(1, 0.12*k);
   while(S.genX < S.camX + W + 300) genPlatform();
   S.dist = Math.max(S.dist, Math.floor((P.x - 120)/10));
-  if(S.stage && S.stage.goal && !S.stage.done && P.onGround && P.plat === S.stage.goal && P.x > S.stage.goal.x + 300){ stageClear(); return; }
+  if(S.stage && S.stage.goal && !S.stage.done && P.x + P.w/2 > S.stage.goal.x + 300 && P.y < S.stage.goal.y + 40){ stageClear(); return; }   // 깃발 선을 넘으면 (공중이어도) 도착
   // 고릴라 추격전
   if(!S.chase && !S.chaseWarned && S.dist >= S.nextChase - 30){ S.chaseWarned = true; S.banner = {text:'쿵… 쿵… 무언가 다가와요!', t:0}; S.shake = 6; }
   if(!S.chase && S.dist >= S.nextChase) startChase();
@@ -5146,13 +5158,16 @@ function showScreen(type){
     let svg = '';
     for(let i=0;i<route.length - 1;i++){ const [x1, y1] = route[i], [x2, y2] = route[i + 1], mx = (x1 + x2)/2, my = Math.min(y1, y2) - 40, done = !!DEX.stageStars[i];
       svg += `<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" class="${done ? 'rdone' : 'rnext'}"/>`; }
+    svg += `<path d="M1696 392 Q1930 330 1955 150" class="rsoon"/>`;   // 다음 섬으로 이어질 길 (업데이트 예정)
     const star = (n, max = 3) => [...Array(max)].map((_, i) => `<i class="${i < n ? 'on' : ''}">${i < n ? '★' : '☆'}</i>`).join('');
     const nodes = NODES.map((p, i) => { const open = stageOpen(i), st = DEX.stageStars[i] || 0;
       return `<button class="snode${open ? '' : ' lock'}${i === next && open ? ' cur' : ''}${smSel === i ? ' sel' : ''}${st ? ' done' : ''}" data-sn="${i}" style="${pt(p)}"><b>${open ? i + 1 : '🔒'}</b><span>${star(st)}</span></button>`; }).join('')
       + `<button class="snode sp${bossOpen() ? '' : ' lock'}${smSel === 'boss' ? ' sel' : ''}" data-sn="boss" style="${pt(BOSS)}"><b>${bossOpen() ? '🦍' : '🔒'}</b><span>보스</span></button>`
-      + `<button class="snode sp${endlessOpen() ? '' : ' lock'}${smSel === 'endless' ? ' sel' : ''}" data-sn="endless" style="${pt(ENDLESS)}"><b>${endlessOpen() ? '♾️' : '🔒'}</b><span>무한 모험</span></button>`;
+      + `<button class="snode sp${endlessOpen() ? '' : ' lock'}${smSel === 'endless' ? ' sel' : ''}" data-sn="endless" style="${pt(ENDLESS)}"><b>${endlessOpen() ? '♾️' : '🔒'}</b><span>무한 모험</span></button>`
+      + `<div class="smfog"></div><button class="snode soon${smSel === 'soon' ? ' sel' : ''}" data-sn="soon" style="${pt([1955,150])}"><b>?</b><span>곧 열려요</span></button>`;
     let info;
-    if(smSel === 'boss') info = `<h3>🦍 고릴라 대장</h3><p>황금 사원을 지키는 고릴라 대장과 마지막 대결! 머리를 3번 밟아요.</p>${bossOpen() ? '<button class="go" id="smGo">▶ 도전!</button>' : '<p class="lk">🔒 스테이지 8을 깨면 열려요</p>'}`;
+    if(smSel === 'soon') info = `<h3>🚧 새로운 섬 준비 중</h3><p>황금 사원 너머에 새 스테이지가 곧 열려요!</p>`;
+    else if(smSel === 'boss') info = `<h3>🦍 고릴라 대장</h3><p>황금 사원을 지키는 고릴라 대장과 마지막 대결! 머리를 3번 밟아요.</p>${bossOpen() ? '<button class="go" id="smGo">▶ 도전!</button>' : '<p class="lk">🔒 스테이지 8을 깨면 열려요</p>'}`;
     else if(smSel === 'endless') info = `<h3>♾️ 무한 모험</h3><p>도착 깃발 없이 계속 달려요. 얼마나 멀리 갈 수 있을까?</p>${endlessOpen() ? '<button class="go" id="smGo">▶ 출발!</button>' : '<p class="lk">🔒 스테이지 3을 깨면 열려요</p>'}`;
     else { const i = smSel, z = ZONES[i], g = DEX.stageGot[i] || [false, false, false], open = stageOpen(i);
       info = `<h3>${z.icon} 스테이지 ${i + 1} · ${z.name.split('·')[1].trim()}</h3>
@@ -5160,7 +5175,7 @@ function showScreen(type){
         ${open ? `<button class="go" id="smGo">▶ ${DEX.stageStars[i] ? '다시 도전' : '시작!'}</button>` : '<p class="lk">🔒 앞 스테이지를 깨면 열려요</p>'}`; }
     html = `<div class="smap"><div class="smwrap"><img src="assets/stage_map.jpg" alt="정글 모험 지도" draggable="false">
         <svg viewBox="0 0 2048 869" preserveAspectRatio="none">${svg}</svg>${nodes}
-        <div class="smhead"><b>🗺️ 정글 모험 지도</b><span>⭐ ${total} / 24</span><button class="go alt sm" id="goBtn">마을로</button></div>
+        <div class="smhead"><b>🗺️ 정글 모험 지도</b><span>⭐ ${total} / 24</span><em class="newtag">🆕 스테이지 추가 예정</em><button class="go alt sm" id="goBtn">마을로</button></div>
         <div class="sminfo">${info}</div></div></div>`;
   } else if(type === 'stageClear'){
     const st = S.stage, r = st.result, z = ZONES[st.n], nb = r.stars > r.prev;
