@@ -6394,12 +6394,15 @@ const TY_MENU = {
     {name:'꿀 팬케이크', icon:'🥞', need:{wheat:1, egg:2, honey:1}, steps:['cook','plate'], pan:true, lv:3},
     {name:'망고 코코넛 수프', icon:'🍲', need:{mango:2, coconut:1}, steps:['chop','cook','plate'], lv:3},
     {name:'바나나 오믈렛', icon:'🍳', need:{egg:2, banana:1}, steps:['chop','cook','plate'], pan:true, lv:3},
-    {name:'우유 푸딩', icon:'🍮', need:{milk:1, egg:1, honey:1}, steps:['cook','plate'], lv:3}
+    {name:'우유 푸딩', icon:'🍮', need:{milk:1, egg:1, honey:1}, steps:['cook','plate'], lv:3},
+    {name:'바나나 팬케이크', icon:'🥞', need:{wheat:1, egg:1, banana:2}, steps:['chop','cook','plate'], pan:true, lv:3},
+    {name:'망고 바나나 샐러드', icon:'🥗', need:{mango:1, banana:2}, steps:['chop','plate'], lv:3},
+    {name:'딸기 팬케이크', icon:'🥞', need:{wheat:1, egg:1, strawberry:1}, steps:['chop','cook','plate'], pan:true, lv:2}
   ]
 };
 const TY_PAL = {
-  cafe:{1:['strawberry','banana','orange','grape','watermelon','mango'], 2:['strawberry','banana','orange','grape','mango','milk','yogurt','honey','ice'], 3:['strawberry','banana','orange','grape','mango','milk','yogurt','honey','ice']},
-  kitchen:{1:['apple','banana','strawberry','watermelon','egg'], 2:['apple','banana','watermelon','egg','wheat','honey','coconut','milk'], 3:['apple','banana','strawberry','mango','egg','wheat','honey','coconut','milk']}
+  cafe:{1:['strawberry','banana','orange','grape','watermelon','mango'], 2:['strawberry','banana','orange','grape','watermelon','mango','milk','yogurt','honey','ice'], 3:['strawberry','banana','orange','grape','watermelon','mango','milk','yogurt','honey','ice']},
+  kitchen:{1:['apple','banana','strawberry','watermelon','egg'], 2:['apple','banana','strawberry','watermelon','egg','wheat','honey','coconut','milk'], 3:['apple','banana','strawberry','watermelon','mango','egg','wheat','honey','coconut','milk']}
 };
 TY_PAL.cafe[4] = TY_PAL.cafe[3]; TY_PAL.kitchen[4] = TY_PAL.kitchen[3];
 const tyPal = () => TY.kind === 'coffee' && TY.work && TY.work.steps[TY.work.si] === 'cup' ? CF_CUPS : TY_PAL[TY.kind][TY.lv];
@@ -6792,7 +6795,7 @@ const KT_ART = {};
 const ktArt = k => KT_ART[k] || (KT_ART[k] = artImg(`assets/kitchen/${k}.png`));
 const KT_ING = {milk:'ing_milk', ice:'ing_ice', honey:'ing_honey', yogurt:'ing_yogurt', egg:'ing_egg', wheat:'ing_flour', coconut:'ing_coconut', vanilla:'ing_vanilla', choco:'ing_choco'};
 const KT_DISH = {'사과 샐러드':'salad_mix', '바나나 샐러드':'salad_mix', '딸기 샐러드':'salad_mix', '과일 샐러드':'salad_mix', '딸기 사과 샐러드':'salad_mix', '수박 조각':'watermelon', '수박 화채':'watermelon',
-  '달걀 프라이':'egg', '팬케이크':'pancake', '꿀 팬케이크':'pancake_honey', '코코넛 수프':'soup_coconut', '망고 코코넛 수프':'soup_mango', '꿀 바나나 구이':'banana_grill', '바나나 오믈렛':'omelette', '우유 푸딩':'pudding'};
+  '달걀 프라이':'egg', '팬케이크':'pancake', '꿀 팬케이크':'pancake_honey', '코코넛 수프':'soup_coconut', '망고 코코넛 수프':'soup_mango', '꿀 바나나 구이':'banana_grill', '바나나 오믈렛':'omelette', '우유 푸딩':'pudding', '바나나 팬케이크':'pancake', '딸기 팬케이크':'pancake', '망고 바나나 샐러드':'salad_mix'};
 const KT_KDISH = {salad:'salad_mix', grill:'banana_grill', soup:'soup_coconut', cake:'pancake'};
 function ktDishArt(m){ if(!m) return null; const k = m.dishArt || KT_DISH[m.name]; if(!k) return null; const a = ktArt('dish_' + k); return a.ok ? a.img : null; }
 function ktDish(x, m, cx, cy, size){   // 요리 그림 (없으면 이모지)
@@ -6900,7 +6903,7 @@ function tyNextDeco(kind){   // 아직 없는 꾸미기 중 가장 싼 것
 function tyRecipeLv(need){ const v = Object.values(need), tot = v.reduce((a, b) => a + b, 0); return v.length >= 3 || tot >= 3 ? 3 : v.length === 2 ? 2 : 1; }
 function tyMenus(kind, lv){
   const L = Math.min(lv, 3), pal = TY_PAL[kind][lv];
-  const base = TY_MENU[kind].filter(m => m.lv <= L);
+  const base = TY_MENU[kind].filter(m => m.lv <= L && Object.keys(m.need).every(t => pal.includes(t)));   // 재료 버튼에 있는 것만
   const mine = tyData(kind).custom.filter(m => m.lv <= L && Object.keys(m.need).every(t => pal.includes(t)));
   return {base, mine, all:[...base, ...mine]};
 }
@@ -6941,11 +6944,18 @@ function tyFit(){   // 그림을 화면에 맞추기 (아래쪽 기준, 위쪽 �
   return {k, w, h, ox:(w - TY_W*k)/2, oy:h - TY_H*k};
 }
 /* ---- 손님 ---- */
+function tyPickMenu(list){   // 골고루: 이번 영업에 안 나온 메뉴, 아직 못 만들어 본 메뉴를 더 자주
+  const T = TY, D = tyData(T.kind); D.menuSeen = D.menuSeen || {}; T.usedM = T.usedM || [];
+  let c = list.filter(m => !T.usedM.includes(m.name)); if(!c.length) c = list;
+  const w = c.map(m => D.menuSeen[m.name] ? 1 : 3); let r = Math.random()*w.reduce((a, b) => a + b, 0), i = 0;
+  while(i < c.length - 1 && r >= w[i]){ r -= w[i]; i++; }
+  return c[i];
+}
 function tyNewCust(){
   const T = TY, D = tyData(T.kind), M = tyMenus(T.kind, T.lv), top = M.base.filter(m => m.lv === Math.min(T.lv, 3));
   const kingOk = typeof artGorilla !== 'undefined' && artGorilla.ok;
   let look, m, special = false;
-  if(T.special && !T.specialSpawned && kingOk && T.spawned === (T.lv === 4 ? 3 : 2)){ look = TY_KING; m = pick(top.length ? top : M.base); special = true; T.specialSpawned = true; }
+  if(T.special && !T.specialSpawned && kingOk && T.spawned === (T.lv === 4 ? 3 : 2)){ look = TY_KING; m = tyPickMenu(top.length ? top : M.base); special = true; T.specialSpawned = true; }
   else if(T.kind === 'coffee' && T.spawned > 0 && !T.babyN && Math.random() < 0.3 && cfArt('baby').ok){ look = TY_BABY; m = {name:'커피 주세요!', baby:true, cup:'cup_mug', need:{}, lv:1, col:'#3b2314'}; T.babyN = 1; }
   else {
     const artN = TY_LOOKS.filter(L => L.img && FRIEND_ART[L.img] && FRIEND_ART[L.img].ok).length;
@@ -6959,8 +6969,9 @@ function tyNewCust(){
   if(!m){
     if(favM && Math.random() < 0.5){ m = favM; fav = true; }
     else if(M.mine.length && Math.random() < 0.3){ m = pick(M.mine); custom = true; }
-    else m = top.length && Math.random() < 0.65 ? pick(top) : pick(M.base);
+    else m = tyPickMenu(top.length && Math.random() < 0.55 ? top : M.base);
   }
+  if(m && !m.baby){ TY.usedM = TY.usedM || []; TY.usedM.push(m.name); }
   const reg = !!look.id && !special && (D.reg[look.id] || 0) >= 3;
   const c = {look, menu:m, x:TY_W + 180, tx:TY_W + 180, sc:0.84, ts:0.84, pat:1, state:'walk', t:Math.random()*5, id:T.spawned, shakeT:0, bonus:false,
     fav, custom, special, reg, ordered:!T.duo, revealed:false};
@@ -7098,6 +7109,7 @@ function tyServeEnd(c){
   T.tips += tip; T.patSum += T.relax ? 1 : c.pat; T.served++;
   if(L.id && !c.special){ const n0 = D.reg[L.id] || 0; D.reg[L.id] = n0 + 1; if(n0 + 1 === 3) T.newRegs.push(L); }
   if(c.fav && L.id) D.favSeen[L.id] = true;
+  D.menuSeen = D.menuSeen || {}; D.menuSeen[c.menu.name] = 1;
   for(let i=0;i<8;i++) T.fx.push({type:'heart', x:c.x + rand(-60, 60), y:G.occ - rand(120, 220), vx:rand(-40, 40), vy:rand(-120, -60), t:0, dur:1.2});
   const f = tyFit();
   for(let i=0;i<Math.min(8, 2 + Math.floor(tip/4));i++) T.fx.push({type:'coin', x0:c.x + rand(-40, 40), y0:G.occ - 150, x1:(f.w - 150 - f.ox)/f.k, y1:(34 - f.oy)/f.k, t:-i*0.06, dur:0.7});
