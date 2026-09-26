@@ -92,6 +92,10 @@
   .ach.on{opacity:1;background:rgba(242,193,78,.16);border:1.5px solid var(--gold)}
   .ach .ic{font-size:clamp(22px,3.6vw,30px)} .ach b{display:block;font-weight:400;font-size:clamp(11px,1.6vw,14px)} .ach small{display:block;font-size:clamp(9px,1.3vw,11px);opacity:.8}
   .card.learnc{width:min(96%,760px)}
+  .titletop{display:flex;justify-content:center;gap:.5em;flex-wrap:wrap;margin-bottom:.2em}
+  .profchip small{font-size:.72em;opacity:.8;margin-right:.1em} .profchip em{font-style:normal;font-size:.78em;color:#ffe07a;margin-left:.3em}
+  .teachchip{background:rgba(46,125,50,.45)!important;border-color:rgba(184,255,122,.6)!important}
+  @media (max-height:520px){ #card.titlec h1{font-size:clamp(28px,8vh,44px);margin:.05em 0} #card.titlec > p:not(.keys){display:none} #card.titlec .keys{margin:.1em 0} #card.titlec .startbig{padding:.3em 1.4em!important} }
   .profchip{font-family:var(--font);font-size:clamp(14px,2.2vw,18px);border:2px solid rgba(255,246,220,.4);border-radius:999px;background:rgba(0,0,0,.25);color:var(--cream);padding:.25em 1em;cursor:pointer;margin-bottom:.3em}
   .profs{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(100px,17vw,140px),1fr));gap:10px;margin:.6em 0}
   .prof{font-family:var(--font);border:3px solid rgba(255,246,220,.3);border-radius:18px;background:rgba(255,246,220,.08);color:var(--cream);padding:10px 4px;cursor:pointer}
@@ -1103,7 +1107,11 @@ addEventListener('pageshow', layoutUI); addEventListener('load', layoutUI);
 let lastTouchEnd = 0;
 document.addEventListener('touchend', e => {
   const now = Date.now();
-  if(now - lastTouchEnd < 380 && !(e.target.closest && e.target.closest('input, textarea, select'))) e.preventDefault();   // 빠른 두 번째 탭 = 확대 신호 → 막기
+  if(now - lastTouchEnd < 380 && !(e.target.closest && e.target.closest('input, textarea, select'))){   // 빠른 두 번째 탭 = 확대 신호 → 막기
+    e.preventDefault();
+    const btn = e.target.closest && e.target.closest('button, summary, a, label, [role=button]');   // 단, 버튼은 그대로 눌러 줘요
+    if(btn && !btn.disabled) btn.click();
+  }
   lastTouchEnd = now;
 }, {passive:false});
 document.addEventListener('touchmove', e => { if(e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, {passive:false});
@@ -5068,7 +5076,7 @@ function showScreen(type){
   let html = '';
   if(type === 'title'){
     const ttl = titleOf(totalClears()), sv = loadJSON(pk('jungle_save')), dailyDone = DEX.daily[todayKey()];
-    html = `<button class="profchip" id="profBtn">${faceHTML(curProf())} ${escapeHTML(curProf().name)} ▾</button>
+    html = `<div class="titletop"><button class="profchip" id="profBtn"><small>학생</small> ${faceHTML(curProf())} ${escapeHTML(curProf().name)} <em>바꾸기 ▾</em></button><button class="profchip teachchip" id="teachBtn">👩‍🏫 선생님</button></div>
       <h1>정글 점프 탐험대</h1>
       ${ttl ? `<div class="badge">${ttl}</div>` : ''}
       <p>보물상자 속 빛나는 글자를 모아<br>'강원특수교육원 강릉분원'을 완성하세요!</p>
@@ -5078,7 +5086,7 @@ function showScreen(type){
       <div class="btnrow" style="margin-top:.1em"><button class="go alt sm" id="quickBtn">🌴 다음 스테이지 바로 하기</button>${sv ? `<button class="go alt sm" id="contBtn">이어하기 · ${sv.dist}m</button>` : ''}</div>
       <details class="more"><summary>더 보기 ▾</summary>
       <div class="btnrow" style="margin-top:.4em"><button class="go alt sm" id="tutBtn">연습하기</button><button class="go alt sm" id="dailyBtn">오늘의 도전${dailyDone ? ' ✓' : ''}</button><button class="go alt sm" id="duoBtn">2인 대결</button><button class="go alt sm" id="stageBtn">🗺️ 스테이지 지도</button><button class="go alt sm" id="learnBtn">과일 학습</button></div>
-      <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="helpBtn">게임 방법</button><button class="go alt sm" id="dexBtn">도감</button><button class="go alt sm" id="wardBtn">옷장</button><button class="go alt sm" id="rankBtn">순위표</button><button class="go alt sm" id="customBtn">꾸미기</button><button class="go alt sm" id="myItemsBtn">내 아이템</button><button class="go alt sm" id="setBtn">설정</button><button class="go alt sm" id="treasBtn">💎 내 보물</button><button class="go alt sm" id="teachBtn">👩‍🏫 선생님</button></div>
+      <div class="btnrow" style="margin-top:.2em"><button class="go alt sm" id="helpBtn">게임 방법</button><button class="go alt sm" id="dexBtn">도감</button><button class="go alt sm" id="wardBtn">옷장</button><button class="go alt sm" id="rankBtn">순위표</button><button class="go alt sm" id="customBtn">꾸미기</button><button class="go alt sm" id="myItemsBtn">내 아이템</button><button class="go alt sm" id="setBtn">설정</button><button class="go alt sm" id="treasBtn">💎 내 보물</button></div>
       ${isTouch && !isStandalone() ? `<div class="btnrow" style="margin-top:.3em">${canFull && !isFull() ? '<button class="go alt sm" id="fullBtn">⛶ 전체 화면</button>' : ''}<button class="go alt sm" id="installBtn">📲 주소창 없이 앱처럼 하기</button></div>` : ''}
       </details>
       <p class="coins">🪙 ${DEX.coins} 코인</p>
@@ -5394,6 +5402,7 @@ function showScreen(type){
   card.innerHTML = html;
   card.classList.toggle('learnc', ['learn','learnMenu','stages','barista','cook','club','rhythm','safety','esports','pangResult','pangMap','village','townMap','avatar','levelup','stageClear','stageFail'].includes(type));
   card.classList.toggle('mapc', type === 'stageMap');
+  card.classList.toggle('titlec', type === 'title');
   overlay.classList.add('show'); document.body.classList.add('menuopen'); if(typeof doorBtnUpdate === 'function') doorBtnUpdate();
   const b = document.getElementById('goBtn') || {focus(){}};   // 학습 화면엔 없을 수 있어요
   const back = () => { if(S.state === 'lobby'){ hideScreen(); return; } bgmStop(); showScreen('title'); };
@@ -6579,13 +6588,13 @@ function runDiag(){
 function classHTML(type){
   if(type === 'profiles'){
     return `<h2>누가 할 차례예요?</h2>
-      <div class="profs">${PROF.list.map(p => { const d = profData(p.id); return `<button class="prof${p.id === PROF.cur ? ' on' : ''}" data-prof="${p.id}"><span>${faceHTML(p)}</span><b>${escapeHTML(p.name)}</b><small>${d.lastPlayed ? '최근 ' + new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '새 친구'}</small></button>`; }).join('')}
-        ${PROF.list.length < 30 ? `<button class="prof add" id="profAdd"><span>➕</span><b>새 친구</b><small>이름 만들기</small></button>` : ''}</div>
+      <div class="profs">${PROF.list.map(p => { const d = profData(p.id); return `<button class="prof${p.id === PROF.cur ? ' on' : ''}" data-prof="${p.id}"><span>${faceHTML(p)}</span><b>${escapeHTML(p.name)}</b><small>${d.lastPlayed ? '최근 ' + new Date(d.lastPlayed).toLocaleDateString('ko-KR') : '아직 안 해 봤어요'}</small></button>`; }).join('')}
+        ${PROF.list.length < 30 ? `<button class="prof add" id="profAdd"><span>➕</span><b>학생 추가</b><small>새 이름 만들기</small></button>` : ''}</div>
       <button class="go alt sm" id="goBtn">돌아가기</button>`;
   }
   if(type === 'profNew'){
     const d = window.PDRAFT || (window.PDRAFT = {name:'', icon:PROF_ICONS[PROF.list.length % PROF_ICONS.length]});
-    return `<h2>새 친구 만들기</h2>
+    return `<h2>학생 추가하기</h2>
       <p><input class="namein" id="pnName" maxlength="8" placeholder="이름" value="${escapeHTML(d.name)}"></p>
       <p class="keys">나를 나타낼 동물을 골라요</p>
       <div class="iconpick">${PROF_ICONS.map(ic => `<button class="ip${d.icon === ic ? ' on' : ''}" data-ic="${ic}">${ic}</button>`).join('')}</div>
@@ -6676,6 +6685,10 @@ function wireClass(type){
         if(pinBuf === TEACH.pin){ teacherOK = true; const nx = pinNext; pinNext = null; if(nx) nx(); return; }
         pinBuf = ''; showScreen(type); setMsg('비밀번호가 달라요'); return;
       } else if(pinBuf.length < 4) pinBuf += k;
+      if(type === 'pin' && pinBuf.length === 4){   // 4자리를 누르면 바로 확인
+        if(pinBuf === TEACH.pin){ teacherOK = true; const nx = pinNext; pinNext = null; if(nx) nx(); return; }
+        pinBuf = ''; showScreen(type); setMsg('비밀번호가 달라요. 다시 눌러 주세요'); tone(220, .15, 'sine', .04); return;
+      }
       showScreen(type);
     });
   }
