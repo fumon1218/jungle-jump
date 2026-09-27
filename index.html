@@ -7300,28 +7300,41 @@ MG_GAMES.recycle = M => {
   const BINS = [{k:'paper', n:'종이', e:'📰', col:'#1e88e5'}, {k:'plastic', n:'플라스틱', e:'🥤', col:'#fb8c00'}, {k:'can', n:'캔', e:'🥫', col:'#fdd835'}, {k:'glass', n:'유리', e:'🍯', col:'#43a047'}];
   const ITEMS = [{e:'📰', n:'신문지', b:'paper'}, {e:'📦', n:'택배 상자', b:'paper'}, {e:'📒', n:'다 쓴 공책', b:'paper'}, {e:'🧴', n:'샴푸 통', b:'plastic', wash:true}, {e:'🥤', n:'플라스틱 컵', b:'plastic', wash:true}, {e:'🥫', n:'통조림 캔', b:'can', wash:true}, {e:'🥛', n:'유리 우유병', b:'glass', wash:true}, {e:'🍯', n:'꿀 병', b:'glass', wash:true}];
   const G = {rounds:3, bgCol:'#0277bd', how:['쓰레기가 나오면 알맞은 통을 눌러요', '💧 표시가 있으면 먼저 헹궈요', '종이 · 플라스틱 · 캔 · 유리 나누기!'], endTitle:'분리수거 끝!', endMsg:r => r.stars === 3 ? '지구가 고마워해요! 분리수거 박사!' : '잘했어요! 헹구고 나누면 다시 쓸 수 있어요'};
-  let queue, cur, qi, washed, first, wrong, fly;
+  const RA = k => mgArt(`assets/wj/recycle/${k}.png`);
+  const IMR = {bg:mgArt('assets/wj/recycle/bg_recycle.jpg'), dirt:RA('dirt')}; BINS.forEach(b => b.a = RA('bin_' + b.k));
+  const IMG_OF = {'신문지':'newspaper', '택배 상자':'box', '다 쓴 공책':'notebook', '샴푸 통':'shampoo', '플라스틱 컵':'cup', '통조림 캔':'can', '유리 우유병':'milk_bottle', '꿀 병':'honey_jar'}; ITEMS.forEach(it => it.a = RA(IMG_OF[it.n]));
+  const fit = (a, cx, cy, sz) => { if(!a || !a.ok) return false; const im = a.img, k = sz/Math.max(im.width, im.height); mgx.drawImage(im, cx - im.width*k/2, cy - im.height*k/2, im.width*k, im.height*k); return true; };
+  let queue, cur, qi, washed, first, wrong, fly, washT = 0;
   G.round = () => { queue = mgShuffle(ITEMS).slice(0, 4); qi = 0; newItem(); };
   const newItem = () => { cur = queue[qi]; washed = !cur.wash; first = true; wrong = 0; fly = null; M.say(`${cur.n}${cur.wash ? '. 먼저 헹궈요' : ''}. 어느 통에 넣을까요?`); };
   const put = b => { if(fly) return;
     if(!washed){ first = false; wrong++; M.bad('먼저 물로 헹궈요!', 640, 300); return; }
     if(b.k === cur.b){ M.chance(first, 640, 300, `${b.n} 통 딩동!`); fly = {b, t:0}; }
     else { first = false; wrong++; const r = BINS.find(x => x.k === cur.b); M.bad(wrong >= 2 ? `${cur.n}는 ${r.n} 통이에요` : `${b.n} 통이 아니에요`, 640, 300); } };
-  G.update = dt => { if(fly){ fly.t += dt*2; if(fly.t >= 1){ fly = null; qi++; if(qi >= queue.length) M.next(); else newItem(); } } };
-  G.btns = () => { const L = BINS.map((b, i) => ({id:'b' + i, x:90 + i*285, y:470, w:250, h:160, draw:false, label:`${b.n} 통`, key:String(i + 1), hint:wrong >= 2 && b.k === cur.b && washed, on:() => put(b)}));
-    if(!washed) L.unshift({id:'wash', x:860, y:220, w:250, h:90, icon:'💧', label:'헹구기', col:'#b3e5fc', primary:true, on:() => { washed = true; M.good(640, 250, '깨끗!'); M.say('어느 통에 넣을까요?'); }});
+  G.update = dt => { washT = Math.max(0, washT - dt*1.6); if(fly){ fly.t += dt*2; if(fly.t >= 1){ fly = null; qi++; if(qi >= queue.length) M.next(); else newItem(); } } };
+  G.btns = () => { const L = BINS.map((b, i) => ({id:'b' + i, x:90 + i*285, y:430, w:250, h:210, draw:false, label:`${b.n} 통`, key:String(i + 1), hint:wrong >= 2 && b.k === cur.b && washed, on:() => put(b)}));
+    if(!washed) L.unshift({id:'wash', x:890, y:230, w:250, h:90, icon:'💧', label:'헹구기', col:'#b3e5fc', primary:true, on:() => { washed = true; washT = 1; M.good(640, 250, '깨끗!'); M.say('어느 통에 넣을까요?'); }});
     return L; };
   G.prompt = () => fly ? '' : !washed ? `💧 ${cur.n}를 먼저 헹궈요` : `${cur.e} ${cur.n} → 어느 통?`;
-  G.bg = c => { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#b3e5fc'); g.addColorStop(0.6, '#e1f5fe'); g.addColorStop(0.6, '#a5d6a7'); g.addColorStop(1, '#81c784'); c.fillStyle = g; c.fillRect(-400, -400, MGW + 800, MGH + 800); mgEmoji('🌍', 150, 160, 80); mgEmoji('🌳', 1150, 380, 90); };
+  G.bg = c => { const f = mgResize.f, vx = -f.ox/f.k, vy2 = -f.oy/f.k, vw = f.w/f.k, vh = f.h/f.k;
+    if(IMR.bg.ok){ const im = IMR.bg.img, k = Math.max(vw/im.width, vh/im.height); c.drawImage(im, vx + (vw - im.width*k)/2, vy2 + (vh - im.height*k)/2, im.width*k, im.height*k); }
+    else { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#b3e5fc'); g.addColorStop(0.6, '#e1f5fe'); g.addColorStop(0.6, '#a5d6a7'); g.addColorStop(1, '#81c784'); c.fillStyle = g; c.fillRect(vx, vy2, vw, vh); } };
   G.draw = c => {
-    BINS.forEach((b, i) => { const x = 90 + i*285, y = 470, hint = wrong >= 2 && b.k === cur.b && washed && Math.sin(M.t*6) > 0;
-      if(hint){ c.fillStyle = 'rgba(255,235,59,.6)'; mgRR(c, x - 10, y - 10, 270, 180, 30); c.fill(); }
-      c.fillStyle = 'rgba(0,0,0,.2)'; mgRR(c, x + 4, y + 10, 250, 160, 24); c.fill(); c.fillStyle = b.col; mgRR(c, x, y, 250, 160, 24); c.fill(); c.fillStyle = mgMix(b.col, '#000000', 0.2); mgRR(c, x - 8, y - 6, 266, 34, 14); c.fill();
-      mgEmoji(b.e, x + 70, y + 90, 60); mgText(b.n, x + 170, y + 92, 34, b.k === 'can' ? '#3a2412' : '#fff'); if(!isTouch) mgText(String(i + 1), x + 20, y + 14, 20, '#fff'); });
-    if(cur){ let x = 640, y = 250, s = 150; if(fly){ const bx = 90 + BINS.indexOf(fly.b)*285 + 125; x = 640 + (bx - 640)*fly.t; y = 250 + (500 - 250)*fly.t - Math.sin(fly.t*Math.PI)*120; s = 150*(1 - fly.t*0.6); }
-      else { c.fillStyle = 'rgba(255,255,255,.8)'; c.beginPath(); c.ellipse(640, 340, 150, 30, 0, 0, 6.29); c.fill(); }
-      mgEmoji(cur.e, x, y + Math.sin(M.t*3)*4, s); if(!fly){ mgText(cur.n, 640, 385, 30, '#01579b'); if(!washed){ mgEmoji('💧', 740, 180, 44); mgText('더러워요', 740, 222, 20, '#6d4c41'); } } }
-    mgText(`${qi + 1}/4`, 1180, 130, 26, '#01579b');
+    BINS.forEach((b, i) => { const x = 90 + i*285, cx = x + 125, hint = wrong >= 2 && b.k === cur.b && washed && Math.sin(M.t*6) > 0, near = fly && fly.b === b && fly.t > 0.7;
+      c.fillStyle = 'rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(cx, 628, 105, 16, 0, 0, 6.29); c.fill();
+      if(hint){ c.fillStyle = 'rgba(255,235,59,.55)'; c.beginPath(); c.ellipse(cx, 530, 135, 120, 0, 0, 6.29); c.fill(); }
+      const bob = near ? -Math.sin((fly.t - 0.7)/0.3*Math.PI)*10 : 0;
+      if(!fit(b.a, cx, 520 + bob, 200)){ c.fillStyle = b.col; mgRR(c, x, 440, 250, 180, 24); c.fill(); mgEmoji(b.e, cx, 520, 60); }
+      c.fillStyle = b.col; mgRR(c, cx - 70, 606, 140, 38, 19); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); mgText(b.n, cx, 626, 24, b.k === 'can' ? '#3a2412' : '#fff');
+      if(!isTouch){ c.fillStyle = 'rgba(0,0,0,.5)'; c.beginPath(); c.arc(x + 30, 450, 15, 0, 6.29); c.fill(); mgText(String(i + 1), x + 30, 451, 18, '#fff'); } });
+    if(cur){ let x = 660, y = 250, s = 190; if(fly){ const bx = 90 + BINS.indexOf(fly.b)*285 + 125; x = 660 + (bx - 660)*fly.t; y = 250 + (470 - 250)*fly.t - Math.sin(fly.t*Math.PI)*120; s = 190*(1 - fly.t*0.6); }
+      else { c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(660, 355, 130, 24, 0, 0, 6.29); c.fill(); }
+      const by = y + (fly ? 0 : Math.sin(M.t*3)*4);
+      if(!fit(cur.a, x, by, s)) mgEmoji(cur.e, x, by, s*0.8);
+      if(!washed && !fly){ c.globalAlpha = 0.9; fit(IMR.dirt, x + 20, by + 20, s*0.5) || mgEmoji('💩', x + 30, by + 30, 40); c.globalAlpha = 1; }
+      if(washT > 0) for(let k=0;k<10;k++){ c.fillStyle = `rgba(100,190,255,${washT})`; c.beginPath(); c.arc(x - 60 + k*13, by - 90 + ((1 - washT)*160 + k*17) % 170, 5, 0, 6.29); c.fill(); }
+      if(!fly){ c.fillStyle = 'rgba(1,40,80,.55)'; mgRR(c, 560, 368, 200, 40, 20); c.fill(); mgText(cur.n, 660, 389, 26, '#fff'); if(!washed){ mgText('더러워요! 먼저 헹궈요', 1015, 208, 22, '#6d4c41'); } } }
+    c.fillStyle = 'rgba(255,255,255,.85)'; mgRR(c, 1130, 104, 100, 44, 22); c.fill(); mgText(`${Math.min(4, qi + 1)}/4`, 1180, 127, 24, '#01579b');
   };
   return G;
 };
