@@ -7132,6 +7132,8 @@ MG_GAMES.farm = M => {
   const G = {rounds:1, bgCol:'#33691e', how:['도구를 고르고 밭을 눌러요 (💧 물 · 🐛 벌레 · 🧺 수확 · 🌱 씨앗)', '온도가 초록 칸(18~24도)이 되게 맞춰요', '물을 준 채소는 내일 쑥쑥 자라요!'], endTitle:'오늘 스마트팜 돌보기 끝!'};
   const F = farmData(); let tool = 'water', seedI = 0, done = 0, bonus = null, noTask = false, grew = 0;
   const today = todayKey();
+  const FA = k => mgArt(`assets/wj/farm/${k}.png`), IMF = {bg:mgArt('assets/wj/farm/bg_farm.jpg'), plot:FA('plot'), sprout:FA('sprout'), young:FA('young'), bug:FA('bug'), panel:FA('panel')};
+  const pic = (a, cx, by, w) => { if(!a || !a.ok) return false; const im = a.img, h = w*im.height/im.width; mgx.drawImage(im, cx - w/2, by - h, w, h); return true; };
   G.start = () => {
     if(F.day !== today || TEACH.allOpen){
       for(const p of F.plots){ if(p.c && p.st < 3 && p.w){ p.st++; grew++; } p.w = false; if(p.c && p.st < 3 && Math.random() < 0.3) p.bug = true; }
@@ -7151,34 +7153,41 @@ MG_GAMES.farm = M => {
   const finish = () => { if(F.bonusDay !== today){ const g = F.plots.filter(p => p.c && p.st < 3 && p.w); if(g.length){ const p = mgPick(g); p.st++; bonus = FARM_CROPS.find(c => c.k === p.c); } F.bonusDay = today; saveDex(); } M.finish(); };
   G.stars = () => 3 - Math.min(2, Math.floor(M.mist/2));
   G.endMsg = () => bonus ? `🌱 쑥쑥 보너스! ${bonus.e} ${bonus.n}가 한 뼘 자랐어요. 내일 또 와서 물을 줘요!` : '내일 또 와서 물을 주면 쑥쑥 자라요!';
-  const TOOLS = [{k:'water', icon:'💧', label:'물 주기'}, {k:'bug', icon:'🐛', label:'벌레 잡기'}, {k:'harvest', icon:'🧺', label:'수확하기'}, {k:'seed', icon:'🌱', label:'씨앗 심기'}];
+  const TOOLS = [{k:'water', icon:'💧', label:'물 주기', img:FA('can')}, {k:'bug', icon:'🐛', label:'벌레 잡기', img:FA('tongs')}, {k:'harvest', icon:'🧺', label:'수확하기', img:FA('basket')}, {k:'seed', icon:'🌱', label:'씨앗 심기', img:FA('seed_bag')}];
   G.btns = () => {
     const L = F.plots.map((p, i) => ({id:'pl' + i, x:130 + (i % 3)*300, y:170 + Math.floor(i/3)*190, w:240, h:170, draw:false, label:`${i + 1}번 밭`, on:() => act(p, i)}));
-    TOOLS.forEach((t, i) => L.push({id:'t' + t.k, x:40 + i*232, y:560, w:214, h:80, icon:t.k === 'seed' ? FARM_CROPS[seedI].e : t.icon, label:t.k === 'seed' ? `${FARM_CROPS[seedI].n} 씨앗` : t.label, key:String(i + 1), sel:tool === t.k, col:tool === t.k ? '#ffe082' : '#f1f8e9', on:() => { if(t.k === 'seed' && tool === 'seed') seedI = (seedI + 1) % FARM_CROPS.length; tool = t.k; M.say(t.k === 'seed' ? `${FARM_CROPS[seedI].n} 씨앗. 한 번 더 누르면 다른 씨앗` : t.label); }}));
-    L.push({id:'tu', x:1040, y:180, w:70, h:70, label:'▲', col:'#ffccbc', on:() => temp(1)}, {id:'td', x:1040, y:340, w:70, h:70, label:'▼', col:'#bbdefb', on:() => temp(-1)});
-    if(!tasksLeft()) L.push(noTask && !done ? {id:'bye', x:980, y:470, w:280, h:76, icon:'🏠', label:'마을로 가기', col:'#fff59d', primary:true, on:() => mgExit()} : {id:'fin', x:980, y:470, w:280, h:76, icon:'✔', label:'오늘 돌보기 끝', col:'#aed581', primary:true, on:finish});
+    TOOLS.forEach((t, i) => L.push({id:'t' + t.k, x:40 + i*232, y:560, w:214, h:80, icon:t.k === 'seed' ? FARM_CROPS[seedI].e : t.icon, img:t.img, label:t.k === 'seed' ? `${FARM_CROPS[seedI].n} 씨앗` : t.label, key:String(i + 1), sel:tool === t.k, col:tool === t.k ? '#ffe082' : '#f1f8e9', on:() => { if(t.k === 'seed' && tool === 'seed') seedI = (seedI + 1) % FARM_CROPS.length; tool = t.k; M.say(t.k === 'seed' ? `${FARM_CROPS[seedI].n} 씨앗. 한 번 더 누르면 다른 씨앗` : t.label); }}));
+    L.push({id:'tu', x:995, y:385, w:90, h:66, label:'▲ 올리기', col:'#ffccbc', on:() => temp(1)}, {id:'td', x:1095, y:385, w:90, h:66, label:'▼ 내리기', col:'#bbdefb', on:() => temp(-1)});
+    if(!tasksLeft()) L.push(noTask && !done ? {id:'bye', x:950, y:475, w:280, h:76, icon:'🏠', label:'마을로 가기', col:'#fff59d', primary:true, on:() => mgExit()} : {id:'fin', x:950, y:475, w:280, h:76, icon:'✔', label:'오늘 돌보기 끝', col:'#aed581', primary:true, on:finish});
     return L;
   };
   G.prompt = () => { if(!tasksLeft()) return noTask && !done ? '오늘 할 일을 다 했어요! 내일 다시 와요' : '다 돌봤어요! "오늘 돌보기 끝"을 눌러요';
     const w = F.plots.filter(needW).length, b = F.plots.filter(p => p.bug).length, r = F.plots.filter(ripe).length, e = F.plots.filter(p => !p.c).length;
     return [w ? `💧${w}` : '', b ? `🐛${b}` : '', r ? `🧺${r}` : '', e ? `🌱빈 밭 ${e}` : '', tempOK() ? '' : '🌡️온도'].filter(Boolean).join('  ') + ' 남았어요'; };
   G.hud = () => { mgText(`🧺 ${FARM_CROPS.map(c => `${c.e}${F.bag[c.k] || 0}`).join(' ')}`, 360, 48, 24, '#fff6dc', 'left'); };
-  G.bg = c => { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#e8f5e9'); g.addColorStop(1, '#c5e1a5'); c.fillStyle = g; c.fillRect(-400, -400, MGW + 800, MGH + 800);
-    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 3; for(let x=-400;x<MGW + 400;x+=120){ c.beginPath(); c.moveTo(x, 90); c.lineTo(x + 60, 0); c.stroke(); } c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(-400, 88, MGW + 800, 4); };
+  G.bg = c => { const f = mgResize.f, vx = -f.ox/f.k, vy2 = -f.oy/f.k, vw = f.w/f.k, vh = f.h/f.k;
+    if(IMF.bg.ok){ const im = IMF.bg.img, k = Math.max(vw/im.width, vh/im.height); c.drawImage(im, vx + (vw - im.width*k)/2, vy2 + (vh - im.height*k)/2, im.width*k, im.height*k); }
+    else { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#e8f5e9'); g.addColorStop(1, '#c5e1a5'); c.fillStyle = g; c.fillRect(vx, vy2, vw, vh); } };
   G.draw = c => {
-    F.plots.forEach((p, i) => { const x = 130 + (i % 3)*300, y = 170 + Math.floor(i/3)*190;
-      c.fillStyle = 'rgba(0,0,0,.18)'; mgRR(c, x + 3, y + 8, 240, 170, 20); c.fill(); c.fillStyle = '#a1887f'; mgRR(c, x, y, 240, 170, 20); c.fill();
-      c.fillStyle = p.w ? '#5d4037' : '#8d6e63'; mgRR(c, x + 14, y + 90, 212, 64, 16); c.fill();
-      if(p.c){ const cr = FARM_CROPS.find(k => k.k === p.c), bob = Math.sin(M.t*2 + i)*3;
-        if(p.st === 0){ c.fillStyle = '#4e342e'; c.beginPath(); c.ellipse(x + 120, y + 112, 34, 12, 0, 0, 6.29); c.fill(); mgText('씨앗', x + 120, y + 60, 22, '#6d4c41'); }
-        else mgEmoji(p.st === 1 ? '🌱' : p.st === 2 ? '🌿' : cr.e, x + 120, y + 80 + bob, p.st === 3 ? 82 : 60 + p.st*6);
-        if(p.bug) mgEmoji('🐛', x + 170 + Math.sin(M.t*3 + i)*8, y + 80, 44);
-        if(needW(p)){ c.fillStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.arc(x + 206, y + 30, 22, 0, 6.29); c.fill(); mgEmoji('💧', x + 206, y + 32, 28); }
-        if(ripe(p)) mgEmoji('✨', x + 40, y + 36 + Math.sin(M.t*4)*4, 34);
-        mgText(`${cr.n} ${['씨앗', '새싹', '자라는 중', '다 자람!'][p.st]}`, x + 120, y + 152, 20, '#fff'); }
-      else { mgText('빈 밭', x + 120, y + 60, 24, '#efebe9'); mgText('🌱 씨앗을 심어요', x + 120, y + 124, 20, '#efebe9'); }
-      mgText(String(i + 1), x + 24, y + 24, 22, '#fff'); });
-    mgPanel(1000, 110, 150, 330, '#ffffff', tempOK() ? '#43a047' : '#e53935'); mgText('🌡️ 온도', 1075, 150, 24, '#3a2412'); mgText(`${F.temp}도`, 1075, 295, 40, tempOK() ? '#2e7d32' : '#c62828'); mgText(tempOK() ? '딱 좋아요' : F.temp < 18 ? '추워요' : '더워요', 1075, 425, 22, tempOK() ? '#2e7d32' : '#c62828');
+    F.plots.forEach((p, i) => { const x = 130 + (i % 3)*300, y = 170 + Math.floor(i/3)*190, cx = x + 120, base = y + 170, sel = M.focus >= 0;
+      c.fillStyle = 'rgba(0,0,0,.16)'; c.beginPath(); c.ellipse(cx, base - 4, 118, 16, 0, 0, 6.29); c.fill();
+      if(!pic(IMF.plot, cx, base, 230)){ c.fillStyle = '#a1887f'; mgRR(c, x, y + 80, 240, 90, 20); c.fill(); }
+      const soilY = base - 118;
+      if(p.w){ c.save(); c.globalAlpha = 0.35; c.fillStyle = '#1b0f08'; c.beginPath(); c.ellipse(cx, soilY + 6, 92, 26, 0, 0, 6.29); c.fill(); c.restore(); c.fillStyle = 'rgba(160,220,255,.8)'; for(let k=0;k<4;k++){ c.beginPath(); c.arc(cx - 60 + k*40, soilY + 8 + (k % 2)*6, 3, 0, 6.29); c.fill(); } }
+      if(p.c){ const cr = FARM_CROPS.find(k => k.k === p.c), bob = Math.sin(M.t*2 + i)*2;
+        if(p.st === 0){ c.fillStyle = '#3e2723'; for(let k=0;k<3;k++){ c.beginPath(); c.ellipse(cx - 40 + k*40, soilY + 4, 9, 5, 0, 0, 6.29); c.fill(); } mgText('씨앗', cx, soilY - 22, 22, '#fff'); }
+        else { const a = p.st === 1 ? IMF.sprout : p.st === 2 ? IMF.young : FA('ripe_' + cr.k), w = p.st === 1 ? 110 : p.st === 2 ? 140 : 170;
+          if(!pic(a, cx, soilY + 30 + bob, w)) mgEmoji(p.st === 1 ? '🌱' : p.st === 2 ? '🌿' : cr.e, cx, soilY - 20 + bob, p.st === 3 ? 82 : 60 + p.st*6); }
+        if(p.bug){ if(!pic(IMF.bug, cx + 62 + Math.sin(M.t*3 + i)*8, soilY + 18, 76)) mgEmoji('🐛', cx + 60, soilY - 8, 44); }
+        if(needW(p)){ c.fillStyle = 'rgba(255,255,255,.92)'; c.beginPath(); c.arc(x + 214, y + 18, 22, 0, 6.29); c.fill(); mgEmoji('💧', x + 214, y + 20, 28); }
+        if(ripe(p)) mgEmoji('✨', x + 30, y + 30 + Math.sin(M.t*4)*4, 34);
+        c.fillStyle = 'rgba(40,25,10,.6)'; mgRR(c, cx - 78, base - 26, 156, 26, 13); c.fill(); mgText(`${cr.n} ${['씨앗', '새싹', '자라는 중', '다 자람!'][p.st]}`, cx, base - 13, 18, '#fff'); }
+      else { c.fillStyle = 'rgba(40,25,10,.6)'; mgRR(c, cx - 78, base - 26, 156, 26, 13); c.fill(); mgText('빈 밭 · 씨앗을 심어요', cx, base - 13, 17, '#fff'); }
+      c.fillStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.arc(x + 18, y + 18, 16, 0, 6.29); c.fill(); mgText(String(i + 1), x + 18, y + 19, 20, '#33691e'); });
+    const ok = tempOK(), px = 1090, pb = 375;
+    if(!pic(IMF.panel, px, pb, 230)) mgPanel(990, 150, 200, 220, '#fff', '#90a4ae');
+    const sw = 230, sh = IMF.panel.ok ? sw*IMF.panel.img.height/IMF.panel.img.width : 220, sx = px - sw/2, sy = pb - sh;
+    mgText('🌡️ 온도', sx + sw*0.40, sy + sh*0.24, 20, '#1a3d5c'); mgText(`${F.temp}도`, sx + sw*0.40, sy + sh*0.38, 38, ok ? '#1b5e20' : '#c62828'); mgText(ok ? '딱 좋아요' : F.temp < 18 ? '추워요' : '더워요', sx + sw*0.40, sy + sh*0.52, 18, ok ? '#1b5e20' : '#c62828');
   };
   return G;
 };
