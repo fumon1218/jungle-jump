@@ -6840,8 +6840,22 @@ function mgRoomBg(c, wall, wall2, floor){
   c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(-400, 466, MGW + 800, 6);
 }
 function mgTable(c, x, y, w, h, col){ c.fillStyle = 'rgba(0,0,0,.2)'; mgRR(c, x + 4, y + 10, w, h, 16); c.fill(); c.fillStyle = col || '#c8955c'; mgRR(c, x, y, w, h, 16); c.fill(); c.fillStyle = 'rgba(255,255,255,.2)'; mgRR(c, x + 8, y + 6, w - 16, 10, 5); c.fill(); }
-const MG_ANIMALS = ['🐰', '🐻', '🐱', '🐶', '🐼', '🦊', '🐨', '🐯', '🐸', '🐵'];
-function mgCustomer(c, e, x, y, s, happy, t){ const b = Math.sin((t || 0)*3)*4; c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(x, y + s*0.55, s*0.5, s*0.12, 0, 0, 6.29); c.fill(); mgEmoji(e, x, y + b, s); if(happy) mgEmoji('💖', x + s*0.42, y - s*0.45 + b - Math.sin((t || 0)*5)*6, s*0.3); }
+// 손님 동물: 강릉분원 체험실과 같은 3D 동물 (그림이 없으면 이모지)
+const MG_CUST = {
+  monkey:{e:'🐵', face:[0.28, 0.30]}, parrot:{e:'🦜', face:[0.62, 0.30], fly:true}, frog:{e:'🐸', face:[0.40, 0.25]}, penguin:{e:'🐧', face:[0.45, 0.25]},
+  owl:{e:'🦉', face:[0.40, 0.25]}, elephant:{e:'🐘', face:[0.40, 0.33]}, chameleon:{e:'🦎', face:[0.72, 0.25]}
+};
+const MG_CUST_NEW = [];   // 새 손님 동물 그림이 오면 여기에 이름을 더해요
+for(const k in MG_CUST) MG_CUST[k].art = artImg(`assets/animals/${k}.png`);
+for(const k of MG_CUST_NEW){ MG_CUST[k] = MG_CUST[k] || {e:'🐾', face:[0.5, 0.3]}; MG_CUST[k].art = artImg(`assets/animals/${k}.png`); }
+const MG_ANIMALS = Object.keys(MG_CUST);
+function mgCustArt(k){ const C = MG_CUST[k]; return C && C.art && C.art.ok ? C.art.img : null; }
+function mgCustomer(c, e, x, y, s, happy, t){
+  const b = Math.sin((t || 0)*3)*4, C = MG_CUST[e], im = mgCustArt(e), hop = happy ? -Math.abs(Math.sin((t || 0)*8))*16 : 0;
+  c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(x, y + s*0.55, s*0.5, s*0.12, 0, 0, 6.29); c.fill();
+  if(im){ const h = s*1.45, w = h*im.width/im.height, fy = C.fly ? Math.sin((t || 0)*3)*8 - s*0.15 : 0; c.drawImage(im, x - w/2, y + s*0.58 - h + b*0.5 + hop + fy, w, h); }
+  else mgEmoji(C ? C.e : e, x, y + b + hop, s);
+  if(happy) mgEmoji('💖', x + s*0.45, y - s*0.75 + b - Math.sin((t || 0)*5)*6, s*0.3); }
 function mgMix(a, b, t){ const p = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)], A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v)*clamp(t, 0, 1))).join(',')})`; }
 /* ---------- 춘천본원: 🎨 염색 공방 ---------- */
 MG_GAMES.dye = M => {
@@ -7211,7 +7225,7 @@ MG_GAMES.snack = M => {
   G.prompt = () => { const s = steps[si];
     return {greet:'👋 손님께 인사해요', order:'📝 주문을 받아요', pour:'꾹 누르고 ✓ 550 칸에서 떼요', fire:'🔥 불을 켜요', add:`넣을 것: ${need ? need.join(' · ') : ''}`, timer:rung ? '띵동! 다 됐어요 눌러요' : '⏰ 4분 기다려요…', dish:'그릇에 담아 드려요', nori:'🟩 김을 올려요', rice:'🍚 밥을 펴요', fill:`순서 카드: ${kimOrder.map((a, i) => (i < kimI ? '✔' : '') + a.n).join(' → ')}`, roll:'꾹 눌러서 말아요', cut:`🔪 ${taps + 1}조각`, pay:`${PRICE[menu].toLocaleString()}원 = 1,000원 ${PRICE[menu]/1000}장 · 지금 ${bills}장`, bye:'인사해요'}[s] || ''; };
   G.bg = c => { mgRoomBg(c, '#fff3e0', '#ffe0b2', '#bcaaa4'); c.fillStyle = '#e65100'; c.fillRect(-400, 0, MGW + 800, 96); for(let i=0;i<16;i++){ c.fillStyle = i % 2 ? '#fff' : '#e65100'; c.beginPath(); c.arc(i*90, 96, 45, 0, Math.PI); c.fill(); }
-    mgPanel(720, 130, 230, 150, '#4e342e', '#8d6e63', 18); mgText('메뉴', 835, 160, 26, '#ffe082'); mgText('🍜 라면 3,000원', 835, 205, 22, '#fff'); mgText('🍙 김밥 2,000원', 835, 245, 22, '#fff');
+    mgPanel(610, 118, 230, 130, '#4e342e', '#8d6e63', 18); mgText('메뉴', 725, 146, 26, '#ffe082'); mgText('🍜 라면 3,000원', 725, 186, 22, '#fff'); mgText('🍙 김밥 2,000원', 725, 222, 22, '#fff');
     mgTable(c, 60, 440, 820, 70, '#8d6e63'); };
   G.draw = c => { const s = steps[si];
     mgCustomer(c, cust, 1090, 320, 150, s === 'bye' && eaten, M.t);
@@ -7309,7 +7323,7 @@ MG_GAMES.drone = M => {
     for(const r of rings) ringDraw(c, r, false);
     const px = pad.x - wx;
     if(px < MGW + 360){ if(DA.house.ok){ const hw = 230, hh = hw*DA.house.img.height/DA.house.img.width; c.drawImage(DA.house.img, px + 110, 612 - hh, hw, hh); }
-      if(DA.pad.ok){ const pw = 210, ph = 64; c.drawImage(DA.pad.img, px - pw/2, 600 - ph, pw, ph); }
+      if(DA.pad.ok){ const pw = 220, ph = pw*DA.pad.img.height/DA.pad.img.width; c.drawImage(DA.pad.img, px - pw/2, 612 - ph, pw, ph); }
       if(doneT >= 0) { const bi = DA.drone_box; mgEmoji('📦', px + 30, 572, 36); } }
     const withBox = doneT < 0, im = withBox ? DA.drone_box : DA.drone, tilt = clamp(vy/900, -0.22, 0.22) + 0.06, bob = Math.sin(M.t*6)*3;
     c.save(); c.translate(DX, y + bob); c.rotate(tilt);
@@ -7345,7 +7359,7 @@ MG_GAMES.beauty = M => {
   G.draw = c => {
     const happy = st === 'bye';
     c.fillStyle = '#fff'; c.beginPath(); c.arc(400, 330, 170, 0, 6.29); c.fill(); c.strokeStyle = '#f48fb1'; c.lineWidth = 8; c.stroke();
-    mgEmoji(cust, 400, 330 + Math.sin(M.t*2)*3, 220); if(gotS){ mgEmoji(gotS.e, 318, 380, 48); mgEmoji(gotS.e, 482, 380, 48); } if(happy) for(let i=0;i<3;i++) mgEmoji('💖', 300 + i*100, 150 - ((anim*80 + i*30) % 60), 36);
+    { const im = mgCustArt(cust), C = MG_CUST[cust], bb = Math.sin(M.t*2)*3; if(im){ const h = 300, w = Math.min(320, h*im.width/im.height), hh = w*im.height/im.width, x0 = 400 - w/2, y0 = 340 - hh/2 + bb; c.save(); c.beginPath(); c.arc(400, 330, 166, 0, 6.29); c.clip(); c.drawImage(im, x0, y0, w, hh); c.restore(); if(gotS){ const fx = x0 + w*C.face[0], fy = y0 + hh*C.face[1]; mgEmoji(gotS.e, fx - w*0.13, fy + hh*0.06, 38); mgEmoji(gotS.e, fx + w*0.13, fy + hh*0.06, 38); } } else { mgEmoji(C ? C.e : cust, 400, 330 + bb, 220); if(gotS){ mgEmoji(gotS.e, 318, 380, 48); mgEmoji(gotS.e, 482, 380, 48); } } } if(happy) for(let i=0;i<3;i++) mgEmoji('💖', 300 + i*100, 150 - ((anim*80 + i*30) % 60), 36);
     mgPanel(990, 150, 250, 220, '#fffaf0', '#f06292'); mgText('요청 카드', 1115, 180, 24, '#ad1457'); mgEmoji(wantS.e, 1060, 250, 56); mgText('스티커', 1060, 300, 20, '#6d4c41'); c.fillStyle = wantN.c; mgRR(c, 1135, 222, 60, 56, 14); c.fill(); mgText(wantN.sym, 1165, 250, 26, 'rgba(255,255,255,.9)'); mgText('손톱', 1165, 300, 20, '#6d4c41');
     if(st === 'nail' || st === 'mas' || st === 'mirror' || st === 'bye'){ hand(c, 820, 420, gotN ? gotN.c : null);
       if(st === 'mas'){ const r = 40 + (Math.sin(ph) + 1)*30, big = Math.sin(ph) > 0.55; c.strokeStyle = big ? '#43a047' : '#f06292'; c.lineWidth = 8; c.beginPath(); c.arc(820, 440, r, 0, 6.29); c.stroke(); if(big) mgText('지금!', 820, 320, 30, '#2e7d32'); } }
