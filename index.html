@@ -2530,10 +2530,12 @@ function lbDrawBus(x, y, t){   // 작은 버스 (그림에 버스가 없는 마�
   ctx.fillStyle = '#263238'; for(const wx of [-24, 24]){ ctx.beginPath(); ctx.arc(wx, -2, 7, 0, 6.29); ctx.fill(); ctx.fillStyle = '#b0bec5'; ctx.beginPath(); ctx.arc(wx, -2, 3, 0, 6.29); ctx.fill(); ctx.fillStyle = '#263238'; }
   ctx.restore();
 }
+const lbDroneImg = artImg('assets/wj/drone/drone.png');
 function lbDrawDrone(t){   // 원주분원 드론장 위를 나는 드론
   const x = 1115 + Math.sin(t*0.7)*36, y = 690 + Math.sin(t*1.3)*14 - 30;
   ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(1115 + Math.sin(t*0.7)*36, 736, 16, 4, 0, 0, 6.29); ctx.fill();
   ctx.translate(x, y); ctx.rotate(Math.sin(t*0.7 + 1.5)*0.12);
+  if(lbDroneImg.ok){ const w = 46, h = w*lbDroneImg.img.height/lbDroneImg.img.width; ctx.scale(Math.cos(t*0.7) >= 0 ? 1 : -1, 1); ctx.drawImage(lbDroneImg.img, -w/2, -h/2, w, h); ctx.restore(); return; }
   ctx.strokeStyle = '#37474f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-16, -2); ctx.lineTo(16, -2); ctx.stroke();
   ctx.fillStyle = '#eceff1'; rr(-8, -6, 16, 9, 4); ctx.fill(); ctx.strokeStyle = '#455a64'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.arc(0, -2, 2, 0, 6.29); ctx.fill();
@@ -7282,33 +7284,39 @@ MG_GAMES.drone = M => {
   G.hold = on => { holdOn = on; if(on) tone(300, .05, 'sine', .02); };
   G.wantsHold = () => doneT < 0;
   G.update = dt => {
-    if(doneT >= 0){ doneT += dt; y += (548 - y)*Math.min(1, dt*4); if(doneT > 1.4) M.next(); return; }
-    wx += SPD*dt;
-    if(!landing){ vy += (holdOn ? -900 : 520)*dt; vy = clamp(vy, -420, 340); y = clamp(y + vy*dt, 120, 580); if(y >= 580) vy = 0; if(y <= 120) vy = 0; }
+    if(doneT >= 0){ doneT += dt; y += (LANDY - y)*Math.min(1, dt*4); if(doneT > 1.4) M.next(); return; }
+    if(landing) wx += (pad.x - DX - wx)*Math.min(1, dt*3); else wx += SPD*dt;
+    if(!landing){ vy += (holdOn ? -900 : 520)*dt; vy = clamp(vy, -420, 340); y = clamp(y + vy*dt, 120, 575); if(y >= 575) vy = 0; if(y <= 120) vy = 0; }
     for(const r of rings){ if(!r.done && r.x - wx < DX){ r.done = true; r.ok = Math.abs(r.y - y) < R*0.85; M.chance(r.ok, DX, r.y, r.ok ? '통과!' : null); if(!r.ok) tone(260, .1, 'sine', .03); } }
     if(pad.x - wx < DX + 20 && !landing){ landing = 1; }
-    if(landing && doneT < 0){ y += (548 - y)*Math.min(1, dt*3); vy = 0; if(Math.abs(548 - y) < 6){ doneT = 0; M.chance(true, DX, 480, '배달 완료! 📦'); } }
+    if(landing && doneT < 0){ y += (LANDY - y)*Math.min(1, dt*3); vy = 0; if(Math.abs(LANDY - y) < 6){ doneT = 0; M.chance(true, DX, 480, '배달 완료! 📦'); } }
   };
   G.btns = () => [{id:'up', x:1020, y:540, w:220, h:100, icon:'⬆️', label:'꾹 누르기', col:'#b3e5fc', holdBtn:true, noScan:true}];
   G.prompt = () => landing ? '착륙해요!' : holdOn ? '올라가요 ⬆️' : '꾹 누르면 올라가요 · 떼면 내려와요';
-  G.bg = c => { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#81d4fa'); g.addColorStop(1, '#e1f5fe'); c.fillStyle = g; c.fillRect(-400, -400, MGW + 800, MGH + 800);
-    const off = (wx || 0);
-    for(let i=0;i<6;i++){ const x = ((i*300 - off*0.2) % 1800 + 1800) % 1800 - 200; mgEmoji('☁️', x, 110 + (i % 3)*40, 70); }
-    c.fillStyle = '#a5d6a7'; c.beginPath(); c.moveTo(-400, 560); for(let x=-400;x<=MGW + 400;x+=40) c.lineTo(x, 520 - Math.sin((x + off*0.4)*0.006)*60 - Math.sin((x + off*0.4)*0.017)*20); c.lineTo(MGW + 400, 800); c.lineTo(-400, 800); c.fill();
-    const bx = 700 - (off*0.5) % 2600; c.fillStyle = '#bcaaa4'; c.beginPath(); c.moveTo(bx - 60, 600); c.lineTo(bx - 20, 300); c.lineTo(bx + 30, 290); c.lineTo(bx + 50, 600); c.fill(); c.beginPath(); c.moveTo(bx + 390, 600); c.lineTo(bx + 420, 330); c.lineTo(bx + 470, 320); c.lineTo(bx + 500, 600); c.fill();
-    c.strokeStyle = '#8d4a2b'; c.lineWidth = 5; c.beginPath(); c.moveTo(bx + 20, 300); c.quadraticCurveTo(bx + 225, 380, bx + 440, 330); c.stroke();
-    c.fillStyle = '#4fc3f7'; c.fillRect(-400, 600, MGW + 800, 200); c.fillStyle = 'rgba(255,255,255,.5)'; for(let i=0;i<14;i++){ const x = ((i*140 - off) % 1960 + 1960) % 1960 - 200; c.fillRect(x, 630 + (i % 3)*20, 60, 4); } };
-  const ringDraw = (c, r, half) => { const x = r.x - wx; if(x < -100 || x > MGW + 100) return; c.strokeStyle = r.done ? (r.ok ? '#66bb6a' : '#bdbdbd') : '#ffb300'; c.lineWidth = 14; c.beginPath(); c.ellipse(x, r.y, 26, R, 0, half ? -Math.PI/2 : Math.PI/2, half ? Math.PI/2 : Math.PI*1.5); c.stroke(); };
+  const DA = {}; ['drone', 'drone_box', 'ring', 'ring_ok', 'pad', 'house'].forEach(k => DA[k] = artImg(`assets/wj/drone/${k}.png`)); DA.bg = artImg('assets/wj/drone/bg_drone.jpg');
+  const LANDY = 522;
+  G.bg = c => { const f = mgResize.f, vx = -f.ox/f.k, vy2 = -f.oy/f.k, vw = f.w/f.k, vh = f.h/f.k, off = (wx || 0);
+    if(DA.bg.ok){ const im = DA.bg.img, k = Math.max(vw/im.width, vh/im.height); c.drawImage(im, vx + (vw - im.width*k)/2, vy2 + (vh - im.height*k)/2, im.width*k, im.height*k); }
+    else { const g = c.createLinearGradient(0, 0, 0, MGH); g.addColorStop(0, '#81d4fa'); g.addColorStop(1, '#e1f5fe'); c.fillStyle = g; c.fillRect(vx, vy2, vw, vh); }
+    c.fillStyle = 'rgba(255,255,255,.55)'; for(let i=0;i<16;i++){ const x = ((i*150 - off*1.2) % 2400 + 2400) % 2400 - 400; c.fillRect(x, 655 + (i % 4)*14, 50 + (i % 3)*20, 3); } };
+  const ringDraw = (c, r, front) => { const x = r.x - wx; if(x < -150 || x > MGW + 150) return;
+    const im = (r.done && r.ok ? DA.ring_ok : DA.ring); if(!im.ok) return;
+    const ovH = R*2.3, ih = ovH/0.9, iw = ih*im.img.width/im.img.height, top = r.y - ovH/2 - ih*0.02;
+    c.save(); if(r.done && !r.ok) c.globalAlpha = 0.4; if(front){ c.beginPath(); c.rect(x, top - 10, iw, ih + 20); c.clip(); }
+    c.drawImage(im.img, x - iw/2, top, iw, ih); c.restore();
+    if(r.done && r.ok && x > DX - 40 && x < DX + 160){ for(let k=0;k<3;k++) mgEmoji('✨', x + Math.sin(M.t*6 + k*2)*40, r.y + Math.cos(M.t*5 + k*2)*R, 26); } };
   G.draw = c => {
     for(const r of rings) ringDraw(c, r, false);
-    const px = pad.x - wx; if(px < MGW + 200){ c.fillStyle = '#546e7a'; c.beginPath(); c.ellipse(px, 590, 90, 22, 0, 0, 6.29); c.fill(); c.fillStyle = '#eceff1'; c.beginPath(); c.ellipse(px, 586, 70, 16, 0, 0, 6.29); c.fill(); mgText('H', px, 587, 22, '#546e7a'); mgEmoji('🏠', px + 120, 540, 80); }
-    const tilt = clamp(vy/900, -0.25, 0.25); c.save(); c.translate(DX, y); c.rotate(tilt);
-    c.strokeStyle = '#6d4c41'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 14); c.lineTo(0, 40); c.stroke(); c.fillStyle = '#c8955c'; c.fillRect(-18, 40, 36, 30); c.strokeStyle = '#8d5a2b'; c.strokeRect(-18, 40, 36, 30); c.fillStyle = '#fff'; c.fillRect(-3, 40, 6, 30);
-    c.strokeStyle = '#37474f'; c.lineWidth = 6; c.beginPath(); c.moveTo(-60, 0); c.lineTo(60, 0); c.stroke(); c.fillStyle = '#eceff1'; mgRR(c, -30, -14, 60, 30, 12); c.fill(); c.strokeStyle = '#455a64'; c.lineWidth = 3; c.stroke(); c.fillStyle = '#29b6f6'; mgRR(c, -16, -8, 32, 12, 5); c.fill();
-    for(const s2 of [-60, 60]){ const w = Math.abs(Math.sin(M.t*45 + s2))*28 + 8; c.strokeStyle = 'rgba(60,70,80,.7)'; c.lineWidth = 4; c.beginPath(); c.moveTo(s2 - w, -12); c.lineTo(s2 + w, -12); c.stroke(); c.fillStyle = '#37474f'; c.fillRect(s2 - 3, -12, 6, 12); }
+    const px = pad.x - wx;
+    if(px < MGW + 360){ if(DA.house.ok){ const hw = 230, hh = hw*DA.house.img.height/DA.house.img.width; c.drawImage(DA.house.img, px + 110, 612 - hh, hw, hh); }
+      if(DA.pad.ok){ const pw = 210, ph = 64; c.drawImage(DA.pad.img, px - pw/2, 600 - ph, pw, ph); }
+      if(doneT >= 0) { const bi = DA.drone_box; mgEmoji('📦', px + 30, 572, 36); } }
+    const withBox = doneT < 0, im = withBox ? DA.drone_box : DA.drone, tilt = clamp(vy/900, -0.22, 0.22) + 0.06, bob = Math.sin(M.t*6)*3;
+    c.save(); c.translate(DX, y + bob); c.rotate(tilt);
+    if(im.ok){ const w = 180, h = w*im.img.height/im.img.width, cy = withBox ? h*0.36 : h*0.5; c.drawImage(im.img, -w/2, -cy, w, h); }
     c.restore();
     for(const r of rings) ringDraw(c, r, true);
-    const left = rings.filter(r => !r.done).length; mgText(`남은 고리 ${left} · 통과 ${rings.filter(r => r.ok).length}`, 1100, 130, 24, '#01579b');
+    const left = rings.filter(r => !r.done).length; mgPanel(930, 100, 320, 56, 'rgba(255,255,255,.9)', '#4fc3f7', 28); mgText(`남은 고리 ${left} · 통과 ${rings.filter(r => r.ok).length}`, 1090, 128, 24, '#01579b');
   };
   return G;
 };
