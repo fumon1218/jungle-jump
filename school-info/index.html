@@ -21,26 +21,18 @@ async function loadStats(id){
 }
 
 
-const photoObjects=new Map();
-let photoDBPromise;
-function photoDb(){if(!photoDBPromise)photoDBPromise=new Promise((resolve,reject)=>{const req=indexedDB.open('school-meal-photos-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('photos');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return photoDBPromise}
-function photoId(date,meal){return [school.ATPT_OFCDC_SC_CODE,school.SD_SCHUL_CODE,date,meal].join(':')}
-function mealCard(r){const id=photoId(r.MLSV_YMD,r.MMEAL_SC_CODE||r.MMEAL_SC_NM);return '<article class="item meal-entry" data-photo-id="'+esc(id)+'"><div class="date">'+fmt(r.MLSV_YMD)+' · '+esc(r.MMEAL_SC_NM)+'</div><div class="photo-slot meal-photo-empty">📷<div>등록된 실제 급식 사진이 없습니다.</div></div><div class="photo-actions"><button class="light add-photo" type="button">사진 등록</button><button class="light remove-photo" type="button" hidden>사진 삭제</button></div><div class="photo-hint">선택한 사진은 이 기기에만 저장되며 다른 사용자에게 공개되지 않습니다.</div><div class="dish">'+esc((r.DDISH_NM||'').replace(/<br\s*\/?\s*>/gi,'\n'))+'</div><div class="muted">'+esc(r.CAL_INFO||'')+'</div></article>'}
-async function getPhoto(id){const db=await photoDb();return new Promise((resolve,reject)=>{const tx=db.transaction('photos','readonly'),r=tx.objectStore('photos').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-async function setPhoto(id,file){const db=await photoDb();return new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(file,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-async function deletePhoto(id){const db=await photoDb();return new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-function showPhoto(card,file){const id=card.dataset.photoId,slot=card.querySelector('.photo-slot');if(photoObjects.has(id))URL.revokeObjectURL(photoObjects.get(id));const url=URL.createObjectURL(file);photoObjects.set(id,url);const im=document.createElement('img');im.className='meal-photo';im.alt='사용자가 등록한 실제 급식 사진';im.src=url;slot.replaceWith(im);card.querySelector('.remove-photo').hidden=false;card.querySelector('.add-photo').textContent='사진 변경'}
-async function hydratePhotos(){for(const card of document.querySelectorAll('.meal-entry')){const id=card.dataset.photoId;try{const file=await getPhoto(id);if(file&&card.isConnected)showPhoto(card,file)}catch(e){}}}
-document.addEventListener('click',async e=>{const btn=e.target.closest('.add-photo,.remove-photo');if(!btn)return;const card=btn.closest('.meal-entry');if(!card)return;const id=card.dataset.photoId;if(btn.classList.contains('remove-photo')){if(!confirm('이 기기에 저장된 급식 사진을 삭제할까요?'))return;await deletePhoto(id);if(photoObjects.has(id)){URL.revokeObjectURL(photoObjects.get(id));photoObjects.delete(id)}const img=card.querySelector('.meal-photo');if(img){const div=document.createElement('div');div.className='photo-slot meal-photo-empty';div.textContent='📷 등록된 실제 급식 사진이 없습니다.';img.replaceWith(div)}card.querySelector('.remove-photo').hidden=true;card.querySelector('.add-photo').textContent='사진 등록';return}const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/heic,image/heif';input.onchange=async()=>{const file=input.files?.[0];if(!file)return;if(file.size>8*1024*1024){alert('8MB 이하 사진만 등록할 수 있습니다.');return}try{await setPhoto(id,file);showPhoto(card,file)}catch(err){alert('저장 공간 또는 이미지 형식 문제로 사진을 저장하지 못했습니다.')}};input.click()});
-const observer=new MutationObserver(()=>{if(document.querySelector('.meal-entry'))hydratePhotos()});
-observer.observe(document.getElementById('detail'),{childList:true,subtree:false});
 
+const mealTypes=[
+{test:/돈가스|돈까스|커틀릿|카츠|튀김|치킨|닭강정|탕수육|생선까스/,type:'crispy',title:'바삭한 메인 요리',icon:'🍗'},
+{test:/국수|우동|라면|라멘|스파게티|파스타|짜장면|짬뽕|쫄면|냉면|칼국수|떡볶이/,type:'noodle',title:'면·분식',icon:'🍜'},
+{test:/카레|덮밥|비빔밥|볶음밥|오므라이스|주먹밥|김밥|유부초밥/,type:'rice',title:'밥 요리',icon:'🍛'},
+{test:/국|탕|찌개|전골|스프|수프/,type:'soup',title:'국·찌개',icon:'🍲'},
+{test:/샌드위치|햄버거|피자|토스트|핫도그|빵/,type:'bread',title:'빵·간편식',icon:'🥪'},
+{test:/사과|바나나|귤|오렌지|포도|수박|배\b|딸기|파인애플|멜론|요거트|요구르트|우유/,type:'fruit',title:'과일·후식',icon:'🍎'}
+];
+function mealType(dishes){const entries=String(dishes||'').replace(/<br\s*\/?\s*>/gi,'\n').split('\n').map(v=>v.replace(/\([\d.,]+\)/g,'').trim()).filter(Boolean);const main=entries.filter(v=>!/밥$|김치|깍두기|우유|요구르트|배추김치|쌀밥|잡곡밥/.test(v));for(const dish of main){for(const t of mealTypes)if(t.test.test(dish))return t}return {type:'set',title:'한식 급식',icon:'🍱'}}
+function mealIllustration(type){const colors={crispy:['#fff1db','#e09b42','#a9672f'],noodle:['#e9f9f7','#e2aa4e','#d78245'],rice:['#eff7e7','#79ac65','#e69b49'],soup:['#fff2e9','#df8b57','#a64f3a'],bread:['#f7f0e6','#d09b5f','#8d663f'],fruit:['#eef9ef','#e9a54e','#d76754'],set:['#eff6ff','#94ba6e','#d98749']}[type.type];const c=colors;return '<svg viewBox="0 0 360 170" role="img" aria-label="'+esc(type.title)+' 대표 음식 일러스트" xmlns="http://www.w3.org/2000/svg"><rect width="360" height="170" rx="20" fill="'+c[0]+'"/><ellipse cx="185" cy="143" rx="108" ry="14" fill="#000" opacity=".07"/><ellipse cx="180" cy="90" rx="115" ry="64" fill="#fff" stroke="#d9e4ee" stroke-width="8"/><ellipse cx="180" cy="90" rx="98" ry="50" fill="#f3f6f6"/><ellipse cx="178" cy="90" rx="77" ry="37" fill="'+c[1]+'"/><ellipse cx="165" cy="84" rx="27" ry="18" fill="#fff7d1"/><ellipse cx="203" cy="93" rx="28" ry="18" fill="'+c[2]+'"/><circle cx="150" cy="98" r="8" fill="#6a9f56"/><circle cx="209" cy="76" r="7" fill="#77aa5b"/><circle cx="225" cy="103" r="6" fill="#7db35b"/><text x="180" y="106" text-anchor="middle" font-size="52">'+type.icon+'</text><circle cx="68" cy="38" r="10" fill="#fff" opacity=".5"/><circle cx="291" cy="135" r="15" fill="#fff" opacity=".45"/></svg>'}
+function mealCard(r){const type=mealType(r.DDISH_NM);return '<article class="item"><div class="date">'+fmt(r.MLSV_YMD)+' · '+esc(r.MMEAL_SC_NM)+'</div><div class="meal-illustration">'+mealIllustration(type)+'<div class="meal-caption">'+esc(type.title)+' 대표 이미지 · 실제 급식 사진 아님</div></div><div class="dish">'+esc((r.DDISH_NM||'').replace(/<br\s*\/?\s*>/gi,'\n'))+'</div><div class="muted">'+esc(r.CAL_INFO||'')+'</div></article>'}
 </script>
-<style>
-.meal-photo{display:block;width:100%;max-height:290px;object-fit:cover;border-radius:15px;margin:10px 0;background:#f0f4fa}
-.meal-photo-empty{background:#f2f6fc;border:1px dashed #b5c8df;border-radius:15px;padding:22px 12px;text-align:center;color:#647994;margin:10px 0}
-.photo-actions{display:flex;align-items:center;gap:8px;margin:9px 0 14px}
-.photo-actions button{font-size:13px;padding:10px 13px}
-.photo-hint{color:#74849b;font-size:12px;line-height:1.5}
-</style>
+<style>.meal-illustration{margin:12px 0 15px}.meal-illustration svg{width:100%;display:block;border-radius:16px;max-height:240px}.meal-caption{text-align:center;color:#70819a;font-size:12px;padding:7px 0}.dish{white-space:pre-line}</style>
 </body></html>
