@@ -31,8 +31,42 @@ const mealTypes=[
 {test:/사과|바나나|귤|오렌지|포도|수박|배\b|딸기|파인애플|멜론|요거트|요구르트|우유/,type:'fruit',title:'과일·후식',icon:'🍎'}
 ];
 function mealType(dishes){const entries=String(dishes||'').replace(/<br\s*\/?\s*>/gi,'\n').split('\n').map(v=>v.replace(/\([\d.,]+\)/g,'').trim()).filter(Boolean);const main=entries.filter(v=>!/밥$|김치|깍두기|우유|요구르트|배추김치|쌀밥|잡곡밥/.test(v));for(const dish of main){for(const t of mealTypes)if(t.test.test(dish))return t}return {type:'set',title:'한식 급식',icon:'🍱'}}
-function mealIllustration(type){const colors={crispy:['#fff1db','#e09b42','#a9672f'],noodle:['#e9f9f7','#e2aa4e','#d78245'],rice:['#eff7e7','#79ac65','#e69b49'],soup:['#fff2e9','#df8b57','#a64f3a'],bread:['#f7f0e6','#d09b5f','#8d663f'],fruit:['#eef9ef','#e9a54e','#d76754'],set:['#eff6ff','#94ba6e','#d98749']}[type.type];const c=colors;return '<svg viewBox="0 0 360 170" role="img" aria-label="'+esc(type.title)+' 대표 음식 일러스트" xmlns="http://www.w3.org/2000/svg"><rect width="360" height="170" rx="20" fill="'+c[0]+'"/><ellipse cx="185" cy="143" rx="108" ry="14" fill="#000" opacity=".07"/><ellipse cx="180" cy="90" rx="115" ry="64" fill="#fff" stroke="#d9e4ee" stroke-width="8"/><ellipse cx="180" cy="90" rx="98" ry="50" fill="#f3f6f6"/><ellipse cx="178" cy="90" rx="77" ry="37" fill="'+c[1]+'"/><ellipse cx="165" cy="84" rx="27" ry="18" fill="#fff7d1"/><ellipse cx="203" cy="93" rx="28" ry="18" fill="'+c[2]+'"/><circle cx="150" cy="98" r="8" fill="#6a9f56"/><circle cx="209" cy="76" r="7" fill="#77aa5b"/><circle cx="225" cy="103" r="6" fill="#7db35b"/><text x="180" y="106" text-anchor="middle" font-size="52">'+type.icon+'</text><circle cx="68" cy="38" r="10" fill="#fff" opacity=".5"/><circle cx="291" cy="135" r="15" fill="#fff" opacity=".45"/></svg>'}
-function mealCard(r){const type=mealType(r.DDISH_NM);return '<article class="item"><div class="date">'+fmt(r.MLSV_YMD)+' · '+esc(r.MMEAL_SC_NM)+'</div><div class="meal-illustration">'+mealIllustration(type)+'<div class="meal-caption">'+esc(type.title)+' 대표 이미지 · 실제 급식 사진 아님</div></div><div class="dish">'+esc((r.DDISH_NM||'').replace(/<br\s*\/?\s*>/gi,'\n'))+'</div><div class="muted">'+esc(r.CAL_INFO||'')+'</div></article>'}
+
+function mealParts(raw){
+ const dishes=String(raw||'').replace(/<br\s*\/?\s*>/gi,'\n').split('\n').map(x=>x.replace(/\((?:\d+[.,]?)+\)/g,'').trim()).filter(Boolean);
+ const remaining=dishes.slice();
+ function take(re){const i=remaining.findIndex(x=>re.test(x));return i<0?'':remaining.splice(i,1)[0]}
+ const rice=take(/밥|볶음밥|덮밥|비빔밥|김밥|초밥|리조또/);
+ const soup=take(/국|찌개|탕|전골|스프|수프|떡국/);
+ const dessert=take(/우유|요구르트|요거트|과일|귤|사과|바나나|포도|딸기|수박|마카롱|푸딩|주스|음료/);
+ return {rice,soup,dessert,sides:remaining.slice(0,3)};
+}
+function sideColor(name){
+ if(!name)return '#dfe7ed';
+ if(/김치|깍두기|무생채|떡볶이/.test(name))return '#cd604c';
+ if(/나물|시금치|샐러드|콩나물|오이|브로콜리/.test(name))return '#75aa62';
+ if(/계란|달걀|전|두부/.test(name))return '#efcc72';
+ if(/닭|고기|불고기|제육|갈비|돈육|돼지|소고기|생선|조림|구이/.test(name))return '#ab7051';
+ return '#d9ad6f';
+}
+function mealTraySvg(p){
+ const filled=(x,y,w,h,n)=> n
+  ? '<ellipse cx="'+(x+w/2)+'" cy="'+(y+h/2)+'" rx="'+(w*.34)+'" ry="'+(h*.29)+'" fill="'+sideColor(n)+'"/><ellipse cx="'+(x+w*.42)+'" cy="'+(y+h*.4)+'" rx="'+(w*.09)+'" ry="'+(h*.06)+'" fill="#ffffff" opacity=".38"/>'
+  : '';
+ const tray='<rect x="15" y="14" width="370" height="228" rx="34" fill="url(#metal)" stroke="#a1adba" stroke-width="5"/>';
+ const wells=[
+ [33,31,160,190],[203,31,165,76],[203,116,78,51],[290,116,78,51],[203,177,78,47],[290,177,78,47]
+ ].map(([x,y,w,h])=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="21" fill="url(#well)" stroke="#b4c0ca" stroke-width="3"/>').join('');
+ const rice=p.rice?'<ellipse cx="113" cy="133" rx="66" ry="48" fill="#f6f3e8"/><ellipse cx="113" cy="126" rx="57" ry="39" fill="#fffef7"/><g fill="#ecebdc"><ellipse cx="91" cy="116" rx="13" ry="6"/><ellipse cx="123" cy="143" rx="15" ry="6"/><ellipse cx="141" cy="113" rx="12" ry="6"/></g>':'';
+ const soup=p.soup?'<ellipse cx="285" cy="70" rx="69" ry="29" fill="#e1b88f"/><ellipse cx="285" cy="70" rx="57" ry="23" fill="#bc8b59"/><g fill="#6c9e5a"><ellipse cx="266" cy="65" rx="16" ry="7"/><ellipse cx="301" cy="77" rx="14" ry="6"/></g>':'';
+ const cells=[...p.sides,p.dessert];
+ const foods=filled(203,116,78,51,cells[0])+filled(290,116,78,51,cells[1])+filled(203,177,78,47,cells[2])+filled(290,177,78,47,cells[3]);
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 265" role="img" aria-label="스테인리스 학교 급식판에 표시된 대표 음식 이미지"><defs><linearGradient id="metal" x1="0" x2="1"><stop stop-color="#bbc8d2"/><stop offset=".43" stop-color="#f8fbfc"/><stop offset="1" stop-color="#9eabb8"/></linearGradient><linearGradient id="well" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#c2ced8"/><stop offset="1" stop-color="#edf2f5"/></linearGradient></defs><rect width="400" height="265" rx="22" fill="#f3f6fa"/><ellipse cx="200" cy="238" rx="167" ry="13" fill="#c9d3dc" opacity=".55"/>'+tray+wells+rice+soup+foods+'</svg>';
+}
+function mealCard(r){
+ const p=mealParts(r.DDISH_NM);
+ return '<article class="item"><div class="date">'+fmt(r.MLSV_YMD)+' · '+esc(r.MMEAL_SC_NM)+'</div><div class="meal-illustration">'+mealTraySvg(p)+'<div class="meal-caption">스테인리스 급식판 대표 이미지 · 실제 급식 사진 아님</div></div><div class="dish">'+esc((r.DDISH_NM||'').replace(/<br\s*\/?\s*>/gi,'\n'))+'</div><div class="muted">'+esc(r.CAL_INFO||'')+'</div></article>';
+}
 </script>
-<style>.meal-illustration{margin:12px 0 15px}.meal-illustration svg{width:100%;display:block;border-radius:16px;max-height:240px}.meal-caption{text-align:center;color:#70819a;font-size:12px;padding:7px 0}.dish{white-space:pre-line}</style>
+<style>.meal-illustration{margin:12px 0 15px}.meal-illustration svg{width:100%;display:block;border-radius:16px;max-height:240px}.meal-caption{text-align:center;color:#70819a;font-size:12px;padding:7px 0}.dish{white-space:pre-line}.meal-illustration svg{display:block;width:100%;height:auto;max-height:330px}</style>
 </body></html>
